@@ -1,0 +1,37 @@
+<!-- 
+Launch file to build a rosbag that can be used for mapping on L-CAS cititruck. 
+
+gmapping needs an odometry source and a laserscan, both provided by kmo_navserver: 
+- laserscans 
+  Sick laser
+  Topic  /kmo_navserver/laserscan0
+  frame  laserscan0
+  
+  Velodine-alike laser
+  Topic  /kmo_navserver/laserscan1
+  frame  laserscan1
+
+- odom data
+nav_msgs/Odometry
+
+TODO:
+- TFs?
+
+-->
+
+<launch deprecated="CORRECT TFS!">
+		
+	<!-- TFs: Completely random -->
+	<node pkg="tf" type="static_transform_publisher" name="laser1_map" args="0.8 0 0.85 0 0 0 odom_base_link laserscan1 100"/>
+
+	<node pkg="tf" type="static_transform_publisher" name="laser0_map" args="1.4 0 0.02 3.142 0 0 odom_base_link laserscan0 100"/>
+	
+	
+    <!-- Minimal cititruck config: (tested) -->
+    <include file="$(find kmo_navserver)/launch/cititruck.launch"/>
+
+	
+	<node pkg="rosbag" type="record" name="rosbag_recorder"
+       args="-a -O $(find demo)/bags/forMapping.bag" />
+	
+</launch>

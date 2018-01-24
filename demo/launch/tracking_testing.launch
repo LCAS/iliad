@@ -1,0 +1,72 @@
+<!-- 
+Launch file for testing spencer people tracker on L-CAS cititruck. 
+This file is based on "tracking_on_robot.launch" on spencer_people_tracking_launch package.
+
+Spencer needs a laserscan and rgbd: 
+- laserscans are provided from minimal cititruck launcher loaded from package kmo_navserver
+  Topic  /kmo_navserver/laserscan0
+  frame  laserscan0
+
+- rgbd data comes from kinect2
+	Topic  /kinect2/hd/... (camera_info /compressed image_color image_mono image_color/compressed image_mono/compressed image_color_rect image_mono_rect image_color_rect/compressed image_mono_rect/compressed points)
+	frame  kinect2_rgb_optical_frame
+
+TODO:
+- TFs?
+- change topic names?
+- add kinect2 as rgbd?
+
+-->
+
+<launch deprecated="CORRECT TFS!">
+	
+	
+	<!-- Constants -->
+	<arg name="rviz_config_file" default="$(find demo)/rviz/visualization_robot.rviz"/> <!-- configuration file for RViz to use, if visualization is enabled -->
+
+		
+	<!-- TFs: Completely random -->
+	<node pkg="tf" type="static_transform_publisher" name="kinect_map" args="0.8 0 1.1 -1.54 0 -1.54 base_link kinect2_rgb_optical_frame 100"/>
+
+	<node pkg="tf" type="static_transform_publisher" name="laser_map" args="0.8 0 0.85 0 0 0 base_link laserscan1 100"/>
+
+	<node pkg="tf" type="static_transform_publisher" name="laser_map" args="1.4 0 0.02 3.142 0 0 base_link laserscan0 100"/>
+
+	<node pkg="tf" type="static_transform_publisher" name="foot_odom" args="0 0 0.05 0 0 0  base_footprint base_link 100"/>
+
+	
+	
+    <!-- Minimal cititruck config: (tested) -->
+    <include file="$(find kmo_navserver)/launch/cititruck.launch"/>
+
+    <!-- Kinect2 config: (tested) -->
+    <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch"/>
+
+
+	<!-- What follows is adapted from spencer people tracker  -->
+
+    <!-- RGB-D detectors -->
+    <include file="$(find demo)/launch/detectors/front_rgbd_detectors.launch">
+		<arg name="camera_frame" default="kinect2_rgb_optical_frame"/>
+		<arg name="camera_namespace" default="/kinect2/hd"/>
+		<arg name="base_footprint" default="odom_base_link"/>
+	</include>
+
+    <!-- Laser detectors -->
+    <include file="$(find demo)/launch/detectors/laser_detectors.launch">
+		<arg name="laser" default="/kmo_navserver/laserscan0"/>
+    </include>
+
+    <!-- People tracking -->
+    <include file="$(find spencer_people_tracking_launch)/launch/tracking/freiburg_people_tracking.launch">
+        <arg name="rgbd" default="true"/>
+        <arg name="laser_low_confidence_detections" default="true"/>
+    </include>
+
+    <!-- Group tracking -->
+    <include file="$(find spencer_people_tracking_launch)/launch/tracking/group_tracking.launch"/> 
+    
+    <!-- VISUALIZATION -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config_file)"/>
+
+</launch>
