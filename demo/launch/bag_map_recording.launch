@@ -1,0 +1,48 @@
+<!-- 
+Launch file to build a rosbag that can be used for mapping on L-CAS cititruck. 
+
+gmapping needs a full tf tree and a laserscan.
+- kmo_navserver provides part of the tf and laserscans
+
+  tf between world and odom_base_link
+  world is global static tf, using odometry to measure motion.
+  We rename this to odom like other ROS modules
+
+  odom_base_link is center of the robot
+  We rename odom_base_link to base_link  
+ 
+  Sick laser
+  Topic  /kmo_navserver/laserscan0
+  frame  laserscan0
+  
+  Velodine-alike laser
+  Topic  /kmo_navserver/laserscan1
+  frame  laserscan1
+
+TODO:
+- ReTest with new remappings!!
+
+-->
+
+<launch deprecated="Test this with new frame id mappings">
+		
+	<!-- TFs: Taken from gazebo models. laserscan0 roll is changed from 3.142 to 0, and from 0 to 3.142 in laserscan1-->
+	<node pkg="tf" type="static_transform_publisher" name="laser1_map" args="0.8 0 0.85 3.142 0 0 base_link laserscan1 100"/>
+
+	<node pkg="tf" type="static_transform_publisher" name="laser0_map" args="1.4 0 0.02 0 0 0 base_link laserscan0 100"/>
+	
+	
+    <!-- Minimal cititruck config: (tested) -->
+    <include file="$(find kmo_navserver)/launch/cititruck.launch">
+		<remap from="tf" to="tf_old" />
+    </include>
+
+    <!-- robot frame_id is usually base_link -->
+    <node pkg="tf" type="tf_remap" name="tf_remapper" output="screen">
+		<rosparam param="mappings">[{old: odom_base_link, new: base_link}]</rosparam>
+	</node>
+	
+	<node pkg="rosbag" type="record" name="rosbag_recorder"
+       args="-a -O $(find demo)/bags/forMapping.bag" />
+	
+</launch>
