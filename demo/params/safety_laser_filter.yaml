@@ -1,0 +1,11 @@
+scan_filter_chain:
+- name: wheelBox
+  type: LaserScanAngularBoundsFilter
+  params:
+    lower_angle: -3.1416
+    upper_angle:  -2.73
+- name: wheelBox2
+  type: LaserScanAngularBoundsFilter
+  params:
+    lower_angle:  2.73
+    upper_angle:  3.1416
