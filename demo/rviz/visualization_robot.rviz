@@ -1,6 +1,6 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 78
+    Help Height: 0
     Name: Displays
     Property Tree Widget:
       Expanded:
@@ -9,24 +9,12 @@ Panels:
         - /TF and Axes1/Odom Frame Axes1
         - /TF and Axes1/TF1/Tree1
         - /Grids1
-        - /Grids1/Fine Grid1/Status1
+        - /Grids1/Fine Grid1
+        - /Grids1/Grid1
         - /Odometry1/Wheel Odometry1
         - /Laser First Echoes Only1
         - /RGB-D Frustums1
         - /RGB-D Frustums1/Front Top RGB-D1
-        - /RGB-D Point Clouds1
-        - /RGB-D Point Clouds1/Front RGB-D1
-        - /RGB-D Point Clouds1/Rear RGB-D1
-        - /RGB Cameras1
-        - /RGB Cameras1/Front1/Front Top1/Visibility1
-        - /RGB Cameras1/Front1/Front Bottom1/Visibility1
-        - /RGB Cameras1/Rear1
-        - /Depth Cameras1/Front1
-        - /Depth Cameras1/Front1/Front Top1
-        - /Depth Cameras1/Front1/Front Top1/Visibility1
-        - /Depth Cameras1/Front1/Front Bottom1/Visibility1
-        - /Depth Cameras1/Rear1/Rear Bottom1/Visibility1
-        - /Depth Cameras1/Rear1/Rear Top1/Visibility1
         - /Collision Checking1
         - /Collision Checking1/RGB-D Collision Rear Bottom1/Collision RGB-D Rear Bottom1
         - /Collision Checking1/RGB-D Collision Rear Top1/Safe1
@@ -35,32 +23,16 @@ Panels:
         - /People Tracking1
         - /People Tracking1/Detections front1
         - /People Tracking1/Detections front1/Upper-Body1/Style1
-        - /People Tracking1/TrackedPersons1
         - /People Tracking1/TrackedPersons1/Style1
         - /People Tracking1/TrackedPersons1/History as line1
         - /People Tracking1/TrackedPersons1/Render covariances1
         - /People Tracking1/Filtered DetectedPersons1/Render covariances1
         - /People Tracking1/Filtered high-recall detections1/Style1
         - /People Tracking1/Filtered high-recall detections1/Render covariances1
-        - /Map1
-        - /Global Planned Path1
-        - /Global costmap1
-        - /Kinect2 Point Cloud1
-        - /Map2
-        - /PoseArray1
-        - /Depth Image1
-        - /Occ Cloud Front1
-        - /Occ Cloud Rear1
-        - /LaserScan1
-        - /LaserScan2
-        - /Laser Area1
-        - /Symbolic Path1
-        - /Symbolic Path1/Offset1
-        - /Velodyne1
         - /Tracked in Driving Direction1/Style1
-        - /Eband1
+        - /Camera1
       Splitter Ratio: 0.486301005
-    Tree Height: 650
+    Tree Height: 292
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -139,7 +111,7 @@ Visualization Manager:
             Z: 0
           Plane: XY
           Plane Cell Count: 5000
-          Reference Frame: odom_base_link
+          Reference Frame: base_link
           Value: true
         - Alpha: 0.5
           Cell Size: 1
@@ -157,7 +129,7 @@ Visualization Manager:
             Z: 0
           Plane: XY
           Plane Cell Count: 500
-          Reference Frame: odom_base_link
+          Reference Frame: base_link
           Value: true
       Enabled: true
       Name: Grids
@@ -564,874 +536,6 @@ Visualization Manager:
           use image: false
       Enabled: true
       Name: RGB-D Frustums
-    - Class: rviz/Group
-      Displays:
-        - Class: rviz/Group
-          Displays:
-            - Alpha: 1
-              Autocompute Intensity Bounds: true
-              Autocompute Value Bounds:
-                Max Value: 10
-                Min Value: -10
-                Value: true
-              Axis: Z
-              Channel Name: rgb
-              Class: rviz/PointCloud2
-              Color: 255; 255; 255
-              Color Transformer: RGB8
-              Decay Time: 0
-              Enabled: true
-              Invert Rainbow: false
-              Max Color: 255; 255; 255
-              Max Intensity: 2.35079995e-38
-              Min Color: 0; 0; 0
-              Min Intensity: 0
-              Name: Front top cloud
-              Position Transformer: XYZ
-              Queue Size: 0
-              Selectable: false
-              Size (Pixels): 3
-              Size (m): 0.100000001
-              Style: Points
-              Topic: /spencer/sensors/rgbd_front_top/depth_registered/points
-              Unreliable: false
-              Use Fixed Frame: true
-              Use rainbow: true
-              Value: true
-            - Alpha: 1
-              Autocompute Intensity Bounds: true
-              Autocompute Value Bounds:
-                Max Value: 10
-                Min Value: -10
-                Value: true
-              Axis: Z
-              Channel Name: intensity
-              Class: rviz/PointCloud2
-              Color: 255; 255; 255
-              Color Transformer: RGB8
-              Decay Time: 0
-              Enabled: true
-              Invert Rainbow: false
-              Max Color: 255; 255; 255
-              Max Intensity: 4096
-              Min Color: 0; 0; 0
-              Min Intensity: 0
-              Name: Front bottom cloud
-              Position Transformer: XYZ
-              Queue Size: 0
-              Selectable: false
-              Size (Pixels): 3
-              Size (m): 0.00999999978
-              Style: Points
-              Topic: /spencer/sensors/rgbd_front_bottom/depth_registered/points
-              Unreliable: false
-              Use Fixed Frame: true
-              Use rainbow: true
-              Value: true
-          Enabled: true
-          Name: Front RGB-D
-        - Class: rviz/Group
-          Displays:
-            - Alpha: 1
-              Autocompute Intensity Bounds: true
-              Autocompute Value Bounds:
-                Max Value: 10
-                Min Value: -10
-                Value: true
-              Axis: Z
-              Channel Name: intensity
-              Class: rviz/PointCloud2
-              Color: 255; 255; 255
-              Color Transformer: RGB8
-              Decay Time: 0
-              Enabled: true
-              Invert Rainbow: false
-              Max Color: 255; 255; 255
-              Max Intensity: 4096
-              Min Color: 0; 0; 0
-              Min Intensity: 0
-              Name: Rear top cloud
-              Position Transformer: XYZ
-              Queue Size: 0
-              Selectable: false
-              Size (Pixels): 3
-              Size (m): 0.00999999978
-              Style: Points
-              Topic: /spencer/sensors/rgbd_rear_top/depth_registered/points
-              Unreliable: false
-              Use Fixed Frame: true
-              Use rainbow: true
-              Value: true
-            - Alpha: 1
-              Autocompute Intensity Bounds: true
-              Autocompute Value Bounds:
-                Max Value: 10
-                Min Value: -10
-                Value: true
-              Axis: Z
-              Channel Name: intensity
-              Class: rviz/PointCloud2
-              Color: 255; 255; 255
-              Color Transformer: RGB8
-              Decay Time: 0
-              Enabled: true
-              Invert Rainbow: false
-              Max Color: 255; 255; 255
-              Max Intensity: 4096
-              Min Color: 0; 0; 0
-              Min Intensity: 0
-              Name: Rear bottom cloud
-              Position Transformer: XYZ
-              Queue Size: 0
-              Selectable: false
-              Size (Pixels): 3
-              Size (m): 0.00999999978
-              Style: Points
-              Topic: /spencer/sensors/rgbd_rear_bottom/depth_registered/points
-              Unreliable: false
-              Use Fixed Frame: true
-              Use rainbow: true
-              Value: true
-          Enabled: true
-          Name: Rear RGB-D
-      Enabled: false
-      Name: RGB-D Point Clouds
-    - Class: rviz/Group
-      Displays:
-        - Class: rviz/Group
-          Displays:
-            - Class: jsk_rviz_plugin/OverlayCamera
-              Enabled: true
-              Image Rendering: background
-              Image Topic: /spencer/sensors/rgbd_front_top/throttled/rgb/image_raw
-              Name: Front Top
-              Overlay Alpha: 0.5
-              Queue Size: 2
-              Transport Hint: raw
-              Unreliable: false
-              Value: true
-              Visibility:
-                Camera: true
-                Collision Checking:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Depth Cameras:
-                  "":
-                    "": true
-                    Value: true
-                  Value: false
-                Depth Image: true
-                Eband: false
-                Global Planned Path: true
-                Global costmap: true
-                Goal Pose: true
-                Grids:
-                  Fine Grid: true
-                  Grid: true
-                  Value: false
-                Kinect2 Point Cloud: true
-                Laser All Echoes + RSSIs:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Laser Area: true
-                Laser First Echoes Only:
-                  "": true
-                  Value: true
-                LaserScan: true
-                Local costmap: true
-                Map: false
-                NDT: true
-                Occ Cloud Front: true
-                Occ Cloud Rear: true
-                Odometry:
-                  Value: true
-                  Wheel Odometry: true
-                People Tracking:
-                  "": true
-                  Value: false
-                PoseArray: true
-                RGB Cameras:
-                  Front:
-                    Front Bottom: true
-                    Value: true
-                  Rear:
-                    "": true
-                    Value: true
-                  Value: false
-                RGB-D Frustums:
-                  "": true
-                  Value: false
-                RGB-D Point Clouds:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Symbolic Path: true
-                TF and Axes:
-                  Base Footprint: true
-                  Odom Frame Axes: true
-                  Optitrack Frame: true
-                  TF: true
-                  Value: true
-                Tracked in Driving Direction: true
-                Value: true
-                Velodyne: true
-              Zoom Factor: 1
-              height: 240
-              left: 10
-              texture alpha: 0.899999976
-              top: 10
-              width: 320
-            - Class: jsk_rviz_plugin/OverlayCamera
-              Enabled: true
-              Image Rendering: background
-              Image Topic: /spencer/sensors/rgbd_front_bottom/throttled/rgb/image_raw
-              Name: Front Bottom
-              Overlay Alpha: 0.5
-              Queue Size: 2
-              Transport Hint: raw
-              Unreliable: false
-              Value: true
-              Visibility:
-                Camera: true
-                Collision Checking:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Depth Cameras:
-                  "":
-                    "": true
-                    Value: true
-                  Value: false
-                Depth Image: true
-                Eband: false
-                Global Planned Path: true
-                Global costmap: true
-                Goal Pose: true
-                Grids:
-                  Fine Grid: true
-                  Grid: true
-                  Value: true
-                Kinect2 Point Cloud: true
-                Laser All Echoes + RSSIs:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Laser Area: true
-                Laser First Echoes Only:
-                  "": true
-                  Value: true
-                LaserScan: true
-                Local costmap: true
-                Map: false
-                NDT: true
-                Occ Cloud Front: true
-                Occ Cloud Rear: true
-                Odometry:
-                  Value: true
-                  Wheel Odometry: true
-                People Tracking:
-                  "": true
-                  Value: false
-                PoseArray: true
-                RGB Cameras:
-                  Front:
-                    Front Top: true
-                    Value: true
-                  Rear:
-                    "": true
-                    Value: true
-                  Value: false
-                RGB-D Frustums:
-                  "": true
-                  Value: false
-                RGB-D Point Clouds:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Symbolic Path: true
-                TF and Axes:
-                  Base Footprint: true
-                  Odom Frame Axes: true
-                  Optitrack Frame: true
-                  TF: true
-                  Value: true
-                Tracked in Driving Direction: true
-                Value: true
-                Velodyne: true
-              Zoom Factor: 1
-              height: 240
-              left: 10
-              texture alpha: 0.899999976
-              top: 255
-              width: 320
-          Enabled: false
-          Name: Front
-        - Class: rviz/Group
-          Displays:
-            - Class: jsk_rviz_plugin/OverlayCamera
-              Enabled: true
-              Image Rendering: background
-              Image Topic: /spencer/sensors/rgbd_rear_top/throttled/rgb/image_raw
-              Name: Rear Top
-              Overlay Alpha: 0.699999988
-              Queue Size: 2
-              Transport Hint: raw
-              Unreliable: false
-              Value: true
-              Visibility:
-                Camera: true
-                Collision Checking:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Depth Cameras:
-                  "":
-                    "": true
-                    Value: true
-                  Value: false
-                Depth Image: true
-                Eband: true
-                Global Planned Path: true
-                Global costmap: true
-                Goal Pose: true
-                Grids:
-                  Fine Grid: true
-                  Grid: true
-                  Value: false
-                Kinect2 Point Cloud: true
-                Laser All Echoes + RSSIs:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Laser Area: true
-                Laser First Echoes Only:
-                  "": true
-                  Value: true
-                LaserScan: true
-                Local costmap: true
-                Map: false
-                NDT: true
-                Occ Cloud Front: true
-                Occ Cloud Rear: true
-                Odometry:
-                  Value: true
-                  Wheel Odometry: true
-                People Tracking:
-                  "": true
-                  Value: false
-                PoseArray: true
-                RGB Cameras:
-                  Front:
-                    Front Bottom: true
-                    Front Top: true
-                    Value: true
-                  Rear:
-                    Rear Bottom: true
-                    Value: true
-                  Value: false
-                RGB-D Frustums:
-                  "": true
-                  Value: false
-                RGB-D Point Clouds:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Symbolic Path: true
-                TF and Axes:
-                  Base Footprint: true
-                  Odom Frame Axes: true
-                  Optitrack Frame: true
-                  TF: true
-                  Value: true
-                Tracked in Driving Direction: true
-                Value: true
-                Velodyne: true
-              Zoom Factor: 1
-              height: 240
-              left: 1235
-              texture alpha: 0.899999976
-              top: 10
-              width: 320
-            - Class: jsk_rviz_plugin/OverlayCamera
-              Enabled: true
-              Image Rendering: background
-              Image Topic: /spencer/sensors/rgbd_rear_bottom/throttled/rgb/image_raw
-              Name: Rear Bottom
-              Overlay Alpha: 0.5
-              Queue Size: 2
-              Transport Hint: raw
-              Unreliable: false
-              Value: true
-              Visibility:
-                Camera: true
-                Collision Checking:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Depth Cameras:
-                  "":
-                    "": true
-                    Value: true
-                  Value: false
-                Depth Image: true
-                Eband: false
-                Global Planned Path: true
-                Global costmap: true
-                Goal Pose: true
-                Grids:
-                  Fine Grid: true
-                  Grid: true
-                  Value: true
-                Kinect2 Point Cloud: true
-                Laser All Echoes + RSSIs:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Laser Area: true
-                Laser First Echoes Only:
-                  "": true
-                  Value: true
-                LaserScan: true
-                Local costmap: true
-                Map: false
-                NDT: true
-                Occ Cloud Front: true
-                Occ Cloud Rear: true
-                Odometry:
-                  Value: true
-                  Wheel Odometry: true
-                People Tracking:
-                  "": true
-                  Value: true
-                PoseArray: true
-                RGB Cameras:
-                  Front:
-                    Front Bottom: true
-                    Front Top: true
-                    Value: true
-                  Rear:
-                    Rear Top: true
-                    Value: true
-                  Value: false
-                RGB-D Frustums:
-                  "": true
-                  Value: false
-                RGB-D Point Clouds:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Symbolic Path: true
-                TF and Axes:
-                  Base Footprint: true
-                  Odom Frame Axes: true
-                  Optitrack Frame: true
-                  TF: true
-                  Value: true
-                Tracked in Driving Direction: true
-                Value: true
-                Velodyne: true
-              Zoom Factor: 1
-              height: 240
-              left: 1235
-              texture alpha: 0.899999976
-              top: 255
-              width: 320
-          Enabled: true
-          Name: Rear
-      Enabled: false
-      Name: RGB Cameras
-    - Class: rviz/Group
-      Displays:
-        - Class: rviz/Group
-          Displays:
-            - Class: jsk_rviz_plugin/OverlayCamera
-              Enabled: true
-              Image Rendering: background
-              Image Topic: /spencer/visualization/clients/local/rgbd_front_top/depth/image_raw
-              Name: Front Top
-              Overlay Alpha: 0.5
-              Queue Size: 2
-              Transport Hint: raw
-              Unreliable: false
-              Value: true
-              Visibility:
-                Camera: true
-                Collision Checking:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Depth Cameras:
-                  Front:
-                    Front Bottom: true
-                    Value: true
-                  Rear:
-                    "": true
-                    Value: true
-                  Value: false
-                Depth Image: true
-                Eband: true
-                Global Planned Path: true
-                Global costmap: true
-                Goal Pose: true
-                Grids:
-                  Fine Grid: true
-                  Grid: true
-                  Value: false
-                Kinect2 Point Cloud: true
-                Laser All Echoes + RSSIs:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Laser Area: true
-                Laser First Echoes Only:
-                  "": true
-                  Value: true
-                LaserScan: true
-                Local costmap: true
-                Map: true
-                NDT: true
-                Occ Cloud Front: true
-                Occ Cloud Rear: true
-                Odometry:
-                  Value: true
-                  Wheel Odometry: true
-                People Tracking:
-                  "": true
-                  Value: true
-                PoseArray: true
-                RGB Cameras:
-                  Front:
-                    Front Bottom: true
-                    Front Top: true
-                    Value: true
-                  Rear:
-                    Rear Bottom: true
-                    Rear Top: true
-                    Value: true
-                  Value: false
-                RGB-D Frustums:
-                  "": true
-                  Value: false
-                RGB-D Point Clouds:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Symbolic Path: true
-                TF and Axes:
-                  Base Footprint: true
-                  Odom Frame Axes: true
-                  Optitrack Frame: true
-                  TF: true
-                  Value: true
-                Tracked in Driving Direction: true
-                Value: true
-                Velodyne: true
-              Zoom Factor: 1
-              height: 240
-              left: 10
-              texture alpha: 0.800000012
-              top: 10
-              width: 320
-            - Class: jsk_rviz_plugin/OverlayCamera
-              Enabled: true
-              Image Rendering: background
-              Image Topic: /spencer/visualization/clients/local/rgbd_front_bottom/depth/image_raw
-              Name: Front Bottom
-              Overlay Alpha: 0.5
-              Queue Size: 2
-              Transport Hint: raw
-              Unreliable: false
-              Value: true
-              Visibility:
-                Camera: true
-                Collision Checking:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Depth Cameras:
-                  Front:
-                    Front Top: true
-                    Value: true
-                  Rear:
-                    "": true
-                    Value: true
-                  Value: false
-                Depth Image: true
-                Eband: true
-                Global Planned Path: true
-                Global costmap: true
-                Goal Pose: true
-                Grids:
-                  Fine Grid: true
-                  Grid: true
-                  Value: true
-                Kinect2 Point Cloud: true
-                Laser All Echoes + RSSIs:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Laser Area: true
-                Laser First Echoes Only:
-                  "": true
-                  Value: true
-                LaserScan: true
-                Local costmap: true
-                Map: true
-                NDT: true
-                Occ Cloud Front: true
-                Occ Cloud Rear: true
-                Odometry:
-                  Value: true
-                  Wheel Odometry: true
-                People Tracking:
-                  "": true
-                  Value: true
-                PoseArray: true
-                RGB Cameras:
-                  Front:
-                    Front Bottom: true
-                    Front Top: true
-                    Value: true
-                  Rear:
-                    Rear Bottom: true
-                    Rear Top: true
-                    Value: true
-                  Value: false
-                RGB-D Frustums:
-                  "": true
-                  Value: false
-                RGB-D Point Clouds:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Symbolic Path: true
-                TF and Axes:
-                  Base Footprint: true
-                  Odom Frame Axes: true
-                  Optitrack Frame: true
-                  TF: true
-                  Value: true
-                Tracked in Driving Direction: true
-                Value: true
-                Velodyne: true
-              Zoom Factor: 1
-              height: 240
-              left: 10
-              texture alpha: 0.800000012
-              top: 255
-              width: 320
-          Enabled: true
-          Name: Front
-        - Class: rviz/Group
-          Displays:
-            - Class: jsk_rviz_plugin/OverlayCamera
-              Enabled: true
-              Image Rendering: background
-              Image Topic: /spencer/visualization/clients/local/rgbd_rear_bottom/depth/image_raw
-              Name: Rear Bottom
-              Overlay Alpha: 0.5
-              Queue Size: 2
-              Transport Hint: raw
-              Unreliable: false
-              Value: true
-              Visibility:
-                Camera: true
-                Collision Checking:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Depth Cameras:
-                  Front:
-                    Front Bottom: true
-                    Front Top: true
-                    Value: true
-                  Rear:
-                    Rear Top: true
-                    Value: true
-                  Value: false
-                Depth Image: true
-                Eband: true
-                Global Planned Path: true
-                Global costmap: true
-                Goal Pose: true
-                Grids:
-                  Fine Grid: true
-                  Grid: true
-                  Value: true
-                Kinect2 Point Cloud: true
-                Laser All Echoes + RSSIs:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Laser Area: true
-                Laser First Echoes Only:
-                  "": true
-                  Value: true
-                LaserScan: true
-                Local costmap: true
-                Map: true
-                NDT: true
-                Occ Cloud Front: true
-                Occ Cloud Rear: true
-                Odometry:
-                  Value: true
-                  Wheel Odometry: true
-                People Tracking:
-                  "": true
-                  Value: true
-                PoseArray: true
-                RGB Cameras:
-                  Front:
-                    Front Bottom: true
-                    Front Top: true
-                    Value: true
-                  Rear:
-                    Rear Bottom: true
-                    Rear Top: true
-                    Value: true
-                  Value: false
-                RGB-D Frustums:
-                  "": true
-                  Value: false
-                RGB-D Point Clouds:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Symbolic Path: true
-                TF and Axes:
-                  Base Footprint: true
-                  Odom Frame Axes: true
-                  Optitrack Frame: true
-                  TF: true
-                  Value: true
-                Tracked in Driving Direction: true
-                Value: true
-                Velodyne: true
-              Zoom Factor: 1
-              height: 240
-              left: 1235
-              texture alpha: 0.800000012
-              top: 255
-              width: 320
-            - Class: jsk_rviz_plugin/OverlayCamera
-              Enabled: true
-              Image Rendering: background
-              Image Topic: /spencer/visualization/clients/local/rgbd_rear_top/depth/image_raw
-              Name: Rear Top
-              Overlay Alpha: 0.5
-              Queue Size: 2
-              Transport Hint: raw
-              Unreliable: false
-              Value: true
-              Visibility:
-                Camera: true
-                Collision Checking:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Depth Cameras:
-                  Front:
-                    Front Bottom: true
-                    Front Top: true
-                    Value: true
-                  Rear:
-                    Rear Bottom: true
-                    Value: true
-                  Value: false
-                Depth Image: true
-                Eband: true
-                Global Planned Path: true
-                Global costmap: true
-                Goal Pose: true
-                Grids:
-                  Fine Grid: true
-                  Grid: true
-                  Value: false
-                Kinect2 Point Cloud: true
-                Laser All Echoes + RSSIs:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Laser Area: true
-                Laser First Echoes Only:
-                  "": true
-                  Value: true
-                LaserScan: true
-                Local costmap: true
-                Map: true
-                NDT: true
-                Occ Cloud Front: true
-                Occ Cloud Rear: true
-                Odometry:
-                  Value: true
-                  Wheel Odometry: true
-                People Tracking:
-                  "": true
-                  Value: true
-                PoseArray: true
-                RGB Cameras:
-                  Front:
-                    Front Bottom: true
-                    Front Top: true
-                    Value: true
-                  Rear:
-                    Rear Bottom: true
-                    Rear Top: true
-                    Value: true
-                  Value: false
-                RGB-D Frustums:
-                  "": true
-                  Value: false
-                RGB-D Point Clouds:
-                  "":
-                    "": true
-                    Value: true
-                  Value: true
-                Symbolic Path: true
-                TF and Axes:
-                  Base Footprint: true
-                  Odom Frame Axes: true
-                  Optitrack Frame: true
-                  TF: true
-                  Value: true
-                Tracked in Driving Direction: true
-                Value: true
-                Velodyne: true
-              Zoom Factor: 1
-              height: 240
-              left: 1235
-              texture alpha: 0.800000012
-              top: 10
-              width: 320
-          Enabled: false
-          Name: Rear
-      Enabled: false
-      Name: Depth Cameras
     - Class: rviz/Group
       Displays:
         - Class: rviz/MarkerArray
@@ -1975,7 +1079,7 @@ Visualization Manager:
           Color: 255; 0; 0
           Color map offset: 0
           Color transform: Constant color
-          Enabled: false
+          Enabled: true
           Excluded person IDs: ""
           Font color: 255; 255; 255
           Font color style: Same color
@@ -1998,7 +1102,7 @@ Visualization Manager:
           Text spacing: 1
           Topic: /spencer/perception_internal/detected_person_association/lasers_upper_body_fused
           Unreliable: false
-          Value: false
+          Value: true
           Z offset:
             Use Z position from message: false
             Value: -0.200000003
@@ -2083,7 +1187,7 @@ Visualization Manager:
           Color map offset: 0
           Color transform: Rainbow
           Delete after no. cycles: 100
-          Enabled: false
+          Enabled: true
           Excluded person IDs: ""
           Font color: 255; 255; 255
           Font color style: Constant color
@@ -2116,7 +1220,7 @@ Visualization Manager:
             Value: Person meshes
           Topic: /spencer/perception/tracked_persons_moving
           Unreliable: false
-          Value: false
+          Value: true
           Z offset:
             Use Z position from message: false
             Value: 0
@@ -2232,7 +1336,7 @@ Visualization Manager:
           Color: 0; 255; 255
           Color map offset: 0
           Color transform: Constant color
-          Enabled: false
+          Enabled: true
           Excluded person IDs: ""
           Font color: 255; 255; 255
           Font color style: Same color
@@ -2255,7 +1359,7 @@ Visualization Manager:
           Text spacing: 1
           Topic: /spencer/perception_internal/people_tracking/srl_nearest_neighbor_tracker/missed_observation_recovery/low_confidence_observations
           Unreliable: false
-          Value: false
+          Value: true
           Z offset:
             Use Z position from message: false
             Value: 0
@@ -2275,67 +1379,9 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: true
-      Enabled: false
+      Enabled: true
       Name: Map
-      Topic: /move_base_node/global_costmap/costmap
-      Unreliable: false
-      Use Timestamp: false
-      Value: false
-    - Alpha: 1
-      Axes Length: 1
-      Axes Radius: 0.100000001
-      Class: rviz/Pose
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.300000012
-      Head Radius: 0.300000012
-      Name: Goal Pose
-      Shaft Length: 1
-      Shaft Radius: 0.100000001
-      Shape: Arrow
-      Topic: /move_base_simple/goal
-      Unreliable: false
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 25; 255; 0
-      Enabled: true
-      Head Diameter: 0.300000012
-      Head Length: 0.200000003
-      Length: 0.300000012
-      Line Style: Billboards
-      Line Width: 0.100000001
-      Name: Global Planned Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Radius: 0.0299999993
-      Shaft Diameter: 0.100000001
-      Shaft Length: 0.100000001
-      Topic: /move_base_node/GlobalPlanner/plan
-      Unreliable: false
-      Value: true
-    - Alpha: 0.699999988
-      Class: rviz/Map
-      Color Scheme: costmap
-      Draw Behind: false
-      Enabled: false
-      Name: Local costmap
-      Topic: /move_base_node/local_costmap/costmap
-      Unreliable: false
-      Use Timestamp: false
-      Value: false
-    - Alpha: 0.699999988
-      Class: rviz/Map
-      Color Scheme: jet (101 levels)
-      Draw Behind: true
-      Enabled: true
-      Name: Global costmap
-      Topic: /move_base_node/global_costmap/costmap
+      Topic: /map
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -2364,24 +1410,11 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Flat Squares
-      Topic: /kinect2/sd/points
+      Topic: /kinect2/qhd/points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
-    - Alpha: 0.699999988
-      Class: rviz/Map
-      Color Scheme: jet (101 levels)
-      Draw Behind: false
-      Enabled: false
-      Name: Map
-      Topic: /move_base_node/global_costmap/costmap
-      Unreliable: false
-      Use Timestamp: false
-      Value: false
-    - Class: ndt_rviz_visualisation/NDT
-      Enabled: false
-      Name: NDT
     - Alpha: 1
       Arrow Length: 0.300000012
       Axes Length: 0.300000012
@@ -2398,18 +1431,6 @@ Visualization Manager:
       Topic: /particles
       Unreliable: false
       Value: true
-    - Class: rviz/Image
-      Enabled: false
-      Image Topic: /spencer/sensors/rgbd_rear_top/depth/image_raw
-      Max Value: 1
-      Median window: 5
-      Min Value: 0
-      Name: Depth Image
-      Normalize Range: true
-      Queue Size: 2
-      Transport Hint: raw
-      Unreliable: false
-      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -2448,36 +1469,6 @@ Visualization Manager:
         Value: true
       Axis: Z
       Channel Name: intensity
-      Class: rviz/PointCloud2
-      Color: 170; 0; 127
-      Color Transformer: FlatColor
-      Decay Time: 0
-      Enabled: false
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: Occ Cloud Rear
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 10
-      Size (m): 0.00999999978
-      Style: Points
-      Topic: /spencer/control/collision/rgbd_rear_bottom/local_occ_cloud
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: false
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
       Class: rviz/LaserScan
       Color: 0; 170; 255
       Color Transformer: FlatColor
@@ -2500,172 +1491,13 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/LaserScan
-      Color: 0; 170; 255
-      Color Transformer: FlatColor
-      Decay Time: 0
-      Enabled: false
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 254
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: LaserScan
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 10
-      Size (m): 10
-      Style: Points
-      Topic: /spencer/navigation/laser_rear/scan_filtered
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /spencer/navigation/laser_front/scan_filtered_visible_area
       Name: Laser Area
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
-    - Class: rviz/Camera
-      Enabled: false
-      Image Rendering: background and overlay
-      Image Topic: /spencer/sensors/rgbd_front_bottom/rgb/image_raw
-      Name: Camera
-      Overlay Alpha: 0.5
-      Queue Size: 2
-      Transport Hint: raw
-      Unreliable: false
-      Value: false
-      Visibility:
-        Collision Checking:
-          "":
-            "": true
-            Value: true
-          Value: true
-        Depth Cameras:
-          "":
-            "": true
-            Value: true
-          Value: true
-        Depth Image: true
-        Eband: true
-        Global Planned Path: true
-        Global costmap: true
-        Goal Pose: true
-        Grids:
-          "": true
-          Value: true
-        Kinect2 Point Cloud: true
-        Laser All Echoes + RSSIs:
-          "":
-            "": true
-            Value: true
-          Value: true
-        Laser Area: true
-        Laser First Echoes Only:
-          "": true
-          Value: true
-        LaserScan: true
-        Local costmap: true
-        Map: true
-        NDT: true
-        Occ Cloud Front: true
-        Occ Cloud Rear: true
-        Odometry:
-          "": true
-          Value: true
-        People Tracking:
-          "": true
-          Value: true
-        PoseArray: true
-        RGB Cameras:
-          "":
-            "": true
-            Value: true
-          Value: true
-        RGB-D Frustums:
-          "": true
-          Value: true
-        RGB-D Point Clouds:
-          "":
-            "": true
-            Value: true
-          Value: true
-        Symbolic Path: true
-        TF and Axes:
-          Base Footprint: true
-          Odom Frame Axes: true
-          Optitrack Frame: true
-          TF: true
-          Value: true
-        Tracked in Driving Direction: true
-        Value: true
-        Velodyne: true
-      Zoom Factor: 1
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 255; 85; 255
-      Enabled: true
-      Head Diameter: 0.300000012
-      Head Length: 0.200000003
-      Length: 0.300000012
-      Line Style: Billboards
-      Line Width: 0.150000006
-      Name: Symbolic Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 1
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Radius: 0.0299999993
-      Shaft Diameter: 0.100000001
-      Shaft Length: 0.100000001
-      Topic: /supervision/navigation/path
-      Unreliable: false
-      Value: true
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: Intensity
-      Decay Time: 0
-      Enabled: false
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 255
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: Velodyne
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 5
-      Size (m): 0.00999999978
-      Style: Points
-      Topic: /velodyne_points
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
       Value: false
     - Alpha: 1
       Class: spencer_tracking_rviz_plugin/TrackedPersons
@@ -2673,7 +1505,7 @@ Visualization Manager:
       Color map offset: 0
       Color transform: Rainbow
       Delete after no. cycles: 100
-      Enabled: false
+      Enabled: true
       Excluded person IDs: ""
       Font color: 255; 255; 255
       Font color style: Same color
@@ -2706,23 +1538,115 @@ Visualization Manager:
         Value: Person meshes
       Topic: /spencer/perception/tracked_persons_confirmed_in_driving_direction
       Unreliable: false
-      Value: false
+      Value: true
       Z offset:
         Use Z position from message: false
         Value: 0
-    - Class: rviz/Marker
+    - Class: rviz/Camera
       Enabled: true
-      Marker Topic: /move_base_node/SrlEBandPlannerROS/eband_visualization
-      Name: Eband
-      Namespaces:
-        {}
-      Queue Size: 10
+      Image Rendering: background and overlay
+      Image Topic: /spencer/perception_internal/people_detection/rgbd_front_top/upper_body_detector/image
+      Name: Camera
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
       Value: true
+      Visibility:
+        Collision Checking:
+          Collision Laser Front: true
+          Collision Laser Rear: true
+          RGB-D Collision Front Bottom:
+            Collision Debug Error: true
+            Collision Debug Safe: true
+            Collision Debug Warn: true
+            Collision RGB-D Front Bottom: true
+            Value: true
+          RGB-D Collision Front Top:
+            Error: true
+            RGB-D Front Top: true
+            Safe: true
+            Value: true
+            Warn: true
+          RGB-D Collision Rear Bottom:
+            Collision Debug Error: true
+            Collision Debug Safe: true
+            Collision Debug Warn: true
+            Collision RGB-D Rear Bottom: true
+            Value: true
+          RGB-D Collision Rear Top:
+            Error: true
+            RGB-D Rear Top: true
+            Safe: true
+            Value: true
+            Warn: true
+          Value: true
+        Grids:
+          Fine Grid: true
+          Grid: true
+          Value: true
+        Kinect2 Point Cloud: true
+        Laser All Echoes + RSSIs:
+          Front laser:
+            Echo 0: true
+            Echo 1: true
+            Echo 2: true
+            Echo 3: true
+            Echo 4: true
+            Value: true
+          Rear laser:
+            Echo 0: true
+            Echo 1: true
+            Echo 2: true
+            Echo 3: true
+            Echo 4: true
+            Value: true
+          Value: true
+        Laser Area: true
+        Laser First Echoes Only:
+          Front laser: true
+          Value: true
+        LaserScan: true
+        Map: true
+        Occ Cloud Front: true
+        Odometry:
+          Value: true
+          Wheel Odometry: true
+        People Tracking:
+          Composite arrows: true
+          Debug Map: true
+          Detections front:
+            Laser: true
+            Laser high-recall: true
+            Upper-Body: true
+            Value: true
+          Filtered DetectedPersons: true
+          Filtered high-recall detections: true
+          Fused RGBD+laser: true
+          Fused detections: true
+          Groundtruth Tracks: true
+          Moving TrackedPersons: true
+          Recovered DetectedPersons: true
+          TrackedPersons: true
+          Value: true
+        PoseArray: true
+        RGB-D Frustums:
+          Front Top RGB-D: true
+          Value: true
+        TF and Axes:
+          Base Footprint: true
+          Odom Frame Axes: true
+          Optitrack Frame: true
+          TF: true
+          Value: true
+        Tracked in Driving Direction: true
+        Value: true
+      Zoom Factor: 1
   Enabled: true
   Global Options:
     Background Color: 40; 40; 40
     Default Light: true
-    Fixed Frame: world
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -2765,14 +1689,12 @@ Visualization Manager:
 Window Geometry:
   Camera:
     collapsed: false
-  Depth Image:
-    collapsed: false
   Displays:
     collapsed: false
   Height: 823
   Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd00000004000000000000022c00000319fc020000000ffb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000000000000319000000d700fffffffa000000050100000006fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730000000000ffffffff0000009b00fffffffb0000002800460072006f006e0074002000640065007000740068002000700061006e006f00720061006d00610100000000ffffffff0000000000000000fb000000260052006500610072002000640065007000740068002000700061006e006f00720061006d006102000003d8000000350000026600000337fb0000002400460072006f006e00740020005200470042002000700061006e006f00720061006d00610100000000ffffffff0000000000000000fb0000005e006b0069006e006400650072006300610072005f006f0064006f006d0065007400720079005f005f004f0064006f006d0065007400720079004700550049005f005f0031005f005f004f0064006f006d006500740072007900470055004903000001ef000001c90000057800000135fb000000100044006900730070006c00610079007301000000000000013c0000016a00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001a004b0069006e006500630074003100200043006f006c006f0072000000017d000000700000000000000000fb0000001a004b0069006e006500630074003100200044006500700074006800000001b9000000840000000000000000fb0000001a004b0069006e0065006300740030002000440065007000740068000000020d0000009d0000000000000000fb0000001c004b0069006e0065006300740020003000200043006f006c006f00720000000289000000c50000000000000000fb0000001400440053004c005200200069006d00610067006502000002e40000001f0000035c000001dcfb0000002200520065006100720020005200470042002000700061006e006f00720061006d006102000003d9000000350000026500000337fb000000160044006500700074006800200049006d0061006700650200000496000001cf000001a80000017bfb0000000c00430061006d0065007200610200000039000000590000050f0000032b00000001000001d3000002d8fc0200000008fb0000005a007200710074005f0069006d006100670065005f0076006900650077005f005f0049006d0061006700650056006900650077005f005f0032005f005f0049006d006100670065005600690065007700570069006400670065007403000003100000011a0000018b00000148fb0000001a004b0069006e00650063007400310020004400650070007400680000000041000000ac0000000000000000fb0000001a004b0069006e00650063007400300020004400650070007400680000000041000001030000000000000000fb0000001a004b0069006e006500630074003100200043006f006c006f007200000000410000018a0000000000000000fb0000001c004b0069006e0065006300740020003000200043006f006c006f007200000000410000030d0000000000000000fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fc00000041000002d80000000000fffffffa000000000100000002fb0000000a0049006d0061006700650100000000ffffffff0000000000000000fb0000000a005600690065007700730000000510000001300000010f00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000003ce0000003bfc0100000004fb0000000800540069006d0065020000025d00000018000003ce00000043fb0000000800540069006d00650100000000000004500000000000000000fb0000004c007200710074005f0063006f006e0073006f006c0065005f005f0043006f006e0073006f006c0065005f005f0031005f005f0043006f006e0073006f006c006500570069006400670065007403000001f700000311000002890000039ffb0000005a007200710074005f0069006d006100670065005f0076006900650077005f005f0049006d0061006700650056006900650077005f005f0031005f005f0049006d006100670065005600690065007700570069006400670065007403000001e20000022e00000578000001f90000040c0000031900000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730000000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000022c00000302fc0200000010fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006700fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000001900000165000000e300fffffffa000000050100000006fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730000000000ffffffff0000009400fffffffb0000002800460072006f006e0074002000640065007000740068002000700061006e006f00720061006d00610100000000ffffffff0000000000000000fb000000260052006500610072002000640065007000740068002000700061006e006f00720061006d006102000003d8000000350000026600000337fb0000002400460072006f006e00740020005200470042002000700061006e006f00720061006d00610100000000ffffffff0000000000000000fb0000005e006b0069006e006400650072006300610072005f006f0064006f006d0065007400720079005f005f004f0064006f006d0065007400720079004700550049005f005f0031005f005f004f0064006f006d006500740072007900470055004903000001ef000001c90000057800000135fb000000100044006900730070006c00610079007301000000000000013c0000016a00fffffffb0000000c00430061006d0065007200610100000184000001970000001600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001a004b0069006e006500630074003100200043006f006c006f0072000000017d000000700000000000000000fb0000001a004b0069006e006500630074003100200044006500700074006800000001b9000000840000000000000000fb0000001a004b0069006e0065006300740030002000440065007000740068000000020d0000009d0000000000000000fb0000001c004b0069006e0065006300740020003000200043006f006c006f00720000000289000000c50000000000000000fb0000001400440053004c005200200069006d00610067006502000002e40000001f0000035c000001dcfb0000002200520065006100720020005200470042002000700061006e006f00720061006d006102000003d9000000350000026500000337fb000000160044006500700074006800200049006d0061006700650200000496000001cf000001a80000017bfb0000000c00430061006d0065007200610100000259000000c2000000000000000000000001000001d3000002d8fc0200000008fb0000005a007200710074005f0069006d006100670065005f0076006900650077005f005f0049006d0061006700650056006900650077005f005f0032005f005f0049006d006100670065005600690065007700570069006400670065007403000003100000011a0000018b00000148fb0000001a004b0069006e00650063007400310020004400650070007400680000000041000000ac0000000000000000fb0000001a004b0069006e00650063007400300020004400650070007400680000000041000001030000000000000000fb0000001a004b0069006e006500630074003100200043006f006c006f007200000000410000018a0000000000000000fb0000001c004b0069006e0065006300740020003000200043006f006c006f007200000000410000030d0000000000000000fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fc00000041000002d80000000000fffffffa000000000100000002fb0000000a0049006d0061006700650100000000ffffffff0000000000000000fb0000000a005600690065007700730000000510000001300000010f00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000003ce0000003bfc0100000004fb0000000800540069006d0065020000025d00000018000003ce00000043fb0000000800540069006d00650100000000000004500000000000000000fb0000004c007200710074005f0063006f006e0073006f006c0065005f005f0043006f006e0073006f006c0065005f005f0031005f005f0043006f006e0073006f006c006500570069006400670065007403000001f700000311000002890000039ffb0000005a007200710074005f0069006d006100670065005f0076006900650077005f005f0049006d0061006700650056006900650077005f005f0031005f005f0049006d006100670065005600690065007700570069006400670065007403000001e20000022e00000578000001f90000040c0000030200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730000000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -2782,5 +1704,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1598
-  X: 65
-  Y: 24
+  X: 53
+  Y: 31

@@ -1,0 +1,12 @@
+
+
+<launch deprecated="CORRECT TFS!">
+
+      <!-- RGB-D detectors -->
+  <include file="$(find demo)/launch/detectors/front_rgbd_detectors.launch">
+               <arg name="camera_frame" default="kinect2_rgb_optical_frame"/>
+               <arg name="camera_namespace" default="/kinect2/sd"/>
+               <arg name="base_footprint" default="base_footprint"/>
+  </include>
+    
+</launch>
