@@ -21,7 +21,7 @@
  
  
  
-commandSender::commandSender(double _max_car_velocity_change, double _max_car_steer_angle_change) 
+commandSendero::commandSendero(double _max_car_velocity_change, double _max_car_steer_angle_change) 
 {
    	pdoCounter = 0;
 
@@ -39,7 +39,9 @@ commandSender::commandSender(double _max_car_velocity_change, double _max_car_st
 
 }
 
-
+void commandSendero::formWriteMSG(double speed, double angle, const char flags){	
+	formWriteMSG(convertVelocity( speed),  convertAngle(angle), flags);
+}
 
 
 
@@ -50,7 +52,7 @@ commandSender::commandSender(double _max_car_velocity_change, double _max_car_st
  * @param[in] angle angle (centidegree)
  * @param[in] flags flags for the controller (not for canlib)
  */
-void commandSender::formWriteMSG(int speed, int angle, const char flags)
+void commandSendero::formWriteMSG(int speed, int angle, const char flags)
 {
     canMessage msg;
 
@@ -73,19 +75,35 @@ void commandSender::formWriteMSG(int speed, int angle, const char flags)
     msg.msg[6] = 0;
     msg.msg[7] = 0;
 
-
+	//printf("MSG flags is 0x%x \n",(unsigned int) flags);
+	
     sw_can.canWrite(msg);
 }
 
 
+/**
+ * @brief Convert angle to centidegrees.
+ *
+ * @param[in] angle angle in radians
+ *
+ * @return angle in centidegrees as integer
+ */
+int commandSendero::convertAngle(const double angle)
+{
+    return (static_cast<int> (SW_STEER_RESOLUTION_PI * angle));
+}
+
 
 /**
- * @brief Forms and sends a CAN message containing command (is not used in simulation).
+ * @brief Convert velocity to mm/s
  *
- * @param[in] speed speed (mm/s)
- * @param[in] angle angle (centidegree)
+ * @param[in] velocity velocity in m/s
+ *
+ * @return velocity in mm/s as integer
  */
-void commandSender::formWriteMSG(int speed, int angle)
+int commandSendero::convertVelocity(const double velocity)
 {
-     formWriteMSG( speed,  angle, message_flags);
+    return (static_cast<int> (SW_VELOCITY_RESOLUTION * velocity));
 }
+
+
