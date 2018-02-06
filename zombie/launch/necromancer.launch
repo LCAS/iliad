@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+ <!-- Testing crude of steering/vel control in robot
+    
+  -->
+ 
+<launch>
+
+        <!-- Joy -->    
+        <node name="joy_node" pkg="joy" type="joy_node">
+        </node>
+    
+        <!-- joy cmd vel -->
+        <node name="tele_joy_node" pkg="teleop_twist_joy" type="teleop_node">
+        </node>
+
+        <!-- Parse cmd vel to steering -->
+        <node name="vel_caster" pkg="zombie" type="parseVels.py" output="screen">
+         <param name="twist_cmd_topic"      value="cmd_vel"/>     <!-- In -->
+         <param name="ackermann_cmd_topic"  value="z_cmd_vel"/>   <!-- out -->
+         <param name="distBtBackWheels"     value="0.5"/>         <!-- distance between forks -->
+         <param name="backWheelsRadius"     value="0.05"/>        <!-- wheel diameter -->
+         <param name="wheelsAxesDist"       value="1.2"/>         <!-- distance between front and rear wheels -->
+        </node>
+
+        <!-- Changes default mode to odom/based navigation. 
+            We need to reset robot anyways                    -->
+        <node name="telnet_config" pkg="zombie" type="initOdomNav.py">
+        </node>
+                
+        <!-- Move robot using z_cmd_vel topic -->        
+        <node name="zombie_node" pkg="zombie" type="zombienode">
+        </node>
+    
+</launch>
+ 
