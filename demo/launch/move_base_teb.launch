@@ -19,21 +19,29 @@
       <arg name="cmd_vel_topic" default="controller/cmd_vel" />
 
       <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-      
-        <rosparam file="$(find demo)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
-        <rosparam file="$(find demo)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
-        <rosparam file="$(find demo)/params/local_costmap_params.yaml" command="load" />
-        <rosparam file="$(find demo)/params/global_costmap_params.yaml" command="load" />
-        <rosparam file="$(find demo)/params/base_local_planner_params.yaml" command="load" />
-        <rosparam file="$(find demo)/params/dwa_local_planner_params.yaml" command="load" />
-        <rosparam file="$(find demo)/params/move_base_params.yaml" command="load" />
+          <rosparam file="$(find demo)/cfg/carlike/costmap_common_params.yaml" command="load" ns="global_costmap" />
+          <rosparam file="$(find demo)/cfg/carlike/costmap_common_params.yaml" command="load" ns="local_costmap" />
+          <rosparam file="$(find demo)/cfg/carlike/local_costmap_params.yaml" command="load" />
+          <rosparam file="$(find demo)/cfg/carlike/global_costmap_params.yaml" command="load" />
+          <rosparam file="$(find demo)/cfg/carlike/teb_local_planner_params.yaml" command="load" />
 
-        <remap from="cmd_vel" to="move_base/cmd_vel"/> 
+          <param name="base_global_planner" value="global_planner/GlobalPlanner" />
+          <param name="planner_frequency" value="1.0" />
+          <param name="planner_patience" value="5.0" />
 
-        <remap from="odom" to="$(arg odom_topic)"/>
-        <remap from="/$(arg prefix)/map" to="/map" />
+          <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+          <param name="controller_frequency" value="5.0" />
+          <param name="controller_patience" value="15.0" />
+
+          <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
+          <remap from="cmd_vel" to="move_base/cmd_vel"/> 
+
+          <remap from="odom" to="$(arg odom_topic)"/>
+          <remap from="/$(arg prefix)/map" to="/map" />
+
       </node>
-      
+
+
       <node pkg="laser_filters" type="scan_to_scan_filter_chain"
           name="safety_filter">
         <rosparam command="load" file="$(find demo)/params/safety_laser_filter.yaml" />
@@ -52,8 +60,8 @@
       <!-- Casts from vtrans,vrot from move base to robot (vtrans,vrot) for motrix wheel in robot  -->
       <node pkg="demo" type="velParser.py" name="velParser_node" output="screen">
           <param name="wheelsAxesDist" value="1.2"/>
-          <param name="inPlacePhi" value="1.56"/>
-          <param name="phiTol" value="0.1"/>
+          <param name="inPlacePhi" value="1.57"/>
+          <param name="phiTol" value="0.2"/>
           <param name="useOmega" value="True"/>
           <param name="steer_pose_cmd_topic" value="steer_pose"/>
           <param name="in_cmd_topic" value="move_base/cmd_vel"/>
