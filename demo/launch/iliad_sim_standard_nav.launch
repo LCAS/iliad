@@ -45,7 +45,9 @@
  
 
 
-   <!-- Move base <include file="$(find demo)/launch/move_base.launch"/>  -->
+   <!-- Move base: include file when its working properly... 
+   <include file="$(find demo)/launch/move_base_teb.launch"/>  
+   -->
   
  
  </group>

@@ -3,6 +3,8 @@
 <!-- 
     ROS navigation stack with velocity smoother and safety (reactive) controller
     based on turtlebot move_base.launch
+
+    This file is to be included inside iliad_sim_standard_nav.launch when finally debugged.
 -->
 <launch>
 	
@@ -11,10 +13,6 @@
 	
   <group ns="$(arg prefix)"> <!-- REMOVE WHEN IT WORKS -->
       
-
-      <!-- include file="$(find turtlebot_navigation)/launch/includes/velocity_smoother.launch.xml"/ -->
-      <!-- include file="$(find turtlebot_navigation)/launch/includes/safety_controller.launch.xml"/ -->
-
       <arg name="odom_topic" default="odom" />
       <arg name="cmd_vel_topic" default="controller/cmd_vel" />
 
@@ -34,23 +32,24 @@
           <param name="controller_patience" value="15.0" />
 
           <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
-          <remap from="cmd_vel" to="move_base/cmd_vel"/> 
 
+          <param name="oscillation_timeout" value="10.0" />  <!-- How long to allow for oscillation before executing recovery behaviors.  0.0 == infinite timeout -->
+          <param name="oscillation_distance" value="0.25" /> <!-- How far to be considered not to be oscillating. Moving this far resets the timer counting up to the ~oscillation_timeout  -->
+          
+          <remap from="cmd_vel" to="move_base/cmd_vel"/> 
           <remap from="odom" to="$(arg odom_topic)"/>
           <remap from="/$(arg prefix)/map" to="/map" />
 
       </node>
 
-
-      <node pkg="laser_filters" type="scan_to_scan_filter_chain"
-          name="safety_filter">
+      <!-- Filters out laser points hitting robot frame/wheels  -->
+      <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="safety_filter">
         <rosparam command="load" file="$(find demo)/params/safety_laser_filter.yaml" />
         <remap from="scan" to="safety_laser" />
         <remap from="scan_filtered" to="safety_laser_fil" />
       </node>
       
-      <node pkg="laser_filters" type="scan_to_scan_filter_chain"
-          name="nav_filter">
+      <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="nav_filter">
         <rosparam command="load" file="$(find demo)/params/nav_laser_filter.yaml" />
         <remap from="scan" to="nav_laser" />
         <remap from="scan_filtered" to="nav_laser_fil" />
@@ -61,15 +60,16 @@
       <node pkg="demo" type="velParser.py" name="velParser_node" output="screen">
           <param name="wheelsAxesDist" value="1.2"/>
           <param name="inPlacePhi" value="1.57"/>
-          <param name="phiTol" value="0.2"/>
+          <param name="phiTol" value="0.01"/>
           <param name="useOmega" value="True"/>
+          <param name="moveWhileOrienting" value="True"/>
           <param name="steer_pose_cmd_topic" value="steer_pose"/>
           <param name="in_cmd_topic" value="move_base/cmd_vel"/>
           <param name="out_cmd_topic" value="$(arg cmd_vel_topic)"/>
       </node>
         
 
-      <!-- Publishes relative tag position related to robot. Used by velParser -->
+      <!-- Publishes relative motor wheel position related to robot frame coordinates. Used by velParser -->
       <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="steer_pose_publisher" output="screen">
           <param name="map_frame" value="$(arg prefix)/base_footprint"/>
           <param name="base_frame" value="$(arg prefix)/steer_link"/>

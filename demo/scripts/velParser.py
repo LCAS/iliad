@@ -51,7 +51,10 @@ class vParser():
         self.phiTol=rospy.get_param('~phiTol', 0.1)  #(~0.57 degs)
 
         # use steering wheel speeds instead of angles.
-        self.useOmega=rospy.get_param('~useOmega', True)          
+        self.useOmega=rospy.get_param('~useOmega', True) 
+
+        # allow motor wheel to move while being reoriented
+        self.moveWhileOrienting=rospy.get_param('~moveWhileOrienting', True)         
 
         # More convenient ...
         self.minCosP = math.cos(self.inPlacePhi)
@@ -115,7 +118,10 @@ class vParser():
 
       # achieve command in two steps:
       # first step: turn motor wheel in place until we achieve desired orientation 
-      msg.linear.x = 0
+      if self.moveWhileOrienting:
+          msg.linear.x = v_m
+      else:
+          msg.linear.x = 0
       
       angDiffPrev = math.pi/2.0
       hasTurned = False
