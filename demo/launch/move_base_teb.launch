@@ -25,14 +25,12 @@
 
           <param name="base_global_planner" value="global_planner/GlobalPlanner" />
           <param name="planner_frequency" value="1.0" />
+          <param name="controller_frequency" value="3.0" />
           <param name="planner_patience" value="5.0" />
-
-          <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
-          <param name="controller_frequency" value="5.0" />
-          <param name="controller_patience" value="15.0" />
-
           <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
 
+          <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+          
           <param name="oscillation_timeout" value="10.0" />  <!-- How long to allow for oscillation before executing recovery behaviors.  0.0 == infinite timeout -->
           <param name="oscillation_distance" value="0.25" /> <!-- How far to be considered not to be oscillating. Moving this far resets the timer counting up to the ~oscillation_timeout  -->
           
@@ -60,9 +58,9 @@
       <node pkg="demo" type="velParser.py" name="velParser_node" output="screen">
           <param name="wheelsAxesDist" value="1.2"/>
           <param name="inPlacePhi" value="1.57"/>
-          <param name="phiTol" value="0.01"/>
+          <param name="phiTol" value="0.15"/>
           <param name="useOmega" value="True"/>
-          <param name="moveWhileOrienting" value="True"/>
+          <param name="moveWhileOrienting" value="False"/>
           <param name="steer_pose_cmd_topic" value="steer_pose"/>
           <param name="in_cmd_topic" value="move_base/cmd_vel"/>
           <param name="out_cmd_topic" value="$(arg cmd_vel_topic)"/>

@@ -8,7 +8,7 @@ TebLocalPlannerROS:
  # Trajectory
   
  teb_autosize: True
- dt_ref: 0.3
+ dt_ref: 1.0
  dt_hysteresis: 0.1
  global_plan_overwrite_orientation: True
  allow_init_with_backwards_motion: True
@@ -17,15 +17,15 @@ TebLocalPlannerROS:
     
  # Robot
          
- max_vel_x: 5.0
+ max_vel_x: 1.5
  max_vel_x_backwards: 0.5
  max_vel_y: 0.0
- max_vel_theta: 4.0 # the angular velocity is also bounded by min_turning_radius in case of a carlike robot (r = v / omega)
- acc_lim_x: 0.5
- acc_lim_theta: 0.5
+ max_vel_theta: 2.0 # the angular velocity is also bounded by min_turning_radius in case of a carlike robot (r = v / omega)
+ acc_lim_x: 0.8
+ acc_lim_theta: 1.0
 
  # ********************** Carlike robot parameters ********************
- min_turning_radius: 0.3        # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
+ min_turning_radius: 0.1        # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
  wheelbase: 1.2                 # Wheelbase of our robot
  cmd_angle_instead_rotvel: False # gazebo simulator takes  rotvel (omega) as input (twist message)
  # ********************************************************************
@@ -33,8 +33,8 @@ TebLocalPlannerROS:
  footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
    type: "line"
    radius: 0.2 # for type "circular"
-   line_start: [-0.27, 0.0] # for type "line"
-   line_end: [1.45, 0.0] # for type "line"
+   line_start: [0.05, 0.0] #-0.25 + min_obst_dist for type "line"
+   line_end: [1.15, 0.0] # for type "line" 1.45 - min_obst_dist
    front_offset: 0.2 # for type "two_circles"
    front_radius: 0.2 # for type "two_circles"
    rear_offset: 0.2 # for type "two_circles"
@@ -49,13 +49,14 @@ TebLocalPlannerROS:
     
  # Obstacles
     
- min_obstacle_dist: 0.5 #0.2 If footprint_model is set to "line", this value must also include robot's expansion
+ min_obstacle_dist: 0.3 #Robot expansion is 0.25. If footprint_model is set to "line", this value must also include robot's expansion
  include_costmap_obstacles: True
  costmap_obstacles_behind_robot_dist: 1.0
  obstacle_poses_affected: 30
- costmap_converter_plugin: ""
+ costmap_converter_plugin: "costmap_converter::CostmapToPolygonsDBSMCCH"
  costmap_converter_spin_thread: True
  costmap_converter_rate: 5
+
 
  # Optimization
     
@@ -91,3 +92,18 @@ TebLocalPlannerROS:
  obstacle_keypoint_offset: 0.1
  obstacle_heading_threshold: 0.45
  visualize_hc_graph: False
+
+
+
+## The parameters must be added for each plugin separately
+costmap_converter/CostmapToLinesDBSRANSAC:
+   cluster_max_distance: 0.4
+   cluster_min_pts: 2
+   ransac_inlier_distance: 0.15
+   ransac_min_inliers: 10
+   ransac_no_iterations: 2000
+   ransac_remainig_outliers: 3
+   ransac_convert_outlier_pts: True
+   ransac_filter_remaining_outlier_pts: False
+   convex_hull_min_pt_separation: 0.1
+
