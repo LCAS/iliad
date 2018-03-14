@@ -16,8 +16,8 @@ header:
     nsecs: 543000000
   frame_id: "world"
 point: 
-  x: -0.428505986929
-  y: -1.70938253403
+  x: 0.0486522763968
+  y: -2.89281725883
   z: 0.00372314453125
 ---
 header: 
@@ -48,8 +48,10 @@ def getMeaGoal(x,y):
 def movebase_client():
 
     client = actionlib.SimpleActionClient('/robot1/move_base',MoveBaseAction)
+    rospy.loginfo("waiting move base!")
     client.wait_for_server()
-    goal1 = getMeaGoal(-0.43,-1.71)
+    rospy.loginfo("Starting goal cycling")
+    goal1 = getMeaGoal(0.04,-2.81)
     goal2 = getMeaGoal(-21.1,-1.0)
 
     goals = [goal1, goal2]
@@ -59,7 +61,7 @@ def movebase_client():
         i = (i + 1) % len(goals)
 
         g.target_pose.header.stamp = rospy.Time.now()
-
+        rospy.loginfo("Going to "+str(g.target_pose.pose.position.x) + ", " +  str(g.target_pose.pose.position.y) ) 
         client.send_goal(g)
         wait = client.wait_for_result()
         if not wait:

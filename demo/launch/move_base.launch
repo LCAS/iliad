@@ -17,18 +17,19 @@
       <arg name="cmd_vel_topic" default="controller/cmd_vel" />
 
       <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-          <rosparam file="$(find demo)/cfg/carlike/costmap_common_params.yaml" command="load" ns="global_costmap" />
-          <rosparam file="$(find demo)/cfg/carlike/costmap_common_params.yaml" command="load" ns="local_costmap" />
-          <rosparam file="$(find demo)/cfg/carlike/local_costmap_params.yaml" command="load" />
-          <rosparam file="$(find demo)/cfg/carlike/global_costmap_params.yaml" command="load" />
-
-
-        <rosparam file="$(find demo)/params/base_local_planner_params.yaml" command="load" />
-        <rosparam file="$(find demo)/params/dwa_local_planner_params.yaml" command="load" />
-        <rosparam file="$(find demo)/params/move_base_params.yaml" command="load" />
-
+          <rosparam file="$(find demo)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
+          <rosparam file="$(find demo)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
+          <rosparam file="$(find demo)/params/local_costmap_params.yaml" command="load" />
+          <rosparam file="$(find demo)/params/global_costmap_params.yaml" command="load" />
 
           <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
+
+          <rosparam file="$(find demo)/params/base_local_planner_params.yaml" command="load" />
+          <rosparam file="$(find demo)/params/dwa_local_planner_params.yaml" command="load" />
+          <rosparam file="$(find demo)/params/move_base_params.yaml" command="load" />
+
+          <param name="planner_frequency" value="1.0" />
+          <param name="controller_frequency" value="2.0" />
 
           <param name="oscillation_timeout" value="10.0" />  <!-- How long to allow for oscillation before executing recovery behaviors.  0.0 == infinite timeout -->
           <param name="oscillation_distance" value="0.25" /> <!-- How far to be considered not to be oscillating. Moving this far resets the timer counting up to the ~oscillation_timeout  -->

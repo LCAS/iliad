@@ -31,7 +31,7 @@ class vParser():
         # Other config params
         self.rel_yaw = 0.0
         # when casting angle increment to rot speed, use this factor (Hz.)
-        self.omegaFreq = 4.0
+        self.omegaFreq = 12.0
         # ................................................................
         # start ros subs/pubs/servs....
         self.initROS()

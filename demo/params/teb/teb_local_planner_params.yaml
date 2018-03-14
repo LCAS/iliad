@@ -8,21 +8,22 @@ TebLocalPlannerROS:
  # Trajectory
   
  teb_autosize: True
- dt_ref: 1.0
- dt_hysteresis: 0.1
+ dt_ref: 0.3
+ dt_hysteresis: 0.03
  global_plan_overwrite_orientation: True
  allow_init_with_backwards_motion: True
  max_global_plan_lookahead_dist: 3.0
- feasibility_check_no_poses: 2
+ feasibility_check_no_poses: 0
+ global_plan_viapoint_sep: 0.85
     
  # Robot
          
  max_vel_x: 1.5
- max_vel_x_backwards: 0.5
+ max_vel_x_backwards: 1.5
  max_vel_y: 0.0
- max_vel_theta: 2.0 # the angular velocity is also bounded by min_turning_radius in case of a carlike robot (r = v / omega)
- acc_lim_x: 0.8
- acc_lim_theta: 1.0
+ max_vel_theta: 1.5 # the angular velocity is also bounded by min_turning_radius in case of a carlike robot (r = v / omega)
+ acc_lim_x: 0.5
+ acc_lim_theta: 0.8
 
  # ********************** Carlike robot parameters ********************
  min_turning_radius: 0.1        # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
@@ -31,7 +32,7 @@ TebLocalPlannerROS:
  # ********************************************************************
 
  footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
-   type: "line"
+   type: "polygon"
    radius: 0.2 # for type "circular"
    line_start: [0.05, 0.0] #-0.25 + min_obst_dist for type "line"
    line_end: [1.15, 0.0] # for type "line" 1.45 - min_obst_dist
@@ -49,7 +50,9 @@ TebLocalPlannerROS:
     
  # Obstacles
     
- min_obstacle_dist: 0.3 #Robot expansion is 0.25. If footprint_model is set to "line", this value must also include robot's expansion
+ min_obstacle_dist: 0.15 #Robot expansion is 0.25. If footprint_model is set to "line", this value must also include robot's expansion
+ inflation_dist: 0.45 # buffer zone around obstacles with non 0 penalty cost. Should be bigger than min_obstacle_dist
+
  include_costmap_obstacles: True
  costmap_obstacles_behind_robot_dist: 1.0
  obstacle_poses_affected: 30
@@ -70,15 +73,16 @@ TebLocalPlannerROS:
  weight_acc_lim_x: 1
  weight_acc_lim_theta: 1
  weight_kinematics_nh: 1000
- weight_kinematics_forward_drive: 1
+ weight_kinematics_forward_drive: 0.5
  weight_kinematics_turning_radius: 1
- weight_optimaltime: 1
- weight_obstacle: 50
+ weight_optimaltime: 0.01
+ weight_obstacle: 100
  weight_dynamic_obstacle: 10 # not in use yet
+ weight_viapoint: 1.1
 
  # Homotopy Class Planner
 
- enable_homotopy_class_planning: False
+ enable_homotopy_class_planning: True
  enable_multithreading: True
  simple_exploration: False
  max_number_classes: 4
