@@ -67,7 +67,7 @@ This should be the BIG demo launcher ...
 		 <param name="delay_support_to_low" value="0.2" />
 	  </node>
 
-	  <!-- mfc: (check) What does this do?   -->    
+	  <!-- mfc: this connects to can and sends speed commands   -->    
 	  <node pkg="orunav_mpc" type="controller_node" name="controller" output="screen">
 			<param name="robot_id" value="1" />
 	  </node>
@@ -110,6 +110,7 @@ This should be the BIG demo launcher ...
 		<param name="reassign_min_distance" value="0.1" />
 	  </node>  
 
+	  <!-- mfc: (check) What does this do?   -->    
 	  <node pkg="orunav_vehicle_execution" type="orunav_vehicle_execution_node" name="orunav_vehicle_execution_node_citi1" output="screen">
 		<param name="visualize" value="true" />
 		<param name="max_tracking_error" value="-1." />
@@ -120,6 +121,23 @@ This should be the BIG demo launcher ...
 		<param name="max_acc" value="0.1" />
 	  </node>
 
+	  <!-- mfc: Removes laser points hitting the frame. Needs to be adjusted from simulation   -->          
+      <node pkg="laser_filters" type="scan_to_scan_filter_chain"
+          name="safety_filter">
+        <rosparam command="load" file="$(find demo)/params/safety_laser_filter.yaml" />
+        <remap from="scan" to="safety_laser" />
+        <remap from="scan_filtered" to="safety_laser_fil" />
+      </node>
+      
+	  <!-- mfc: Removes laser points hitting the frame   -->          
+      <node pkg="laser_filters" type="scan_to_scan_filter_chain"
+          name="nav_filter">
+        <rosparam command="load" file="$(find demo)/params/nav_laser_filter.yaml" />
+        <remap from="scan" to="nav_laser" />
+        <remap from="scan_filtered" to="nav_laser_fil" />
+      </node>
+      
+  
   </group>
 
   <!-- rviz config based on original file at cititruck_description package-->

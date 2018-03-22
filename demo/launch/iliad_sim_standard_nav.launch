@@ -3,7 +3,7 @@
  I have removed orunav stack and replaced it with standard ros one -->
  
 <launch>
-	
+    
   <!-- PARAMS ...................................................... -->
   
   <!-- TF prefix of robot -->
@@ -21,36 +21,39 @@
   <!-- INCLUDES .................................................... -->
 
 
-  <!-- LOAD WORLD -->
+  <!-- LOAD WORLD use same file but in demo package to remove people ...  -->
   <include file="$(find gazebo_worlds_oru)/launch/ncfm_world.launch"/>
   <!-- LOAD MAP -->
   <include file="$(find gazebo_worlds_oru)/launch/ncfm_map_server.launch"/>
 
-  <!-- LOAD GAZEBO Model -->
+  <!-- LOAD GAZEBO Model  -->
   <include file="$(find cititruck_gazebo)/launch/cititruck_ncfm.launch">
      <arg name="tf_prefix" value="$(arg prefix)"/>
      <arg name="velodyne" value="$(arg velodyne)"/>
      <arg name="kinect2" value="$(arg kinect2)"/>
      <arg name="kinect1" value="$(arg kinect1)"/>
   </include>
- 
+
  
  
  <group ns="$(arg prefix)">
-	 <!-- 
-		  This param needs to be set under this group, or 
-		  robot_state_publisher wont publish tf properly 
-	 -->  
-	<param name="tf_prefix" value="$(arg prefix)" />
+     <!-- 
+          This param needs to be set under this group, or 
+          robot_state_publisher wont publish tf properly 
+     -->  
+    <param name="tf_prefix" value="$(arg prefix)" />
  
- 
-   <!-- Move base <include file="$(find demo)/launch/move_base.launch"/>  -->
+
+
+   <!-- Move base: include file when its working properly... 
+   <include file="$(find demo)/launch/move_base_teb.launch"/>  
+   -->
   
  
  </group>
 
 
 <!-- Visualization -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cititruck_description)/launch/iliad_cititruck.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find demo)/rviz/iliad_cititruck_nav.rviz"/>
 
 </launch>

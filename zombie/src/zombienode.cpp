@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
   ros::NodeHandle n;
     
-  double refresh_period_msecs= 50;
+  double refresh_period_msecs= 20;
   double refresh_rate=1000.0/refresh_period_msecs; //Herzs
   
   ros::Rate r(refresh_rate);

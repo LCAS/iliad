@@ -11,7 +11,6 @@ tn.read_until('\n',500)
 
 tn.write("nav blind \r\n")
 
-
 tn.close()
 
 
