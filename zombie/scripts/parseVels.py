@@ -16,6 +16,9 @@ def convert_trans_rot_vel_to_steering_angle(vtrans, distWheels, vrot, backWheels
     v = vtrans 
     phi =math.atan2(vrot * backWheelsRadius * carLen,vtrans * distWheels)
     
+    if (math.fabs(vrot) <0.05):
+		phi = 0.0
+    
     return (v,phi)
 
 def getYaw():
@@ -54,7 +57,7 @@ def cmd_callback(data):
   (v,steering) = convert_trans_rot_vel_to_steering_angle(data.linear.x, distBtBackWheels, data.angular.z, backWheelsRadius, wheelsAxesDist)
   msg = Twist()
   msg.linear.x = v
-  msg.angular.z = 0.0
+  msg.angular.z = steering
   
   pub.publish(msg)
   

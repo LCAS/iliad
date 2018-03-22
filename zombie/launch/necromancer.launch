@@ -29,7 +29,7 @@
         </node>
                 
         <!-- Move robot using z_cmd_vel topic -->        
-        <node name="zombie_node" pkg="zombie" type="zombienode">
+        <node name="cmd_ctrl" pkg="zombie" type="zombie_node">
         </node>
     
 </launch>
