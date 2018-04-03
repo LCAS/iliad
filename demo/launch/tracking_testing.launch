@@ -15,7 +15,7 @@ Spencer needs a laserscan and rgbd:
 
 TODO:
   - Improve detectors configuration
-
+  - Add pcl human detection using velodyne
 -->
 
 <launch deprecated="NOISY!">
