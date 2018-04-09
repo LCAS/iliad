@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+
+<!--  
+
+Temporal file to configure parts of people tracker....
+
+      iliad_sim_hri.launch
+      strands_people_tracker.launch
+      testme.launch
+
+
+-->
+
+<launch>
+    
+    <include file="$(find bayes_people_tracker)/launch/people_tracker.launch">
+        <arg name="target_frame" value="$(arg target_frame)" type="string"/>
+        <arg name="base_frame" value="$(arg base_frame)" type="string"/>
+        <arg name="param_file" default="$(find hri_simulation)/config/detectors.yaml" />
+    </include>
+
+
+
+</launch> 

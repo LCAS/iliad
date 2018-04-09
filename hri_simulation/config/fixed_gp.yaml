@@ -1,0 +1,4 @@
+ground_plane:
+    normal: [0.0, -0.99999, 0.01]
+    distance: 1.25
+    frame_id: 'robot1/kinect2_depth_optical_frame'

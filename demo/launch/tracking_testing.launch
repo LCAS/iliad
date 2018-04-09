@@ -1,3 +1,6 @@
+<?xml version="1.0"?>
+
+
 <!-- 
 Launch file for testing spencer people tracker on L-CAS cititruck. 
 This file is based on "tracking_on_robot.launch" on spencer_people_tracking_launch package.

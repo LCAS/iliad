@@ -5,7 +5,8 @@
 <launch>
     
   <!-- PARAMS ...................................................... -->
-  
+  <arg name="hasPeople" default="false"/>
+
   <!-- TF prefix of robot -->
   <arg name="prefix" default="robot1"/>
 
@@ -22,7 +23,11 @@
 
 
   <!-- LOAD WORLD use same file but in demo package to remove people ...  -->
-  <include file="$(find gazebo_worlds_oru)/launch/ncfm_world.launch"/>
+  <include file="$(find gazebo_worlds_oru)/launch/ncfm_world.launch" if="$(arg hasPeople)"/>
+  <include file="$(find demo)/launch/ncfm_world.launch" unless="$(arg hasPeople)"/>
+
+
+
   <!-- LOAD MAP -->
   <include file="$(find gazebo_worlds_oru)/launch/ncfm_map_server.launch"/>
 

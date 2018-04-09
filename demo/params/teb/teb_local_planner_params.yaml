@@ -11,7 +11,7 @@ TebLocalPlannerROS:
  dt_ref: 0.3
  dt_hysteresis: 0.03
  global_plan_overwrite_orientation: True
- allow_init_with_backwards_motion: True
+ allow_init_with_backwards_motion: False
  max_global_plan_lookahead_dist: 3.0
  feasibility_check_no_poses: 0
  global_plan_viapoint_sep: 0.85
@@ -50,7 +50,7 @@ TebLocalPlannerROS:
     
  # Obstacles
     
- min_obstacle_dist: 0.15 #Robot expansion is 0.25. If footprint_model is set to "line", this value must also include robot's expansion
+ min_obstacle_dist: 0.10 #Robot expansion is 0.25. If footprint_model is set to "line", this value must also include robot's expansion
  inflation_dist: 0.45 # buffer zone around obstacles with non 0 penalty cost. Should be bigger than min_obstacle_dist
 
  include_costmap_obstacles: True
@@ -73,7 +73,7 @@ TebLocalPlannerROS:
  weight_acc_lim_x: 1
  weight_acc_lim_theta: 1
  weight_kinematics_nh: 1000
- weight_kinematics_forward_drive: 0.5
+ weight_kinematics_forward_drive: 10
  weight_kinematics_turning_radius: 1
  weight_optimaltime: 0.01
  weight_obstacle: 100
@@ -82,7 +82,7 @@ TebLocalPlannerROS:
 
  # Homotopy Class Planner
 
- enable_homotopy_class_planning: True
+ enable_homotopy_class_planning: False
  enable_multithreading: True
  simple_exploration: False
  max_number_classes: 4
