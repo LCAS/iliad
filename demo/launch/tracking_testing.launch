@@ -5,6 +5,8 @@
 Launch file for testing spencer people tracker on L-CAS cititruck. 
 This file is based on "tracking_on_robot.launch" on spencer_people_tracking_launch package.
 
+
+
 Spencer needs a laserscan and rgbd: 
 - laserscans are provided from minimal cititruck launcher loaded from package kmo_navserver
   Topic  /kmo_navserver/laserscan0
@@ -15,71 +17,80 @@ Spencer needs a laserscan and rgbd:
 	frame  kinect2_rgb_optical_frame
 
 TODO:
-- TFs?
-- change topic names?
-- add kinect2 as rgbd?
-
+  - Improve detectors configuration
+  - Add pcl human detection using velodyne
 -->
 
-<launch deprecated="CORRECT TFS!">
+<launch deprecated="NOISY!">
 	
 	<!-- Constants -->
-	<arg name="rviz_config_file" default="$(find demo)/rviz/visualization_robot.rviz"/> <!-- configuration file for RViz to use, if visualization is enabled -->
+	<arg name="rviz_config_file" default="$(find demo)/rviz/tracking_testing.rviz"/>
 
 		
-	<!-- TFs: Completely random -->
-	<node pkg="tf" type="static_transform_publisher" name="kinect_map1" args="0.8 0 1.1 -1.54 0 -1.54 base_link kinect2_rgb_optical_frame 100"/>
-    <node pkg="tf" type="static_transform_publisher" name="kinect_map2" args="0.8 0 1.1 -1.54 0 -1.54 base_link kinect2_ir_optical_frame  100"/>
+  <!-- TFs: Approximate sensor locations ......................... -->
+  <node pkg="tf" type="static_transform_publisher" name="base_laser0"   args=" 0.1 0 0.0  0 0 0 base_link laserscan0 100"/>
+  <node pkg="tf" type="static_transform_publisher" name="base_velodyne" args="-0.1 0 1.1  0.05 0 0 base_link velodyne   100"/>
+  <node pkg="tf" type="static_transform_publisher" name="kinect_map1" args=" -0.02 -0.1 1.24 -1.52 0 -1.54 base_link kinect2_rgb_optical_frame 100"/>
+  <node pkg="tf" type="static_transform_publisher" name="kinect_map2" args=" -0.02 -0.1 1.24 -1.52 0 -1.54 base_link kinect2_ir_optical_frame  100"/>
+ 
+  <node pkg="tf" type="static_transform_publisher" name="basef_basel" args="0 0 0.00 0 0 0  base_footprint base_link 100"/>
+
+  <node pkg="tf" type="static_transform_publisher" name="odom_basef" args="0.15 -0.50 0.00 0 0 0.08 1  /odom /base_footprint 100"/>
+  
 
 
-    <!--Taken from gazebo models. laserscan0 roll is changed from 3.142 to 0, and from 0 to 3.142 in laserscan1-->
-    <node pkg="tf" type="static_transform_publisher" name="laser1_map" args="0.8 0 0.85 3.142 0 0 base_link laserscan1 100"/>
-    <node pkg="tf" type="static_transform_publisher" name="laser0_map" args="1.4 0 0.02 0 0 0 base_link laserscan0 100"/>
-    
-	<node pkg="tf" type="static_transform_publisher" name="foot_odom" args="0 0 0.05 0 0 0  base_footprint base_link 100"/>
+  <node pkg="tf" type="static_transform_publisher" name="map_odom" args="0 0 0 0 0 0  /map /odom 100"/>
 
-	<!-- Recorded map. see mapping testing launch -->
-    <node name="map_server" pkg="map_server" type="map_server" args="$(find demo)/maps/robotlab.yaml"/>
-   <node pkg="tf" type="static_transform_publisher" name="map_odom" args="0 0 0 0 0 0  /map /odom 100"/>
 
-    <!-- Minimal cititruck config: (tested) -->
-    <node pkg="kmo_navserver" type="kmo_navserver_node" name="kmo_navserver" output="screen">
-		<param name="host" value="192.168.100.100" />
-		<param name="enc" value="true" />
-		<param name="state" value="true" />
-		<param name="laser" value="true" />
-		<param name="steering_fix_wheel_distance" value="1.190" />
-		<param name="steering_fix_wheel_distance_y" value="0.0" />
-		<param name="sick" value="true" />
-        <!-- this is necessary for tf_remap to work -->
-    	<remap from="tf" to="tf_old"/>
-    </node>
-    
-    <!-- spencer expects different frame_ids  -->
-	<node pkg="tf" type="tf_remap" name="tf_remapper" output="screen">
-		<rosparam param="mappings">[{old: odom_base_link, new: base_footprint}, {old: /world, new: /odom}]</rosparam>
-	</node>
-    
+	<!-- Recorded map with Tiago. Not really for navigation... -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find demo)/maps/INB3123.yaml"/>
 
-		
-    <!-- Kinect2 config: (tested) -->
-    <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch"/>
+
+
+    <!-- Hokuyo laser as dummy KM laser -->
+  <node name="urg_node" pkg="urg_node" type="urg_node" output="screen">
+    <param name="serial_port" value="/dev/ttyACM0"/>
+    <param name="serial_baud" value="115200"/>
+    <param name="calibrate_time" value="true"/>
+    <param name="publish_intensity" value="false"/>
+    <param name="publish_multiecho" value="false"/>
+    <param name="angle_min" value="-1.5707963"/>
+    <param name="angle_max" value="1.5707963"/>
     
-    <!-- relaying is to match b***y topics from kinect2 fancy way to spencer -->
-    <node pkg="topic_tools" type="relay" name="k2_repub1" output="screen" args="/kinect2/sd/image_color_rect  /kinect2/sd/rgb/image_rect_color"/>      
-   	<node pkg="topic_tools" type="relay" name="k2_repub3" output="screen" args="/kinect2/sd/camera_info    /kinect2/sd/depth/camera_info"/>
-    <!--  node pkg="topic_tools" type="relay" name="k2_repub2" output="screen" args="/kinect2/sd/image_depth_rect  /kinect2/sd/depth/image_rect" -->
- 	    
-    <!-- Nodelet manager: needed to cast image formats-->
-    <node pkg="nodelet" type="nodelet" args="manager"
-        name="image_converter_manager" output="screen"/>
-        
-    <!-- Nodelet depth_image_proc/convert_metric -->
-    <node pkg="nodelet" type="nodelet" name="image_converter" machine="localhost" args="load depth_image_proc/convert_metric image_converter_manager  --no-bond" respawn="false" output="screen">
-      <remap from="image_raw" to="/kinect2/sd/image_depth_rect"/>
-      <remap from="image" to="/kinect2/sd/depth/image_rect"/>
-    </node>
+    <param name="frame_id" value="laserscan0"/>   
+    <remap from="scan" to="/kmo_navserver/laserscan0"/>
     
+  </node>
+  
+  <!-- Kinect2: this is temporary. Simplify this...  -->
+  <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
+       <arg name="depth_method" value="cuda"/>
+       <arg name="reg_method" default="opencl"/>
+  </include>
+  <!-- relaying is needed to match b***y topics from kinect2 fancy way to spencer -->
+  <node pkg="topic_tools" type="relay" name="k2_repub1" output="screen" args="/kinect2/sd/image_color_rect  /kinect2/sd/rgb/image_rect_color"/>      
+  <node pkg="topic_tools" type="relay" name="k2_repub3" output="screen" args="/kinect2/sd/camera_info    /kinect2/sd/depth/camera_info"/>
+  <!--  node pkg="topic_tools" type="relay" name="k2_repub2" output="screen" args="/kinect2/sd/image_depth_rect  /kinect2/sd/depth/image_rect" -->
+  <!-- Nodelet manager: needed to cast image formats-->
+  <node pkg="nodelet" type="nodelet" args="manager"
+      name="image_converter_manager" output="screen"/>
+      
+  <!-- Nodelet depth_image_proc/convert_metric -->
+  <node pkg="nodelet" type="nodelet" name="image_converter" machine="localhost" args="load depth_image_proc/convert_metric image_converter_manager  --no-bond" respawn="false" output="screen">
+    <remap from="image_raw" to="/kinect2/sd/image_depth_rect"/>
+    <remap from="image" to="/kinect2/sd/depth/image_rect"/>
+  </node>
+
+
+  
+  <!-- Velodyne -->
+  <include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch">
+    <arg name="laserscan_ring" default="1" />   <!-- Publishes channel 1 as a laserscan  -->
+
+  </include>
+
+
+
   <!-- What follows is adapted from spencer people tracker  -->
 
 
@@ -90,21 +101,42 @@ TODO:
                <arg name="base_footprint" default="base_footprint"/>
   </include>
 
-  <!-- Laser detectors -->
+
+  <!-- Laser detectors: Im using velodyne central beam as blob source. 
+       We could use leg detector with SICK300
+  -->  
   <include file="$(find demo)/launch/detectors/laser_detectors.launch">
-               <arg name="laser" default="/kmo_navserver/laserscan0"/>
+               <!-- arg name="laser" default="/kmo_navserver/laserscan0"/ -->
+               <arg name="laser" default="/scan"/>
   </include>
 
-  <!-- People tracking -->
+  <!-- Leg detectors 
+  This is an alternative to laser detector, but requires installing spencer from sources,
+   as spencer_leg_detector_wrapper is not in deb and it depends on wg perception.
+  -->
+
+  <include file="$(find demo)/launch/detectors/leg_detectors.launch">
+    <arg name="node_prefix" default="leg"/>
+    <arg name="config_file" default="iliad.yaml"/>
+    <arg name="scan" default="/kmo_navserver/laserscan0"/>               
+  </include>
+
+
+
+
+   <!-- People tracking -->
   <include file="$(find spencer_people_tracking_launch)/launch/tracking/freiburg_people_tracking.launch">
        <arg name="rgbd" default="true"/>
        <arg name="laser_low_confidence_detections" default="true"/>
   </include>
 
-  <!-- Group tracking -->
-  <include file="$(find spencer_people_tracking_launch)/launch/tracking/group_tracking.launch"/> 
+
+
+
 
   <!-- VISUALIZATION -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config_file)"/>
+
+
 
 </launch>

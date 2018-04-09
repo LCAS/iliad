@@ -37,6 +37,7 @@ int main(int argc, char** argv)
   {
       ros::spinOnce();
       command_sender.formWriteMSG(v, rot, message_flags);
+	  ROS_INFO(".");
       r.sleep();
   }
   

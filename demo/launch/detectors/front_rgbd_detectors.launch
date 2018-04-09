@@ -28,6 +28,7 @@ Could use other detectors than upper body
 
         <!-- Front RGB-D upper body -->
         <include file="$(find rwth_upper_body_detector)/launch/upper_body_detector.launch" ns="rgbd_front_top">
+
             <arg name="detected_persons" value="/spencer/perception_internal/detected_persons/rgbd_front_top/upper_body"/>
             <arg name="camera_namespace" value="$(arg camera_namespace)"/>
             <arg name="upper_body_detections" value="upper_body_detector/detections" />
@@ -36,6 +37,7 @@ Could use other detectors than upper body
             <arg name="ground_plane" value="$(arg ground_plane)" />
             <arg name="detection_id_offset" value="3"/>
             <arg name="detection_id_increment" value="$(arg detection_id_increment)"/>
+
         </include>
 
        

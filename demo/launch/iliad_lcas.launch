@@ -1,3 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+
 <!-- 
 Demo launcher based on kmo_navserver real_single_truck_empty_map 
 
@@ -5,8 +8,7 @@ This should be the BIG demo launcher ...
 
 -->
 
-<?xml version="1.0"?>
-<launch>
+
 
   <rosparam command="load" file="$(find orunav_params)/config/global.cfg"/>
   <rosparam command="load" file="$(find orunav_params)/config/citi1.cfg"/>
