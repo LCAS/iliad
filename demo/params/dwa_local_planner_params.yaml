@@ -47,5 +47,8 @@ DWAPlannerROS:
   global_frame_id: map # this odd - it's used in the trajectory cloud frame id only and for us it refs /map, not /odom
 
 
+
 # Differential-drive robot configuration 
 holonomic_robot: false
+# Human aware navigation:
+velocity_costmap_topic: '/robot1/move_base/velocity_costmap'

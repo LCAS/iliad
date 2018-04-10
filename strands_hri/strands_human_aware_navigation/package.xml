@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<package>
+  <name>strands_human_aware_navigation</name>
+  <version>0.2.0</version>
+  <description>The strands_human_aware_velocity package</description>
+
+  <maintainer email="cdondrup@lincoln.ac.uk">Christian Dondrup</maintainer>
+
+  <license>MIT</license>
+
+  <url type="website">https://github.com/strands-project/strands_hri</url>
+
+  <author email="cdondrup@lincoln.ac.uk">Christian Dondrup</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>actionlib</build_depend>
+  <build_depend>actionlib_msgs</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>bayes_people_tracker</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>dwa_local_planner</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>message_filters</build_depend>
+  <build_depend>move_base_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>strands_gazing</build_depend>
+
+  <run_depend>actionlib</run_depend>
+  <run_depend>actionlib_msgs</run_depend>
+  <run_depend>bayes_people_tracker</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>dwa_local_planner</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>message_filters</run_depend>
+  <run_depend>move_base_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>strands_gazing</run_depend>
+
+  <export/>
+</package>

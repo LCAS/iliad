@@ -9,6 +9,8 @@
 <launch>
     
   <!-- PARAMS ...................................................... -->
+  <arg name="useGui" default="true"/> <!-- requires velodyne_simulator -->
+
 
   <!-- TF prefix of robot -->
   <arg name="prefix" default="robot1"/>
@@ -26,7 +28,9 @@
 
 
   <!-- WORLD A variation of the original with only one person as described avobe  -->
-  <include file="$(find hri_simulation)/launch/ncfm_world.launch"/>
+  <include file="$(find hri_simulation)/launch/ncfm_world.launch">
+        <arg name="gui" value="$(arg useGui)"/>
+  </include>
 
 
 
@@ -56,7 +60,10 @@
      -->  
     <param name="tf_prefix" value="$(arg prefix)" />
 
-       <!-- Filters out laser points hitting robot frame/wheels  -->
+       <!-- Filters out laser points hitting robot frame/wheels
+
+       These filters are also run by move_base.launch
+
       <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="safety_filter">
         <rosparam command="load" file="$(find demo)/params/safety_laser_filter.yaml" />
         <remap from="scan" to="safety_laser" />
@@ -68,13 +75,24 @@
         <remap from="scan" to="nav_laser" />
         <remap from="scan_filtered" to="nav_laser_fil" />
       </node>
+      -->
 
+    <!-- 
+    Strands human tracking modules 
+     -->
+    <include file="$(find hri_simulation)/launch/strands_people_tracker.launch"/>
 
  
  </group>
 
 
+
+
+<!-- navigation -->
+<include file="$(find demo)/launch/move_base.launch"/>
+
+
 <!-- Visualization -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find demo)/rviz/iliad_cititruck_nav.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find demo)/rviz/iliad_cititruck_nav_human_aware.rviz" if="$(arg useGui)"/>
 
 </launch>
