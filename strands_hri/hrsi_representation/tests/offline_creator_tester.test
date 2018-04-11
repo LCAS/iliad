@@ -1,0 +1,7 @@
+<launch>
+
+  <node name="qsr_lib" pkg="qsr_lib" type="qsrlib_ros_server.py" />
+
+  <test test-name="offline_creator_tester" pkg="hrsi_representation" type="offline_creator_tester.py" />
+
+</launch>

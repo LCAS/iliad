@@ -51,4 +51,4 @@ DWAPlannerROS:
 # Differential-drive robot configuration 
 holonomic_robot: false
 # Human aware navigation:
-velocity_costmap_topic: '/robot1/move_base/velocity_costmap'
+velocity_costmap_topic: '/velocity_costmap'

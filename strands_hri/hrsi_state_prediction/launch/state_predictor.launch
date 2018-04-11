@@ -1,0 +1,17 @@
+<launch>
+
+  <arg name="model_dir"          default="$(find hrsi_state_prediction)/models"/>
+  <arg name="visualisation_file" default="$(find hrsi_state_prediction)/conf/visualisation.yaml"/>
+  <arg name="ppl_topic"          default="$(arg ppl_topic)"/>
+  <arg name="qtc_topic"          default="$(arg qtc_topic)"/>
+
+
+  <node pkg="hrsi_state_prediction" type="state_predictor.py" name="qtc_state_predictor" output="screen" respawn="true">
+    <rosparam command="load" file="$(arg visualisation_file)" />    
+    <param name="model_dir" type="string"  value="$(arg model_dir)"/>
+    <param name="ppl_topic" type="string"  value="$(arg ppl_topic)"/>
+    <param name="qtc_topic" type="string"  value="$(arg qtc_topic)"/>
+
+  </node>
+  
+</launch>

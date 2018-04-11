@@ -1,0 +1,8 @@
+buttons:
+  - 'pass by'
+  - 'path crossing'
+  - 'overtake'
+  - 'noise'
+canvas:
+  width: 500
+  height: 500

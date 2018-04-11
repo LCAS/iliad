@@ -25,7 +25,12 @@
           <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
 
           <rosparam file="$(find demo)/params/base_local_planner_params.yaml" command="load" />
+
           <rosparam file="$(find demo)/params/dwa_local_planner_params.yaml" command="load" />
+           <!-- change dwa parameters that is robot-dependant -->
+          <rosparam param="velocity_costmap_topic" subst_value="True">/$(arg prefix)/velocity_costmap_server/velocity_costmap</rosparam>
+
+
           <rosparam file="$(find demo)/params/move_base_params.yaml" command="load" />
 
           <param name="planner_frequency" value="1.0" />

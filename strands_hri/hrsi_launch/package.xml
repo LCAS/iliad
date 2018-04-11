@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+  <name>hrsi_launch</name>
+  <version>0.2.0</version>
+  <description>The hrsi_launch package</description>
+
+  <maintainer email="cdondrup@lincoln.ac.uk">Christian Dondrup</maintainer>
+
+  <license>MIT</license>
+
+  <url type="github">https://github.com/strands-project/strands_hri</url> 
+
+  <author email="cdondrup@lincoln.ac.uk">Christian Dondrup</author> 
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <run_depend>hrsi_representation</run_depend>
+  <run_depend>hrsi_state_prediction</run_depend>
+  <run_depend>hrsi_velocity_costmaps</run_depend>
+  <run_depend>qsr_lib</run_depend>
+  <run_depend>qsr_prob_rep</run_depend>
+
+  <export/>
+</package>

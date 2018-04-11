@@ -142,8 +142,9 @@
 
         <!-- 
               People Tracker Filter:
-              Modified original one to use a different way to detect receiving map 
-         -->
+              Modified original one to use a different way to detect receiving map. 
+        -->
+        
         <include file="$(find people_tracker_filter)/launch/filter.launch">
             <arg name="positions"           value="$(arg positions)"/>           
             <arg name="pose"                value="$(arg pose)"/>                
@@ -155,10 +156,13 @@
             <arg name="filtered_people"     value="$(arg filtered_people)"/>     
             <arg name="filtered_marker"     value="$(arg filtered_marker)"/>     
         </include>
+        
 
         <!--  
             Requires /move_base/DWAPlannerROS to be running...
-        -->
+            This Human Aware Navigation (HAN) modifies DWA parameters.
+            Also was intended to provide gazing, but to take advantage of that, goals must be provided to its service.
+        
         <include file="$(find strands_human_aware_navigation)/launch/human_aware_navigation.launch">
             <arg name="DWAPlannerROS_srv" value="/$(arg prefix)/move_base/DWAPlannerROS"/>
             <arg name="DWAPlannerROS_han_srv" value="/$(arg prefix)/human_aware_navigation"/>
@@ -167,9 +171,32 @@
             <arg name="useGaze" value="false"/>
             <arg name="people_positions" value="$(arg filtered_positions)"/>
         </include>
+        -->
 
 
- 
+
+        <!--  
+            Requires /move_base/DWAPlannerROS to be running...
+            Publishes a velocity costmap that is used in the modified DWAPlanner to contraing solutions.
+        
+        -->
+        <include file="$(find hrsi_launch)/launch/hrsi.launch">
+            <arg name="with_qsr_lib" value="true"/>
+            <arg name="with_qsr_prob_rep" value="true"/>
+            <arg name="goal_topic"   value="/$(arg prefix)/move_base/current_goal"/>
+            <arg name="ppl_topic"    value="$(arg filtered_positions)"/>
+            <arg name="qtc_topic"    value="/qtc_state_predictor/prediction_array"/>
+            <arg name="vis_marker_topic"    value = "/$(arg prefix)/velocity_costmap_server/visualization_marker"/>
+            <arg name="vel_costmap_topic"   value = "/$(arg prefix)/velocity_costmap_server/velocity_costmap"/>
+            <arg name="origin_topic"        value = "/$(arg prefix)/velocity_costmap_server/~origin"/>
+            <arg name="base_link_tf"        value = "$(arg base_frame)"/>
+            <arg name="move_base_topic"     value = "/$(arg prefix)/move_base"/>
+            <arg name="qtc_arr_topic"       value = "/online_qtc_creator/qtc_array"/>
+            <arg name="robot_topic"         value = "/$(arg prefix)/robot_pose"/>
+            <arg name="robotST_topic"       value = "/$(arg prefix)/steer_pose"/>
+            
+        </include>
+
 
 </launch> 
 

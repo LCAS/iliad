@@ -13,7 +13,6 @@
   <arg name="DWAPlannerROS_han_srv" default="/human_aware_navigation/DWAPlannerROS"/>
   <arg name="simple_goal_topic" default="/move_base_simple/goal"/>
 
-simple_goal_topic
 
   <arg name="moveBase_ac" default="move_base"/>
   <arg name="useGaze" default="true"/>

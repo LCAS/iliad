@@ -1,0 +1,12 @@
+<launch>
+
+  <node name="qsr_lib" pkg="qsr_lib" type="qsrlib_ros_server.py" />
+  <node pkg="hrsi_representation" type="online_qtc_creator.py" name="online_qtc_creator" output="screen">
+    <param name="processing_rate" type="int" value="60"/>
+    <param name="max_buffer_size" type="int" value="100"/>
+    <param name="prune_buffer" type="bool" value="false"/>
+  </node>
+
+  <test test-name="online_creator_tester" pkg="hrsi_representation" type="online_creator_tester.py" />
+
+</launch>

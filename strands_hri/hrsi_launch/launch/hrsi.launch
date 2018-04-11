@@ -1,0 +1,82 @@
+<launch>
+
+  <arg name="model_dir" default="$(find hrsi_state_prediction)/models"/>
+  <arg name="predictor_visualisation_file" default="$(find hrsi_state_prediction)/conf/visualisation.yaml"/>
+  <arg name="with_qsr_lib" default="false"/>
+  <arg name="with_qsr_prob_rep" default="true"/>
+
+  <arg name="processing_rate"     default="60"/>
+  <arg name="max_buffer_size"     default="10"/>
+  <arg name="decay_time"          default="20."/>
+  <arg name="quantisation_factor" default="0.01"/>
+  <arg name="distance_threshold"  default="6.0"/>
+  <arg name="smoothing_rate"      default="0.3"/>
+  <arg name="qtc_type"            default="2"/>
+  <arg name="no_collapse"         default="false"/>
+  <arg name="prune_buffer"        default="false"/>
+  <arg name="validate"            default="true"/>
+  <arg name="goal_topic"          default="/move_base/current_goal"/>
+  <arg name="ppl_topic"           default="/people_tracker/positions"/>
+  <arg name="qtc_topic"           default="/qtc_state_predictor/prediction_array"/>
+
+  <arg name="vis_marker_topic"    default = "~visualization_marker"/>
+  <arg name="vel_costmap_topic"   default = "/velocity_costmap"/>
+  <arg name="origin_topic"        default = "~origin"/>
+  <arg name="base_link_tf"        default = "base_link"/>
+  <arg name="move_base_topic"     default = "/move_base"/>
+  <arg name="robot_topic"         default = "/robot_pose"/>
+  <arg name="robotST_topic"       default = "/robot_poseST"/>
+  <arg name="qtc_arr_topic"       default="/online_qtc_creator/qtc_array"/>
+
+
+
+
+
+
+  <node name="qsr_lib" pkg="qsr_lib" type="qsrlib_ros_server.py" output="screen" respawn="true" if="$(arg with_qsr_lib)"/>
+  
+  <!-- What's this for? 
+    node name="goal_pose_republisher" pkg="hrsi_representation" type="goal_pose_republisher.py" output="screen" respawn="true">
+      <param name="move_base_topic"                     type="string"   value="$(arg move_base_topic)"/>   
+    </node
+  -->
+  
+  <node pkg="hrsi_representation" type="online_qtc_creator.py" name="online_qtc_creator" output="screen" respawn="true">
+    <param name="ppl_topic"           type="string"  value="$(arg ppl_topic)"/>
+    <param name="processing_rate"     type="int"     value="$(arg processing_rate)"/>
+    <param name="max_buffer_size"     type="int"     value="$(arg max_buffer_size)"/>
+    <param name="decay_time"          type="double"  value="$(arg decay_time)"/>
+    <param name="quantisation_factor" type="double"  value="$(arg quantisation_factor)"/>
+    <param name="distance_threshold"  type="double"  value="$(arg distance_threshold)"/>
+    <param name="smoothing_rate"      type="double"  value="$(arg smoothing_rate)"/>
+    <param name="qtc_type"            type="int"     value="$(arg qtc_type)"/>
+    <param name="no_collapse"         type="bool"    value="$(arg no_collapse)"/>
+    <param name="prune_buffer"        type="bool"    value="$(arg prune_buffer)"/>
+    <param name="validate"            type="bool"    value="$(arg validate)"/>
+    <param name="goal_topic"          type="string"  value="$(arg goal_topic)"/>
+    <param name="qtc_arr_topic"       type="string"  value="$(arg qtc_arr_topic)"/>
+    <param name="robot_topic"         type="string"  value="$(arg robot_topic)"/>
+    <param name="robotST_topic"       type="string"  value="$(arg robotST_topic)"/>
+
+  </node>
+  
+  <node pkg="qsr_prob_rep" type="qsr_prob_rep_ros_server.py" name="prob_rep_ros_server" output="screen" respawn="true" if="$(arg with_qsr_prob_rep)"/>
+  
+  <include file="$(find hrsi_state_prediction)/launch/state_predictor.launch">
+    <arg name="visualisation_file" value="$(arg predictor_visualisation_file)"/>    
+    <arg name="model_dir"          value="$(arg model_dir)"/>
+    <arg name="ppl_topic"          value="$(arg ppl_topic)"/>
+    <arg name="qtc_topic"          value="$(arg qtc_arr_topic)"/>
+  </include>
+  
+  <node pkg="hrsi_velocity_costmaps" type="velocity_costmap_server.py" name="velocity_costmap_server" output="screen" respawn="true">
+    <param name="qtc_topic"                           type="string"   value="$(arg qtc_topic)"/>
+    <param name="vis_marker_topic"                    type = "string" value= "$(arg vis_marker_topic)"/>
+    <param name="vel_costmap_topic"                   type = "string" value= "$(arg vel_costmap_topic)"/>
+    <param name="origin_topic"                        type = "string" value= "$(arg origin_topic)"/>
+    <param name="base_link_tf"                        type = "string" value= "$(arg base_link_tf)"/>
+    <param name="ppl_topic"                           type="string"   value="$(arg ppl_topic)"/>
+    <param name="move_base_topic"                     type="string"   value="$(arg move_base_topic)"/>   
+  </node>
+
+</launch>
