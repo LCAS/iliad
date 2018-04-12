@@ -50,9 +50,9 @@
  
 
 
-   <!-- Move base: include file when its working properly... 
+   <!-- Move base -->
    <include file="$(find demo)/launch/move_base_teb.launch"/>  
-   -->
+  
   
  
  </group>

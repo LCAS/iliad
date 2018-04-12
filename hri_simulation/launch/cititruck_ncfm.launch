@@ -18,7 +18,7 @@
 <arg name="kinect1"  default="false"/>
 
 
-<group ns="$(arg tf_prefix)">
+
     <!-- Run xacro -->
     <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find hri_simulation)/urdf/iliad_velodyne_cititruck.xacro' tf_prefix:=$(arg tf_prefix) velodyne:=$(arg velodyne) kinect2:=$(arg kinect2) kinect1:=$(arg kinect1)"/>
 
@@ -28,7 +28,6 @@
     <!-- Publish static TF -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
-</group>
 
 
 <!-- This is needed, since the plugin for the kinect camera utilize both the namespace and the tf_previx... -->

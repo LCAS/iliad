@@ -7,11 +7,10 @@
     This file is to be included inside iliad_sim_standard_nav.launch when finally debugged.
 -->
 <launch>
-  
-  <arg name="prefix" default="robot1"/>
-
-  
-  <group ns="$(arg prefix)"> <!-- REMOVE WHEN IT WORKS -->
+  >
+      
+      <arg name="prefix"        default="robot1"/>
+      <arg name="topic_prefix"  default="/robot1"/>
       
       <arg name="odom_topic" default="odom" />
       <arg name="cmd_vel_topic" default="controller/cmd_vel" />
@@ -28,7 +27,7 @@
 
           <rosparam file="$(find demo)/params/dwa_local_planner_params.yaml" command="load" />
            <!-- change dwa parameters that is robot-dependant -->
-          <rosparam param="velocity_costmap_topic" subst_value="True">/$(arg prefix)/velocity_costmap_server/velocity_costmap</rosparam>
+          <rosparam param="velocity_costmap_topic" subst_value="True">$(arg topic_prefix)/velocity_costmap_server/velocity_costmap</rosparam>
 
 
           <rosparam file="$(find demo)/params/move_base_params.yaml" command="load" />
@@ -41,7 +40,7 @@
           
           <remap from="cmd_vel" to="move_base/cmd_vel"/> 
           <remap from="odom" to="$(arg odom_topic)"/>
-          <remap from="/$(arg prefix)/map" to="/map" />
+          <remap from="$(arg topic_prefix)/map" to="/map" />
 
       </node>
 
@@ -80,6 +79,6 @@
           <remap from="robot_pose" to="steer_pose"/>
       </node>
     
-   </group>
+   
 
 </launch>

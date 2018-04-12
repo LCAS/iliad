@@ -10,20 +10,19 @@
 
 
 <launch>
-        <arg name="prefix" default="robot1"/>
- 
+        <arg name="prefix"       default="robot1"/>
+        <arg name="topic_prefix" default="/robot1"/>
    
-
         <arg name="queue_size" value="5" />
 
-        <arg name="ptu_state" value="/$(arg prefix)/ptu/state" />
-        <arg name="ground_plane" value="/$(arg prefix)/ground_plane" />
+        <arg name="ptu_state" value="$(arg topic_prefix)/ptu/state" />
+        <arg name="ground_plane" value="$(arg topic_prefix)/ground_plane" />
 
 
         <arg name="target_frame" value="$(arg prefix)/base_link" />
         <arg name="base_frame" value="$(arg prefix)/base_link" />
 
-        <arg name="camera_namespace" value="/$(arg prefix)/kinect2" />
+        <arg name="camera_namespace" value="$(arg topic_prefix)/kinect2" />
 
         <arg name="rgb_image" value="/hd/image_color_rect" />
         <arg name="camera_info_rgb" value="/hd/camera_info" />
@@ -33,28 +32,28 @@
 
         <arg name="mono_image" value="/sd/image_ir_rect" />        
 
-        <arg name="motion_parameters" value="/$(arg prefix)/visual_odometry/motion_matrix" />
-        <arg name="visual_odometry" value="/$(arg prefix)/visual_odometry/motion_matrix" />
+        <arg name="motion_parameters" value="$(arg topic_prefix)/visual_odometry/motion_matrix" />
+        <arg name="visual_odometry" value="$(arg topic_prefix)/visual_odometry/motion_matrix" />
 
-        <arg name="upper_body_detections" value="/$(arg prefix)/upper_body_detector/detections" />
-        <arg name="upper_body_bb_centres" value="/$(arg prefix)/upper_body_detector/bounding_box_centres" />
-        <arg name="upper_body_image" value="/$(arg prefix)/upper_body_detector/image" />
-        <arg name="upper_body_markers" value="/$(arg prefix)/upper_body_detector/marker_array" />
-        <arg name="upper_body_roi" value="/$(arg prefix)/upper_body_detector/roi" />
-        <arg name="upper_body_closest_bb_centres" value="/$(arg prefix)/upper_body_detector/closest_bounding_box_centre" />
+        <arg name="upper_body_detections" value="$(arg topic_prefix)/upper_body_detector/detections" />
+        <arg name="upper_body_bb_centres" value="$(arg topic_prefix)/upper_body_detector/bounding_box_centres" />
+        <arg name="upper_body_image" value="$(arg topic_prefix)/upper_body_detector/image" />
+        <arg name="upper_body_markers" value="$(arg topic_prefix)/upper_body_detector/marker_array" />
+        <arg name="upper_body_roi" value="$(arg topic_prefix)/upper_body_detector/roi" />
+        <arg name="upper_body_closest_bb_centres" value="$(arg topic_prefix)/upper_body_detector/closest_bounding_box_centre" />
 
 
-        <arg name="positions"           value="/$(arg prefix)/people_tracker/positions" />
-        <arg name="pose"                value="/$(arg prefix)/people_tracker/pose" />
-        <arg name="pose_array"          value="/$(arg prefix)/people_tracker/pose_array" />
-        <arg name="people"              value="/$(arg prefix)/people_tracker/people" />
-        <arg name="marker"              value="/$(arg prefix)/people_tracker/marker_array" />
+        <arg name="positions"           value="$(arg topic_prefix)/people_tracker/positions" />
+        <arg name="pose"                value="$(arg topic_prefix)/people_tracker/pose" />
+        <arg name="pose_array"          value="$(arg topic_prefix)/people_tracker/pose_array" />
+        <arg name="people"              value="$(arg topic_prefix)/people_tracker/people" />
+        <arg name="marker"              value="$(arg topic_prefix)/people_tracker/marker_array" />
 
-        <arg name="filtered_positions"  value="/$(arg prefix)/people_tracker_filter/positions" />
-        <arg name="filtered_pose"       value="/$(arg prefix)/people_tracker_filter/pose" />
-        <arg name="filtered_pose_array" value="/$(arg prefix)/people_tracker_filter/pose_array" />
-        <arg name="filtered_people"     value="/$(arg prefix)/people_tracker_filter/people" />
-        <arg name="filtered_marker"     value="/$(arg prefix)/people_tracker_filter/marker_array" />
+        <arg name="filtered_positions"  value="$(arg topic_prefix)/people_tracker_filter/positions" />
+        <arg name="filtered_pose"       value="$(arg topic_prefix)/people_tracker_filter/pose" />
+        <arg name="filtered_pose_array" value="$(arg topic_prefix)/people_tracker_filter/pose_array" />
+        <arg name="filtered_people"     value="$(arg topic_prefix)/people_tracker_filter/people" />
+        <arg name="filtered_marker"     value="$(arg topic_prefix)/people_tracker_filter/marker_array" />
 
 
 
@@ -62,7 +61,7 @@
 
         <!-- Fixed Ground Plane -->
         <include file="$(find ground_plane_estimation)/launch/ground_plane_fixed.launch">
-            <arg name="param_file" value="$(find hri_simulation)/config/$(arg prefix)/fixed_gp.yaml" />
+            <arg name="param_file" value="$(find hri_simulation)/config$(arg topic_prefix)/fixed_gp.yaml" />
             <arg name="ptu_state" value="$(arg ptu_state)" />
             <arg name="ground_plane" value="$(arg ground_plane)" />
 
@@ -111,15 +110,15 @@
 
 
         <!-- Leg tracker -->
-        <node pkg="leg_detector" type="leg_detector" name="leg_detector" args="scan:=/robot1/safety_laser_fil fixed_frame:=world $(find hri_simulation)/config/$(arg prefix)/trained_leg_detector.yaml" output="screen">
+        <node pkg="leg_detector" type="leg_detector" name="leg_detector" args="scan:=$(arg topic_prefix)/safety_laser_fil fixed_frame:=world $(find hri_simulation)/config$(arg topic_prefix)/trained_leg_detector.yaml" output="screen">
             <!-- Load detector config -->
-            <rosparam command="load" file="$(find hri_simulation)/config/$(arg prefix)/leg_detector.yaml"/>
+            <rosparam command="load" file="$(find hri_simulation)/config$(arg topic_prefix)/leg_detector.yaml"/>
         </node>
 
 
         <!-- Detector to Pose Array -->
         <include file="$(find detector_msg_to_pose_array)/launch/to_pose_array.launch">
-            <arg name="param_file" value="$(find hri_simulation)/config/$(arg prefix)/to_pose_array_detectors.yaml" />
+            <arg name="param_file" value="$(find hri_simulation)/config$(arg topic_prefix)/to_pose_array_detectors.yaml" />
         </include>
 
         <!-- 
@@ -129,7 +128,7 @@
         <include file="$(find bayes_people_tracker)/launch/people_tracker.launch">
             <arg name="target_frame" value="$(arg target_frame)"/>
             <arg name="base_frame" value="$(arg base_frame)"/>
-            <arg name="param_file" value="$(find hri_simulation)/config/$(arg prefix)/detectors.yaml" />
+            <arg name="param_file" value="$(find hri_simulation)/config$(arg topic_prefix)/detectors.yaml" />
             <arg name="positions"           value="$(arg positions)"/>           
             <arg name="pose"                value="$(arg pose)"/>                
             <arg name="pose_array"          value="$(arg pose_array)"/>          
@@ -164,10 +163,10 @@
             Also was intended to provide gazing, but to take advantage of that, goals must be provided to its service.
         
         <include file="$(find strands_human_aware_navigation)/launch/human_aware_navigation.launch">
-            <arg name="DWAPlannerROS_srv" value="/$(arg prefix)/move_base/DWAPlannerROS"/>
-            <arg name="DWAPlannerROS_han_srv" value="/$(arg prefix)/human_aware_navigation"/>
-            <arg name="moveBase_ac" value="/$(arg prefix)/move_base"/>
-            <arg name="simple_goal_topic" value="/$(arg prefix)/human_aware_navigation/move_base_simple/goal"/>
+            <arg name="DWAPlannerROS_srv" value="$(arg topic_prefix)/move_base/DWAPlannerROS"/>
+            <arg name="DWAPlannerROS_han_srv" value="$(arg topic_prefix)/human_aware_navigation"/>
+            <arg name="moveBase_ac" value="$(arg topic_prefix)/move_base"/>
+            <arg name="simple_goal_topic" value="$(arg topic_prefix)/human_aware_navigation/move_base_simple/goal"/>
             <arg name="useGaze" value="false"/>
             <arg name="people_positions" value="$(arg filtered_positions)"/>
         </include>
@@ -179,21 +178,23 @@
             Requires /move_base/DWAPlannerROS to be running...
             Publishes a velocity costmap that is used in the modified DWAPlanner to contraing solutions.
         
-        -->
+-->
+        
+        
         <include file="$(find hrsi_launch)/launch/hrsi.launch">
             <arg name="with_qsr_lib" value="true"/>
             <arg name="with_qsr_prob_rep" value="true"/>
-            <arg name="goal_topic"   value="/$(arg prefix)/move_base/current_goal"/>
+            <arg name="goal_topic"   value="$(arg topic_prefix)/move_base/current_goal"/>
             <arg name="ppl_topic"    value="$(arg filtered_positions)"/>
-            <arg name="qtc_topic"    value="/qtc_state_predictor/prediction_array"/>
-            <arg name="vis_marker_topic"    value = "/$(arg prefix)/velocity_costmap_server/visualization_marker"/>
-            <arg name="vel_costmap_topic"   value = "/$(arg prefix)/velocity_costmap_server/velocity_costmap"/>
-            <arg name="origin_topic"        value = "/$(arg prefix)/velocity_costmap_server/~origin"/>
+            <arg name="qtc_topic"    value="$(arg topic_prefix)/qtc_state_predictor/prediction_array"/>
+            <arg name="vis_marker_topic"    value = "$(arg topic_prefix)/velocity_costmap_server/visualization_marker"/>
+            <arg name="vel_costmap_topic"   value = "$(arg topic_prefix)/velocity_costmap_server/velocity_costmap"/>
+            <arg name="origin_topic"        value = "$(arg topic_prefix)/velocity_costmap_server/~origin"/>
             <arg name="base_link_tf"        value = "$(arg base_frame)"/>
-            <arg name="move_base_topic"     value = "/$(arg prefix)/move_base"/>
-            <arg name="qtc_arr_topic"       value = "/online_qtc_creator/qtc_array"/>
-            <arg name="robot_topic"         value = "/$(arg prefix)/robot_pose"/>
-            <arg name="robotST_topic"       value = "/$(arg prefix)/steer_pose"/>
+            <arg name="move_base_topic"     value = "$(arg topic_prefix)/move_base"/>
+            <arg name="qtc_arr_topic"       value = "$(arg topic_prefix)/online_qtc_creator/qtc_array"/>
+            <arg name="robot_topic"         value = "$(arg topic_prefix)/robot_pose"/>
+            <arg name="robotST_topic"       value = "$(arg topic_prefix)/steer_pose"/>
             
         </include>
 

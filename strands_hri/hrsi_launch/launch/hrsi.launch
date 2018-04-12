@@ -35,11 +35,11 @@
 
   <node name="qsr_lib" pkg="qsr_lib" type="qsrlib_ros_server.py" output="screen" respawn="true" if="$(arg with_qsr_lib)"/>
   
-  <!-- What's this for? 
-    node name="goal_pose_republisher" pkg="hrsi_representation" type="goal_pose_republisher.py" output="screen" respawn="true">
+  <!-- What's this for? -->
+    <node name="goal_pose_republisher" pkg="hrsi_representation" type="goal_pose_republisher.py" output="screen" respawn="true">
       <param name="move_base_topic"                     type="string"   value="$(arg move_base_topic)"/>   
-    </node
-  -->
+    </node>
+  
   
   <node pkg="hrsi_representation" type="online_qtc_creator.py" name="online_qtc_creator" output="screen" respawn="true">
     <param name="ppl_topic"           type="string"  value="$(arg ppl_topic)"/>
@@ -70,13 +70,13 @@
   </include>
   
   <node pkg="hrsi_velocity_costmaps" type="velocity_costmap_server.py" name="velocity_costmap_server" output="screen" respawn="true">
-    <param name="qtc_topic"                           type="string"   value="$(arg qtc_topic)"/>
+    <param name="qtc_topic"                           type = "string"   value="$(arg qtc_topic)"/>
     <param name="vis_marker_topic"                    type = "string" value= "$(arg vis_marker_topic)"/>
     <param name="vel_costmap_topic"                   type = "string" value= "$(arg vel_costmap_topic)"/>
     <param name="origin_topic"                        type = "string" value= "$(arg origin_topic)"/>
     <param name="base_link_tf"                        type = "string" value= "$(arg base_link_tf)"/>
-    <param name="ppl_topic"                           type="string"   value="$(arg ppl_topic)"/>
-    <param name="move_base_topic"                     type="string"   value="$(arg move_base_topic)"/>   
+    <param name="ppl_topic"                           type = "string"   value="$(arg ppl_topic)"/>
+    <param name="move_base_topic"                     type = "string"   value="$(arg move_base_topic)"/>   
   </node>
 
 </launch>

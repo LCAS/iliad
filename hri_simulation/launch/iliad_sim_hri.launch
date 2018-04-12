@@ -9,8 +9,8 @@
 <launch>
     
   <!-- PARAMS ...................................................... -->
-  <arg name="useGui" default="true"/> <!-- requires velodyne_simulator -->
-
+  <arg name="gazeboGui" default="true"/> 
+  <arg name="rvizGui" default="true"/> 
 
   <!-- TF prefix of robot -->
   <arg name="prefix" default="robot1"/>
@@ -29,13 +29,22 @@
 
   <!-- WORLD A variation of the original with only one person as described avobe  -->
   <include file="$(find hri_simulation)/launch/ncfm_world.launch">
-        <arg name="gui" value="$(arg useGui)"/>
+        <arg name="gui" value="$(arg gazeboGui)"/>
+        <arg name="world_name" default="$(find hri_simulation)/worlds/ncfm_model_short.world"/>
   </include>
 
 
 
   <!-- LOAD MAP -->
   <include file="$(find hri_simulation)/launch/ncfm_map_server.launch"/>
+
+
+ <group ns="$(arg prefix)">
+     <!-- 
+          This param needs to be set under this group, or 
+          robot_state_publisher wont publish tf properly 
+     -->  
+    <param name="tf_prefix" value="$(arg prefix)" />
 
   <!-- LOAD GAZEBO Model  -->
   <include file="$(find hri_simulation)/launch/cititruck_ncfm.launch">
@@ -50,15 +59,6 @@
     <arg name="robot_pose_pitch" default="0"/>
     <arg name="robot_pose_yaw" default="0"/>
   </include>
-
- 
- 
- <group ns="$(arg prefix)">
-     <!-- 
-          This param needs to be set under this group, or 
-          robot_state_publisher wont publish tf properly 
-     -->  
-    <param name="tf_prefix" value="$(arg prefix)" />
 
        <!-- Filters out laser points hitting robot frame/wheels
 
@@ -83,16 +83,16 @@
     <include file="$(find hri_simulation)/launch/strands_people_tracker.launch"/>
 
  
+
+<!-- navigation -->
+<include file="$(find demo)/launch/move_base.launch"/>
  </group>
 
 
 
 
-<!-- navigation -->
-<include file="$(find demo)/launch/move_base.launch"/>
-
 
 <!-- Visualization -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find demo)/rviz/iliad_cititruck_nav_human_aware.rviz" if="$(arg useGui)"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find demo)/rviz/iliad_cititruck_nav_human_aware.rviz" if="$(arg rvizGui)"/>
 
 </launch>

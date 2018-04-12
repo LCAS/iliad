@@ -11,6 +11,7 @@ Temporal file to configure parts of human aware navigation
 <launch>
 
  <arg name="prefix" default="robot1"/>
+       <arg name="topic_prefix" default="/robot1"/>
 
 	
  <group ns="$(arg prefix)">
@@ -18,9 +19,61 @@ Temporal file to configure parts of human aware navigation
 		value="$(find hri_simulation)/custom_rosconsole.conf"/>
 
 
-    
+        <arg name="queue_size" value="5" />
+
+        <arg name="ptu_state" value="$(arg topic_prefix)/ptu/state" />
+        <arg name="ground_plane" value="$(arg topic_prefix)/ground_plane" />
+
+
+        <arg name="target_frame" value="$(arg prefix)/base_link" />
+        <arg name="base_frame" value="$(arg prefix)/base_link" />
+
+        <arg name="camera_namespace" value="$(arg topic_prefix)/kinect2" />
+
+        <arg name="rgb_image" value="/hd/image_color_rect" />
+        <arg name="camera_info_rgb" value="/hd/camera_info" />
+
+        <arg name="depth_image" value="/sd/image_depth_rect" />
+        <arg name="camera_info_depth" value="/depth/camera_info" />
+
+        <arg name="mono_image" value="/sd/image_ir_rect" />        
+
+        <arg name="motion_parameters" value="$(arg topic_prefix)/visual_odometry/motion_matrix" />
+        <arg name="visual_odometry" value="$(arg topic_prefix)/visual_odometry/motion_matrix" />
+
+        <arg name="upper_body_detections" value="$(arg topic_prefix)/upper_body_detector/detections" />
+        <arg name="upper_body_bb_centres" value="$(arg topic_prefix)/upper_body_detector/bounding_box_centres" />
+        <arg name="upper_body_image" value="$(arg topic_prefix)/upper_body_detector/image" />
+        <arg name="upper_body_markers" value="$(arg topic_prefix)/upper_body_detector/marker_array" />
+        <arg name="upper_body_roi" value="$(arg topic_prefix)/upper_body_detector/roi" />
+        <arg name="upper_body_closest_bb_centres" value="$(arg topic_prefix)/upper_body_detector/closest_bounding_box_centre" />
+
+
+        <arg name="positions"           value="$(arg topic_prefix)/people_tracker/positions" />
+        <arg name="pose"                value="$(arg topic_prefix)/people_tracker/pose" />
+        <arg name="pose_array"          value="$(arg topic_prefix)/people_tracker/pose_array" />
+        <arg name="people"              value="$(arg topic_prefix)/people_tracker/people" />
+        <arg name="marker"              value="$(arg topic_prefix)/people_tracker/marker_array" />
+
+        <arg name="filtered_positions"  value="$(arg topic_prefix)/people_tracker_filter/positions" />
+        <arg name="filtered_pose"       value="$(arg topic_prefix)/people_tracker_filter/pose" />
+        <arg name="filtered_pose_array" value="$(arg topic_prefix)/people_tracker_filter/pose_array" />
+        <arg name="filtered_people"     value="$(arg topic_prefix)/people_tracker_filter/people" />
+        <arg name="filtered_marker"     value="$(arg topic_prefix)/people_tracker_filter/marker_array" />
+
+
+
+        <arg name="tf_target_frame" value="" />
+
+
 
     
+        <!--  
+            Requires /move_base/DWAPlannerROS to be running...
+            Publishes a velocity costmap that is used in the modified DWAPlanner to contraing solutions.
+        -->
+
+
 
 
 
@@ -29,6 +82,7 @@ Temporal file to configure parts of human aware navigation
 
 
  </group>
+
 
 
 </launch>
