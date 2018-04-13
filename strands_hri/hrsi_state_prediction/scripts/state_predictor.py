@@ -34,6 +34,8 @@ class StatePredictor(object):
     rules = {}
 
     def __init__(self, name):
+        self.isDebug = False
+
         rospy.loginfo("Starting %s ..." % name)
         self.client = ROSClient()
         qmc = QTCModelCreation()
@@ -92,7 +94,7 @@ class StatePredictor(object):
                         state_lookup_table=self.lookup,
                         uuid=q.uuid,
                         ensure_particle_per_state=True,
-                        debug=True,
+                        debug=self.isDebug,
                         starvation_factor=0.1
                     )
                 )
@@ -110,16 +112,18 @@ class StatePredictor(object):
                 PfRepRequestUpdate(
                     uuid=q.uuid,
                     observation=qtc,
-                    debug=True
+                    debug=self.isDebug
                 )
             )
 #            print "+++ elapsed", time.time()-start
             if qtc_state == None:
-                rospy.loginfo("%s state reported, aborting" % qtc_state)
+                rospy.logwarn("[" + rospy.get_name() + "]: " +  str(qtc_state) + " state reported, aborting" )
                 return
                 
-            rospy.loginfo("Current state according to filter: %s" % qtc_state)
+            rospy.logwarn("[" + rospy.get_name() + "]: " + "Current state according to filter " + str(qtc_state))
+
             self.__classification_results[q.uuid] = qtc_state[2]
+            
             try:
                 states = self.rules[qtc_state[2]][qtc_state[0]].keys()
                 probs = self.rules[qtc_state[2]][qtc_state[0]].values() # Both lists are always in a corresponding order
@@ -149,7 +153,7 @@ class StatePredictor(object):
     def __decay(self, filters, decay_time=60.):
         for k in filters.keys():
             if filters[k] + decay_time < rospy.Time.now().to_sec():
-                rospy.loginfo("Deleting particle filter: %s last seen %f" % (k, filters[k]))
+                rospy.logdebug("[" + rospy.get_name() + "]: " + "Deleting particle filter: " + str(k) + " last seen " + str(filters[k]) )
                 self.client.call_service(PfRepRequestRemove(uuid=k))
                 del filters[k]
 

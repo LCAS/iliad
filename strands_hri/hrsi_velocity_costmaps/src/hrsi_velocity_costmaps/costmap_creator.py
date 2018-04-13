@@ -73,6 +73,7 @@ class CostmapCreator(object):
 
         try:
             self.move_base_topic = rospy.get_param("~move_base_topic")
+            self.base_link_tf = rospy.get_param("~base_link_tf")
         except KeyError as e:
             rospy.logerr("[" + rospy.get_name()+"] " + "Unable to get parameter: " + str(e))
 
@@ -240,7 +241,7 @@ class CostmapCreator(object):
             size = max_speed*2 # Magic number: 2 = double the size to have max_vel_x in all directions
             o = OccupancyGrid()
             o.header.stamp = rospy.Time.now()
-            o.header.frame_id = 'base_link'
+            o.header.frame_id = self.base_link_tf
             o.info.resolution = self.resolution
             o.info.height = size
             o.info.width = size

@@ -255,7 +255,6 @@ Visualization Manager:
       Name: Marker
       Namespaces:
         LEGS: true
-        PEOPLE: true
       Queue Size: 1000
       Value: true
     - Angle Tolerance: 0.100000001
@@ -853,9 +852,9 @@ Visualization Manager:
           Topic: /robot1/move_base/DWAPlannerROS/local_plan
           Unreliable: false
           Value: true
-        - Alpha: 0.699999988
+        - Alpha: 0.300000012
           Class: rviz/Map
-          Color Scheme: map
+          Color Scheme: costmap
           Draw Behind: false
           Enabled: true
           Name: Velocity costmap
@@ -931,7 +930,7 @@ Visualization Manager:
           Marker Topic: /robot1/people_tracker/marker_array
           Name: MarkerArray
           Namespaces:
-            people_tracker: true
+            {}
           Queue Size: 100
           Value: true
         - Alpha: 1

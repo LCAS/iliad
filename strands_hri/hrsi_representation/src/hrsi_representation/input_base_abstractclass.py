@@ -58,9 +58,17 @@ class InputBaseAbstractclass(object):
             input_data=world,
             dynamic_args=parameters
         )
+
+        #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Creating client QSRlib")
         cln = QSRlib_ROS_Client()
+
+        #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Create message")
         req = cln.make_ros_request_message(qrmsg)
+
+        #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Sending request")
         res = cln.request_qsrs(req)
+
+        #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Unpickling response")
         out = pickle.loads(res.data)
         qtc = []
         dis = []
@@ -124,15 +132,29 @@ class InputBaseAbstractclass(object):
 
         :param qtc_type: qtcb|qtcc|qtcbc
         """
+        #rospy.logdebug( "[" + rospy.get_name() + "]: " + "converting data")
+
         data = [data] if not isinstance(data, list) else data
         ret = []
         for elem in np.array(data):
+            #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Processing data element")
+
             world = self._convert_to_world(data_dict=elem)
+            #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Converted to world whatever")
+
             if argprobd:
                 qsr = [qtc_type, self.argprobd]
             else:
                 qsr = qtc_type
-            ret.append(self._request_qtc(qsr=qsr, world=world, parameters=parameters))
+
+            #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Obtaining qtc")
+            requested_qtc = self._request_qtc(qsr=qsr, world=world, parameters=parameters)
+
+            #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Appending")
+            ret.append(requested_qtc)
+
+            #rospy.logdebug( "[" + rospy.get_name() + "]: " + "And done")
+
         return ret
 
     def _to_np_array(self, string):

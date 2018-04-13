@@ -8,7 +8,7 @@ Created on Mon Jul 27 16:48:09 2015
 """
 
 import rospy
-from message_filters import Subscriber, TimeSynchronizer
+from message_filters import Subscriber, ApproximateTimeSynchronizer
 from hrsi_state_prediction.msg import QTCPredictionArray
 from bayes_people_tracker.msg import PeopleTracker
 import json
@@ -23,12 +23,12 @@ from tf import TransformListener
 
 class VelocityCostmapServer(object):
     def __init__(self, name):
-        rospy.loginfo("Starting %s..." % name)
+        rospy.loginfo("["+rospy.get_name()+"] " + "Starting ... ")
 
         self.vis_marker_topic = rospy.get_param("~vis_marker_topic","~visualization_marker")
         self.vel_costmap_topic = rospy.get_param("~vel_costmap_topic","/velocity_costmap")
-        self.origin_topic = rospy.get_param("origin_topic","~origin")
-        self.base_link_tf = rospy.get_param("base_link_tf","base_link")
+        self.origin_topic = rospy.get_param("~origin_topic","~origin")
+        self.base_link_tf = rospy.get_param("~base_link_tf","base_link")
 
         self.vis_pub = rospy.Publisher(self.vis_marker_topic, Marker, queue_size=1)
         self.tf = TransformListener()
@@ -41,12 +41,13 @@ class VelocityCostmapServer(object):
             Subscriber(rospy.get_param("~qtc_topic", "/qtc_state_predictor/prediction_array"), QTCPredictionArray),
             Subscriber(rospy.get_param("~ppl_topic", "/people_tracker/positions"), PeopleTracker)
         ]
-        ts = TimeSynchronizer(
+        self.ts = ApproximateTimeSynchronizer(
             fs=subs,
-            queue_size=60
+            queue_size=60,
+            slop=0.1
         )
-        ts.registerCallback(self.callback)
-        rospy.loginfo("... all done.")
+        self.ts.registerCallback(self.callback)
+        rospy.loginfo("["+rospy.get_name()+"] " + "... all done.")
 
     def dyn_callback(self, config, level):
         self.cc.resolution = config["costmap_resolution"]
@@ -56,6 +57,7 @@ class VelocityCostmapServer(object):
 
     def callback(self, qtc, ppl):
         vels = []
+        #rospy.logerr("["+rospy.get_name()+"] " + "data received!.............................. ")
         try:
             t = self.tf.getLatestCommonTime(self.base_link_tf, ppl.header.frame_id)
             vs = Vector3Stamped(header=ppl.header)
@@ -64,7 +66,7 @@ class VelocityCostmapServer(object):
                 vs.vector = v
                 vels.append(self.tf.transformVector3(self.base_link_tf, vs).vector)
         except Exception as e:
-            rospy.logwarn(e)
+            rospy.logerr("["+rospy.get_name()+"] " + str(e))
             return
         data_buffer = {
             e.uuid: {
@@ -76,7 +78,8 @@ class VelocityCostmapServer(object):
         try:
             element = data_buffer[ppl.uuids[ppl.distances.index(ppl.min_distance)]] # Only taking the closest person for now
             self.publish_closest_person_marker(ppl.poses[ppl.distances.index(ppl.min_distance)], ppl.header.frame_id)
-        except KeyError:
+        except KeyError as e:
+            rospy.logerr("["+rospy.get_name()+"] " + str(e))
             return
         qtc = element["qtc"].split(',')
         self.cc.publish(
@@ -84,6 +87,7 @@ class VelocityCostmapServer(object):
             qtc_symbol=','.join([qtc[0]] if len(qtc) == 2 else [qtc[0], qtc[2]]),
             velocity=element["velocity"]
         )
+        #rospy.logerr("["+rospy.get_name()+"] " + "costmap published!.............................. ")
 
     def publish_closest_person_marker(self, pose, frame_id):
         if self.vis_pub.get_num_connections() > 0:

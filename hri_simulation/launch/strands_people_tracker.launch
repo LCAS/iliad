@@ -156,6 +156,14 @@
             <arg name="filtered_marker"     value="$(arg filtered_marker)"/>     
         </include>
         
+        <!-- Publishes robot position related to map frame coordinates. Used by online_qtc_creator -->
+        <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
+              <param name="map_frame" value="map"/>
+              <param name="base_frame" value="$(arg prefix)/base_link"/>
+              <param name="is_stamped" value="true"/>
+              <remap from="robot_pose" to="robot_poseST"/>
+        </node>
+
 
         <!--  
             Requires /move_base/DWAPlannerROS to be running...
@@ -180,7 +188,6 @@
         
 -->
         
-        
         <include file="$(find hrsi_launch)/launch/hrsi.launch">
             <arg name="with_qsr_lib" value="true"/>
             <arg name="with_qsr_prob_rep" value="true"/>
@@ -194,7 +201,7 @@
             <arg name="move_base_topic"     value = "$(arg topic_prefix)/move_base"/>
             <arg name="qtc_arr_topic"       value = "$(arg topic_prefix)/online_qtc_creator/qtc_array"/>
             <arg name="robot_topic"         value = "$(arg topic_prefix)/robot_pose"/>
-            <arg name="robotST_topic"       value = "$(arg topic_prefix)/steer_pose"/>
+            <arg name="robotST_topic"       value = "$(arg topic_prefix)/robot_poseST"/>
             
         </include>
 

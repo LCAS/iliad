@@ -143,7 +143,7 @@ class OnlineQTCCreator(object):
                 msg.header.stamp = t
                 return self.listener.transformPose(target_frame, msg)
             except (tf.Exception, tf.LookupException, tf.ConnectivityException) as ex:
-                rospy.logwarn(ex)
+                ##rospy.logdebug( "[" + rospy.get_name() + "]: " + "TF failed. Reason: " + str(ex))
                 return None
         else:
             return msg
@@ -166,18 +166,22 @@ class OnlineQTCCreator(object):
                 frame_id=self.target_frame
             )
 
+            ##rospy.logdebug( "[" + rospy.get_name() + "]: " + "QTC created. ")
             # Looping through detected humans
             for (uuid, pose, angle) in zip(ppl_msg.uuids, ppl_msg.poses, ppl_msg.angles):
                 # Transforming pose into target_frame if necessary
+                ##rospy.logdebug( "[" + rospy.get_name() + "]: " + "Look! a person! ") 
                 person = PoseStamped()
                 person.header = ppl_msg.header
                 person.pose = pose
                 transformed_person = self._transform(person, self.target_frame)
 #                transformed_goal = self._transform(goal_msg, self.target_frame)
                 if transformed_person == None:
+                    ##rospy.logdebug( "[" + rospy.get_name() + "]: " + "Couldn't transform... ")
                     continue
 
                 if not uuid in self._smoothing_buffer.keys(): # No entry yet
+                    ##rospy.logdebug( "[" + rospy.get_name() + "]: " + "Adding entry ")
                     self._smoothing_buffer[uuid] = {
                         "start_time": ppl_msg.header.stamp.to_sec(),
                         "data": np.array(
@@ -191,6 +195,7 @@ class OnlineQTCCreator(object):
                             ]
                     ).reshape(-1,6), "last_seen": ppl_msg.header.stamp}
                 else: # Already in buffer
+                    ##rospy.logdebug( "[" + rospy.get_name() + "]: " + "I have your entry ")
                     self._smoothing_buffer[uuid]["data"] = np.append(
                         self._smoothing_buffer[uuid]["data"],
                         [
@@ -207,6 +212,7 @@ class OnlineQTCCreator(object):
             # Flush smoothing buffer and create QSR
             # Looping through smoothing buffer
             for uuid, data in self._smoothing_buffer.items():
+                ##rospy.logdebug( "[" + rospy.get_name() + "]: " + "Smoothing buffer ... ")
                 # If the smoothing time is not up, do nothing for this entry
                 if not data["start_time"] + self.smoothing_rate <= ppl_msg.header.stamp.to_sec():
                     continue
@@ -241,7 +247,7 @@ class OnlineQTCCreator(object):
                 # If there are more than 1 entries in the buffer for this person
                 # Create QTC representation
                 if self._buffer[uuid]["data"].shape[0] > 1:
-
+                    #rospy.logdebug( "[" + rospy.get_name() + "]: " + "More than 1 entry in the buffer for this one... ")
                     robot_thread = self.__thread_pool.apply_async(self.create_qsrs, (self._buffer[uuid]["data"][:,0:4], ("Robot", "Human"), self.qtc_type, self.parameters))
                     goal_thread = self.__thread_pool.apply_async(self.create_qsrs, (self._buffer[uuid]["data"][:,2:6], ("Human", "Goal"), "qtccs", self.parameters))
                     qsrs_robot = robot_thread.get()
@@ -266,6 +272,7 @@ class OnlineQTCCreator(object):
                     )
 
                     out.qtc.append(qtc_msg)
+                    #rospy.logdebug( "[" + rospy.get_name() + "]: " + "out qtc vector has " + str(len(out.qtc)) + " entries")
                     out.header.stamp = self._buffer[uuid]["last_seen"]
 
             # If there is something to publish and it hasn't been published before, publish
@@ -273,23 +280,33 @@ class OnlineQTCCreator(object):
 #            if out.qtc and (out.qtc != self.last_msg.qtc or self.prune_buffer):
             if out.qtc:
                 self.pub.publish(out)
+                #rospy.logerr( "[" + rospy.get_name() + "]: " + "PUBLISH.............................................! ")
 #                self.last_msg = out
             self.decay(ppl_msg.header.stamp) # Delete old elements from buffer
             rate.sleep()
 
     def create_qsrs(self, coords, agents, qtc_type, parameters):
-        return self.input.convert(
-            data=self.input.generate_data_from_input(
+        #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Called! ")
+        
+        datum = self.input.generate_data_from_input(
                 agent1=agents[0],
                 agent2=agents[1],
                 x1=coords[:,0],
                 y1=coords[:,1],
                 x2=coords[:,2],
                 y2=coords[:,3]
-            ),
+            )
+        
+        #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Datum generated! ")
+        ans =  self.input.convert(
+            data=datum,
             qtc_type=qtc_type,
             parameters=parameters
         )[0]
+
+        #rospy.logdebug( "[" + rospy.get_name() + "]: " + "Processing finished")
+        
+        return ans
 
     def decay(self, last_time):
         for uuid in self._buffer.keys():
@@ -298,6 +315,6 @@ class OnlineQTCCreator(object):
                 del self._buffer[uuid]
 
 if __name__ == "__main__":
-    rospy.init_node("online_qtc_creator")
+    rospy.init_node("online_qtc_creator")#,log_level=rospy.DEBUG)
     oqc = OnlineQTCCreator(rospy.get_name())
     rospy.spin()
