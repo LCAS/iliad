@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+
+
+<!--  
+     To be used with hri_simulation iliad_sim_hri.launch
+     Purpose is to simulate people tracking to be used with strands human aware navigation
+
+-->
+
+
+
+<launch>
+        <arg name="prefix"       default="robot1"/>
+        <arg name="topic_prefix" default="/robot1"/>
+   
+        <arg name="queue_size" value="5" />
+
+        <arg name="ptu_state" value="$(arg topic_prefix)/ptu/state" />
+        <arg name="ground_plane" value="$(arg topic_prefix)/ground_plane" />
+
+
+        <arg name="target_frame" value="$(arg prefix)/base_link" />
+        <arg name="base_frame" value="$(arg prefix)/base_link" />
+
+        <arg name="camera_namespace" value="$(arg topic_prefix)/kinect2" />
+
+        <arg name="rgb_image" value="/hd/image_color_rect" />
+        <arg name="camera_info_rgb" value="/hd/camera_info" />
+
+        <arg name="depth_image" value="/sd/image_depth_rect" />
+        <arg name="camera_info_depth" value="/depth/camera_info" />
+
+        <arg name="mono_image" value="/sd/image_ir_rect" />        
+
+        <arg name="motion_parameters" value="$(arg topic_prefix)/visual_odometry/motion_matrix" />
+        <arg name="visual_odometry" value="$(arg topic_prefix)/visual_odometry/motion_matrix" />
+
+        <arg name="upper_body_detections" value="$(arg topic_prefix)/upper_body_detector/detections" />
+        <arg name="upper_body_bb_centres" value="$(arg topic_prefix)/upper_body_detector/bounding_box_centres" />
+        <arg name="upper_body_image" value="$(arg topic_prefix)/upper_body_detector/image" />
+        <arg name="upper_body_markers" value="$(arg topic_prefix)/upper_body_detector/marker_array" />
+        <arg name="upper_body_roi" value="$(arg topic_prefix)/upper_body_detector/roi" />
+        <arg name="upper_body_closest_bb_centres" value="$(arg topic_prefix)/upper_body_detector/closest_bounding_box_centre" />
+
+
+        <arg name="positions"           value="$(arg topic_prefix)/people_tracker/positions" />
+        <arg name="pose"                value="$(arg topic_prefix)/people_tracker/pose" />
+        <arg name="pose_array"          value="$(arg topic_prefix)/people_tracker/pose_array" />
+        <arg name="people"              value="$(arg topic_prefix)/people_tracker/people" />
+        <arg name="marker"              value="$(arg topic_prefix)/people_tracker/marker_array" />
+
+        <arg name="filtered_positions"  value="$(arg topic_prefix)/people_tracker_filter/positions" />
+        <arg name="filtered_pose"       value="$(arg topic_prefix)/people_tracker_filter/pose" />
+        <arg name="filtered_pose_array" value="$(arg topic_prefix)/people_tracker_filter/pose_array" />
+        <arg name="filtered_people"     value="$(arg topic_prefix)/people_tracker_filter/people" />
+        <arg name="filtered_marker"     value="$(arg topic_prefix)/people_tracker_filter/marker_array" />
+
+
+
+        <arg name="tf_target_frame" value="" />
+
+        <!-- .................................................................... -->
+
+untested:
+
+
+
+
+           <!-- People tracking -->
+          <include file="$(find spencer_people_tracking_launch)/launch/tracking/freiburg_people_tracking.launch">
+               <arg name="rgbd" value="true"/>
+               <arg name="laser_low_confidence_detections" value="true"/>
+          </include>
+
+
+
+          
+
+        <!-- 
+              People Tracker Filter:
+              Modified original one to use a different way to detect receiving map. 
+        -->
+        
+        <include file="$(find people_tracker_filter)/launch/filter.launch">
+            <arg name="positions"           value="$(arg positions)"/>           
+            <arg name="pose"                value="$(arg pose)"/>                
+            <arg name="pose_array"          value="$(arg pose_array)"/>          
+            <arg name="people"              value="$(arg people)"/>  
+            <arg name="filtered_positions"  value="$(arg filtered_positions)"/>  
+            <arg name="filtered_pose"       value="$(arg filtered_pose)"/>       
+            <arg name="filtered_pose_array" value="$(arg filtered_pose_array)"/> 
+            <arg name="filtered_people"     value="$(arg filtered_people)"/>     
+            <arg name="filtered_marker"     value="$(arg filtered_marker)"/>     
+        </include>
+        
+        <!-- Publishes robot position related to map frame coordinates. Used by online_qtc_creator -->
+        <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
+              <param name="map_frame" value="map"/>
+              <param name="base_frame" value="$(arg prefix)/base_link"/>
+              <param name="is_stamped" value="true"/>
+              <remap from="robot_pose" to="robot_poseST"/>
+        </node>
+
+
+        <!--  
+            Requires /move_base/DWAPlannerROS to be running...
+            Publishes a velocity costmap that is used in the modified DWAPlanner to contraing solutions.
+        
+-->
+        
+        <include file="$(find hrsi_launch)/launch/hrsi.launch">
+            <arg name="with_qsr_lib" value="true"/>
+            <arg name="with_qsr_prob_rep" value="true"/>
+            <arg name="goal_topic"   value="$(arg topic_prefix)/move_base/current_goal"/>
+            <arg name="ppl_topic"    value="$(arg filtered_positions)"/>
+            <arg name="qtc_topic"    value="$(arg topic_prefix)/qtc_state_predictor/prediction_array"/>
+            <arg name="vis_marker_topic"    value = "$(arg topic_prefix)/velocity_costmap_server/visualization_marker"/>
+            <arg name="vel_costmap_topic"   value = "$(arg topic_prefix)/velocity_costmap_server/velocity_costmap"/>
+            <arg name="origin_topic"        value = "$(arg topic_prefix)/velocity_costmap_server/~origin"/>
+            <arg name="base_link_tf"        value = "$(arg base_frame)"/>
+            <arg name="move_base_topic"     value = "$(arg topic_prefix)/move_base"/>
+            <arg name="qtc_arr_topic"       value = "$(arg topic_prefix)/online_qtc_creator/qtc_array"/>
+            <arg name="robot_topic"         value = "$(arg topic_prefix)/robot_pose"/>
+            <arg name="robotST_topic"       value = "$(arg topic_prefix)/robot_poseST"/>
+            
+        </include>
+
+
+</launch> 
+
+
+

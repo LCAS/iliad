@@ -1,1 +1,0 @@
-Kinect v2 sensor for Gazebo. Originally based upon https://github.com/BRML/depth_sensors.
