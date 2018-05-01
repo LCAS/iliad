@@ -43,10 +43,10 @@ PLUGINLIB_EXPORT_CLASS(iliad_smp_planner::iliad_smp_planner, nav_core::BaseGloba
 namespace iliad_smp_planner {
 
   iliad_smp_planner::iliad_smp_planner()
-  :  initialized_(false),task_id_inc_(0){}
+  :  initialized_(false),task_id_inc_(0),tfListener_(tfBuffer_){}
 
   iliad_smp_planner::iliad_smp_planner(std::string name)
-  :  initialized_(false),task_id_inc_(0){
+  :  initialized_(false),task_id_inc_(0),tfListener_(tfBuffer_){
     initialize(name, NULL);
   }
   
@@ -58,13 +58,25 @@ namespace iliad_smp_planner {
       private_nh.param<bool>("load_operation",load_operation_,false);
       private_nh.param<bool>("load_detect",load_detect_,false);
       private_nh.param<int>("robot_id",my_robot_id_,1);
+      private_nh.param<std::string>("service_name",service_name_,"get_path");
+      
 
-      iliad_smp_srv_client_ = private_nh.serviceClient<orunav_msgs::GetPath>("get_path");      
+      while (!ros::service::exists(service_name_, true)){ 
+        ROS_ERROR("[iliad_smp_planner]  get_path service does not exist.. wait a second"); 
+        ros::Duration(1.0).sleep();
+      }      
+      
+      iliad_smp_srv_client_ = private_nh.serviceClient<orunav_msgs::GetPath>(service_name_);
+      
+      ROS_INFO("[iliad_smp_planner] Connected to get_path service at [%s]", iliad_smp_srv_client_.getService().c_str() );      
+      
       map_sub_ = private_nh.subscribe<nav_msgs::OccupancyGrid>("/map",10,&iliad_smp_planner::process_map, this);
+
+     
 
       initialized_ = true;
     } else {
-      ROS_WARN("This planner has already been initialized... doing nothing");
+      ROS_WARN("[iliad_smp_planner]  This planner has already been initialized... doing nothing");
     }
   }
 
@@ -95,13 +107,16 @@ namespace iliad_smp_planner {
       return isOk;
   }
     
-  orunav_msgs::RobotTarget iliad_smp_planner::castPoseStampedToOru(geometry_msgs::PoseStamped goal){
+  orunav_msgs::RobotTarget iliad_smp_planner::castPoseStampedToOru(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped goal){
         // as seen in point_n_click_target_client.cpp
         
         orunav_msgs::RobotTarget target;
         
-        target.goal.pose = goal.pose;
+        target.goal.pose = goal.pose;        
         target.goal.steering = 0.;
+        target.start.pose = start.pose;
+        target.start.steering = 0.;
+        
         target.goal_op.operation = target.goal_op.NO_OPERATION;
         target.start_op.operation = target.start_op.NO_OPERATION;
 
@@ -147,6 +162,34 @@ namespace iliad_smp_planner {
     return true;
   }
 
+
+
+  bool iliad_smp_planner::castPoseToMapFrame(const geometry_msgs::PoseStamped &inPose, geometry_msgs::PoseStamped &outPose, std::string &map_frame_id){
+
+    // this will block for up to a second until tranform is available.
+    try{
+      tfBuffer_.lookupTransform(map_frame_id, inPose.header.frame_id, ros::Time(0),  ros::Duration(1.0));
+    }
+    catch (tf2::TransformException &ex) {
+      ROS_ERROR("[iliad_smp_planner] Can't get transform from map frame [%s] to point frame [%s]. Error is [%s]",
+                            map_frame_id.c_str() , inPose.header.frame_id.c_str() , ex.what());
+      return false;
+    }
+    
+    // transform available, let's transfrom them...
+    try{
+          tfBuffer_.transform(inPose, outPose, map_frame_id);      
+    }
+    catch (tf2::TransformException &ex) {
+      ROS_ERROR("[iliad_smp_planner] Can't transform from map frame [%s] to point frame [%s]. Error is [%s]",
+                            map_frame_id.c_str() , inPose.header.frame_id.c_str() , ex.what());
+      return false;
+    }
+    
+    return true;      
+      
+  }
+
   bool iliad_smp_planner::makePlan(const geometry_msgs::PoseStamped& start, 
       const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan){
 
@@ -156,30 +199,46 @@ namespace iliad_smp_planner {
     bool isOk;
     orunav_msgs::RobotTarget oru_goal;
     orunav_msgs::Path oru_path;
-    
+    geometry_msgs::PoseStamped start_map, goal_map;
+    std::string target_fr_id;    
     if(!initialized_){
       ROS_ERROR("[iliad_smp_planner]  The planner has not been initialized, please call initialize() to use the planner");
       return false;
     }
 
-    ROS_DEBUG("Got a start: %.2f, %.2f, and a goal: %.2f, %.2f", start.pose.position.x, start.pose.position.y, goal.pose.position.x, goal.pose.position.y);
+    ROS_DEBUG("[iliad_smp_planner]  Got a start: %.2f, %.2f, and a goal: %.2f, %.2f", start.pose.position.x, start.pose.position.y, goal.pose.position.x, goal.pose.position.y);
 
     plan.clear();
     
     while (!getCurrentMap(map))
     { 
       ROS_ERROR("[iliad_smp_planner]  Map not ready... wait a second"); 
-      usleep(1000);
+      ros::Duration(1.0).sleep();
     }
     
-    // cast from move_base to oru target
-    oru_goal = castPoseStampedToOru(goal);
+    
+    // cast goal and start to map frame
+    target_fr_id = map.header.frame_id;
+    while (!castPoseToMapFrame(start, start_map, target_fr_id ))
+    { 
+      ROS_ERROR("[iliad_smp_planner] ... wait a second"); 
+      ros::Duration(1.0).sleep();
+    }
+
+    while (!castPoseToMapFrame(goal, goal_map, target_fr_id))
+    { 
+      ROS_ERROR("[iliad_smp_planner] ... wait a second"); 
+      ros::Duration(1.0).sleep();
+    }
+    
+    // cast goal and start from ros format to oru format
+    oru_goal = castPoseStampedToOru(start_map,goal_map);
     
     // ask iliad_smp for a path on the given map and path
-    while (!callSMP(oru_goal,map,oru_path))
+    while (!callSMP(oru_goal, map, oru_path))
     { 
       ROS_ERROR("[iliad_smp_planner]  Can't get a path... wait a second"); 
-      usleep(1000);
+      ros::Duration(1.0).sleep();
     }
     
     // cast oru path into ROS path

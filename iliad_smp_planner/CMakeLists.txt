@@ -7,6 +7,10 @@ find_package(catkin REQUIRED
             nav_core
             base_local_planner
             pluginlib
+            
+            tf2_ros
+            geometry_msgs
+            tf2_geometry_msgs
         )
 
 include_directories(

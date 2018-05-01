@@ -61,6 +61,10 @@
 
 #include <boost/thread/mutex.hpp>
 
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/message_filter.h"
+#include "message_filters/subscriber.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 namespace iliad_smp_planner{
   /**
@@ -98,15 +102,18 @@ namespace iliad_smp_planner{
           const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan);
 
 
-      bool callSMP(orunav_msgs::RobotTarget target, nav_msgs::OccupancyGrid map, orunav_msgs::Path& path);
+      bool callSMP( orunav_msgs::RobotTarget target, nav_msgs::OccupancyGrid map, orunav_msgs::Path& path);
 
-      orunav_msgs::RobotTarget castPoseStampedToOru(geometry_msgs::PoseStamped goal);
+      orunav_msgs::RobotTarget castPoseStampedToOru(geometry_msgs::PoseStamped start, geometry_msgs::PoseStamped goal);
 
       bool getCurrentMap (nav_msgs::OccupancyGrid& map );
 
       bool castPath(geometry_msgs::PoseStamped start, orunav_msgs::Path path, std::vector<geometry_msgs::PoseStamped>& plan);
 
       void process_map(const nav_msgs::OccupancyGrid::ConstPtr &msg);
+
+
+      bool castPoseToMapFrame(const geometry_msgs::PoseStamped &inPose, geometry_msgs::PoseStamped &outPose, std::string &map_frame_id);
 
 
     private:
@@ -121,6 +128,10 @@ namespace iliad_smp_planner{
       bool load_operation_;
       bool load_detect_;
       bool valid_map_;
+      std::string service_name_;
+
+      tf2_ros::Buffer tfBuffer_;
+      tf2_ros::TransformListener tfListener_;
 
   };
 };  

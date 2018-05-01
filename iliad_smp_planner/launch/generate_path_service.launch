@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- -->
+               <group ns="robot1">
+
+    
+  <rosparam file="$(find iliad_smp)/cfg/iliad_smp_costmap.yml" command="load" ns="generate_path_iliad/iliad_smp_costmap/"/>
+  <rosparam file="$(find iliad_smp)/cfg/iliad_smp_planner.yml" command="load" ns="generate_path_iliad/iliad_smp"/>
+
+  <node pkg="iliad_smp" type="generate_path_iliad" name="generate_path_iliad" output="screen">
+    <param name="min_incr_path_dist" value="0.2" />
+    <param name="visualize" value="true" />
+    <param name="service_name" value="/robot1/move_base/iliad_smp_planner/get_path" />
+  </node>
+
+                          </group>
+
+
+</launch>
