@@ -18,10 +18,11 @@ Services:
 "get_path" from iliad_smp.
 
 Topics 
-"/map" from map-server ?
+"/map" from map-server 
 
 Params:
 load_operation,load_detect,robot_id
 
-Missing:
-launcher including iliad_smp to generate trajectories, set parameters and move_base.
+Testing it:
+I've included a launcher (iliad_sim_test_planner.launch) to test this plugin. 
+It's far from smooth, but can be an start poing. 

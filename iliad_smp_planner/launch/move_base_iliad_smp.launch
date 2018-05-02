@@ -4,28 +4,24 @@
     Based on move_base.launch from demo package in iliad repo.  
     
 -->
-<launch deprecated="UNCOMMENT ILIAD SMP">
+<launch>
 
-      
-      <arg name="prefix"        default="robot1"/>
-      <arg name="topic_prefix"  default="/robot1"/>
+      <arg name="robot_id"      default="1"/>
+      <arg name="prefix"        default="robot$(arg robot_id)"/>
+      <arg name="topic_prefix"  default="/robot$(arg robot_id)"/>
       
       <arg name="odom_topic" default="odom" />
       <arg name="cmd_vel_topic" default="controller/cmd_vel" />
       
       
-      <!-- This is the real global planer, as a service: "get_path"
+      <!-- This is the real global planer, as a service.
             move_base global planner plugin is mostly a client to this
             one, with some extra parameters
-            
-            group tag is used to match service location and where client seeks it.+
-                   <group ns="move_base/iliad_smp_planner">
-                          </group>
-
-      <include file="$(find iliad_smp)/launch/generate_path_service.launch"/>  
-
       --> 
- 
+       <include file="$(find iliad_smp)/launch/generate_path_service.launch">
+           <arg name="get_path_service_name" value="$(arg topic_prefix)/move_base/iliad_smp_planner/get_path"/>
+       </include>  
+
       <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
           <rosparam file="$(find iliad_smp_planner)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
           <rosparam file="$(find iliad_smp_planner)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
@@ -40,13 +36,14 @@
 
           <rosparam file="$(find iliad_smp_planner)/params/dwa_local_planner_params.yaml" command="load" />
 
-           <!-- change dwa parameters that is robot-dependant -->
+           <!-- change dwa parameter that is robot-dependant -->
           <rosparam param="velocity_costmap_topic" subst_value="True">$(arg topic_prefix)/velocity_costmap_server/velocity_costmap</rosparam>
 
           <rosparam file="$(find iliad_smp_planner)/params/iliad_smp_global_planner_params.yaml" command="load" />
-           <!-- change iliad_smp parameters that is robot-dependant -->
-          <rosparam param="iliad_smp_planner/robot_id" subst_value="True">$(arg topic_prefix)</rosparam>
-
+          
+           <!-- change iliad_smp parameters that are robot-dependant -->
+          <rosparam param="iliad_smp_planner/robot_id" subst_value="True">$(arg robot_id)</rosparam>
+          <rosparam param="iliad_smp_planner/service_name" subst_value="True">$(arg topic_prefix)/move_base/iliad_smp_planner/get_path</rosparam>
 
           <rosparam file="$(find iliad_smp_planner)/params/move_base_params.yaml" command="load" />
 
