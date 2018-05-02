@@ -59,18 +59,87 @@
 
         <arg name="tf_target_frame" value="" />
 
-        <!-- .................................................................... -->
 
-untested:
+        <!-- ...............TESTED!............................................... -->
+
+
+          <!-- Laser detectors:
+                    -->  
+          <include file="$(find demo)/launch/detectors/laser_detectors.launch">
+                <arg name="topic_prefix" value="/robot1"/>
+                <arg name="laser"        value="$(arg topic_prefix)/safety_laser_fil"/>
+          </include>
+
+          <!-- Leg detectors 
+          This is an alternative to laser detector, but requires installing spencer from sources,
+           as spencer_leg_detector_wrapper is not in deb and it depends on wg perception.
+           Not really interesting, as is basically wrapping into spencer the same tracker strands had.
+          
+          <include file="$(find demo)/launch/detectors/leg_detectors.launch">
+            <arg name="node_prefix" value="leg"/>
+            <arg name="config_file" value="iliad.yaml"/>
+            <arg name="robot_tf_prefix" default="robot1"/>
+
+            <arg name="scan" value="$(arg topic_prefix)/safety_laser_fil"/>               
+          </include>
+                
+          -->
+
+
+          <!-- Beware of topics
+           Published by Gazebo
+           * /robot1/kinect2/depth/camera_info [sensor_msgs/CameraInfo]
+           * /robot1/kinect2/sd/image_depth_rect [sensor_msgs/Image]
+           * /robot1/kinect2/hd/image_color_rect [sensor_msgs/Image]
+
+          Published by Kinect2
+           * /kinect2/sd/image_color_rect   
+           * /kinect2/sd/camera_info        
+           * /depth/image_rect
+          
+          -->
+
+
+
+          <!-- Resized color image with same resolution (512 x 424) than point cloud for quick representation  -->
+          <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager"/>  
+          <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load /robot1/resize_kinect $(find hri_simulation)/config/nodelet_resize.yaml" />
+
+          <node pkg="nodelet" type="nodelet" name="resize_kinect"
+                args="load image_proc/resize nodelet_manager --no-bond"
+                respawn="true">
+                <remap from="image" to="$(arg camera_namespace)/hd/image_color_rect" />
+                <remap from="camera_info" to="$(arg camera_namespace)/sd/camera_info" />
+                <remap from="~image" to="$(arg camera_namespace)/ld/image_color_rect" />
+                <remap from="~camera_info" to="$(arg camera_namespace)/ld/camera_info" />
+
+          </node>  
+
+          <!-- RGB-D detectors -->
+          <include file="$(find demo)/launch/detectors/front_rgbd_detectors.launch">
+                       <arg name="topic_prefix" value="/robot1"/>
+                       <arg name="camera_frame" value="$(arg prefix)/kinect2_rgb_optical_frame"/>
+                       <arg name="camera_namespace" value="$(arg camera_namespace)"/>
+                       <arg name="rgb_image" value="/ld/image_color_rect" />
+                       <arg name="depth_image" value="/sd/image_depth_rect" />
+                       <arg name="camera_info_depth" value="/depth/camera_info" />
+                       <arg name="base_footprint" value="$(arg base_frame)"/>
+          </include>
+
+        <!-- ...............NOT TESTED! .......................................... -->
+
+
 
 
 
 
            <!-- People tracking -->
-          <include file="$(find spencer_people_tracking_launch)/launch/tracking/freiburg_people_tracking.launch">
+          <include file="$(find demo)/launch/tracking/freiburg_people_tracking.launch">
                <arg name="rgbd" value="true"/>
                <arg name="laser_low_confidence_detections" value="true"/>
           </include>
+
+
 
 
 

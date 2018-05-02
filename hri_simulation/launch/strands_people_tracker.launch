@@ -1,18 +1,27 @@
 <?xml version="1.0"?>
 
+ <!-- 
+  requires:
+    - a working forklift (or simulation): tfs, kinect2, velodyne, lasers ...
+    - an human aware dwa local planner in a move_base stack.
 
-<!--  
-     To be used with hri_simulation iliad_sim_hri.launch
-     Purpose is to simulate people tracking to be used with strands human aware navigation
+  I.e. 
+    roslaunch base_simulation iliad_sim_ncfm_short_walk.launch gazeboGui:=false rviz_config_file:=`rospack find hri_simulation`/rviz/iliad_cititruck_dwa_nav_hri.rviz
 
--->
+    roslaunch nav_simulation move_base_dwa.launch 
+  -->
 
 
-
-<launch>
+<launch deprecated="WIP!!!!">
         <arg name="prefix"       default="robot1"/>
         <arg name="topic_prefix" default="/robot1"/>
    
+
+      <group ns="$(arg prefix)">
+
+        <env name="ROSCONSOLE_CONFIG_FILE"
+            value="$(find hri_simulation)/custom_rosconsole.conf"/>
+
         <arg name="queue_size" value="5" />
 
         <arg name="ptu_state" value="$(arg topic_prefix)/ptu/state" />
@@ -24,8 +33,8 @@
 
         <arg name="camera_namespace" value="$(arg topic_prefix)/kinect2" />
 
-        <arg name="rgb_image" value="/hd/image_color_rect" />
-        <arg name="camera_info_rgb" value="/hd/camera_info" />
+        <arg name="rgb_image" value="/ld/image_color_rect" />
+        <arg name="camera_info_rgb" value="/ld/camera_info" />
 
         <arg name="depth_image" value="/sd/image_depth_rect" />
         <arg name="camera_info_depth" value="/depth/camera_info" />
@@ -57,25 +66,38 @@
 
 
 
-        <arg name="tf_target_frame" value="" />
+        <!-- Resized color image with same resolution (512 x 424) than point cloud for quick representation in ubd -->
+        <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager"/>
+
+        <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load $(arg topic_prefix)/resize_kinect $(find hri_simulation)/config/nodelet_resize.yaml"/>
+
+        <node pkg="nodelet" type="nodelet" name="resize_kinect" args="load image_proc/resize nodelet_manager --no-bond" respawn="true">
+            <!-- input -->
+            <remap from="image" to="$(arg camera_namespace)/hd/image_color_rect" />
+            <remap from="camera_info" to="$(arg camera_namespace)/hd/camera_info" />
+            <!-- output -->
+            <remap from="~image" to="$(arg camera_namespace)$(arg rgb_image)" />
+            <remap from="~camera_info" to="$(arg camera_namespace)$(arg camera_info_rgb)" />
+        </node>
+
+
+
 
         <!-- Fixed Ground Plane -->
         <include file="$(find ground_plane_estimation)/launch/ground_plane_fixed.launch">
             <arg name="param_file" value="$(find hri_simulation)/config$(arg topic_prefix)/fixed_gp.yaml" />
             <arg name="ptu_state" value="$(arg ptu_state)" />
-            <arg name="ground_plane" value="$(arg ground_plane)" />
+            <arg name="ground_plane" value="$(arg ground_plane)"/>
 
 
         </include>
+           
+     <!-- Virtual PTU messages (for ground plane estimation) -->
+    <node name="virtual_ptu" pkg="hri_simulation" type="virtual_ptu.py">
+            <param name="ptu_topic" value="$(arg ptu_state)" type="string"/>
 
-        <!-- Ground Plane is published after a ptu state is received. This dummy message forces gp publishing -->
-        <node name="fake_ptu" pkg="rostopic" type="rostopic"
-            args="pub $(arg ptu_state) sensor_msgs/JointState '{header: {seq: 0, stamp: {secs: 0, nsecs: 0}, frame_id: 'base_link'},
-            name: ['tikitiki'],
-            position: [0],
-            velocity: [0],
-            effort: [0]}' -r 0.5"
-        />
+    </node>
+
 
 
 
@@ -96,7 +118,6 @@
             <arg name="rgb_image" value="$(arg rgb_image)"/>
             <arg name="depth_image" value="$(arg depth_image)"/>
             <arg name="camera_info_depth" value="$(arg camera_info_depth)"/>
-
             <arg name="upper_body_detections" value="$(arg upper_body_detections)" />
             <arg name="upper_body_bb_centres" value="$(arg upper_body_bb_centres)" />
             <arg name="upper_body_image" value="$(arg upper_body_image)" />
@@ -106,8 +127,6 @@
 
             <arg name="ground_plane" value="$(arg ground_plane)" />
         </include>
-
-
 
         <!-- Leg tracker -->
         <node pkg="leg_detector" type="leg_detector" name="leg_detector" args="scan:=$(arg topic_prefix)/safety_laser_fil fixed_frame:=world $(find hri_simulation)/config$(arg topic_prefix)/trained_leg_detector.yaml" output="screen">
@@ -165,28 +184,6 @@
         </node>
 
 
-        <!--  
-            Requires /move_base/DWAPlannerROS to be running...
-            This Human Aware Navigation (HAN) modifies DWA parameters.
-            Also was intended to provide gazing, but to take advantage of that, goals must be provided to its service.
-        
-        <include file="$(find strands_human_aware_navigation)/launch/human_aware_navigation.launch">
-            <arg name="DWAPlannerROS_srv" value="$(arg topic_prefix)/move_base/DWAPlannerROS"/>
-            <arg name="DWAPlannerROS_han_srv" value="$(arg topic_prefix)/human_aware_navigation"/>
-            <arg name="moveBase_ac" value="$(arg topic_prefix)/move_base"/>
-            <arg name="simple_goal_topic" value="$(arg topic_prefix)/human_aware_navigation/move_base_simple/goal"/>
-            <arg name="useGaze" value="false"/>
-            <arg name="people_positions" value="$(arg filtered_positions)"/>
-        </include>
-        -->
-
-
-
-        <!--  
-            Requires /move_base/DWAPlannerROS to be running...
-            Publishes a velocity costmap that is used in the modified DWAPlanner to contraing solutions.
-        
--->
         
         <include file="$(find hrsi_launch)/launch/hrsi.launch">
             <arg name="with_qsr_lib" value="true"/>
@@ -204,6 +201,9 @@
             <arg name="robotST_topic"       value = "$(arg topic_prefix)/robot_poseST"/>
             
         </include>
+
+
+ </group>
 
 
 </launch> 

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package>
+  <name>nav_simulation</name>
+  <version>0.0.1</version>
+  <description>Iliad simulations with different navigation stacks</description>
+
+  <maintainer email="mfernandezcarmona@lincoln.ac.uk">Manuel</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+</package>
