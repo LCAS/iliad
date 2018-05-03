@@ -2,25 +2,26 @@
 Note: Those packages are still in early development ("hic sunt dracones")
 
 
-## zombie (to be renamed)
+## twist_controller (previously zombie)
 Extremely simple forklift controller. Contains a basic ROS/CAN bridge and a simple command converter. Command converter transforms from rot/trans vel commands (like a differential robot) to steering angle/speed and motor wheel speed. 
 
-## demo
-Shows simulated forklift using ROS navigation stacks. Currently testing TEB planner and DWA.
+## base_simulation (previously in package named demo)
+Gazebo world configurations and simulated forklifts used in other packages.
+
+## nav_simulation (previously in package named demo)
+Shows simulated forklift using ROS navigation stacks. Currently testing TEB planner and ROS DWA.
 
 ## hri_simulation
-Based on demo package, simulates human aware navigation. 
+Depends on base and navigatio simulation packages. It simulates human aware navigation. 
 
 ## Source dependences:
 Remember to source after building with ``catkin_make -DCMAKE_BUILD_TYPE=Release``
 
 * strands_hri 
-Currently merging (https://github.com/strands-project/strands_hri/pull/154). By now use this fork:
-https://github.com/MFernandezCarmona/strands_hri
+https://github.com/strands-project/strands_hri
 
 * strands_perception_people 
-Currently merging (https://github.com/strands-project/strands_perception_people/pull/218). By now use this fork:
-https://github.com/MFernandezCarmona/strands_perception_people
+https://github.com/strands-project/strands_perception_people
 
 * strands_navigation 
 https://github.com/strands-project/navigation/tree/han_dwa_only_kinetic

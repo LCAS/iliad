@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+
+<!-- 
+    ROS navigation stack controller
+    based on turtlebot move_base.launch
+
+    This file is to be launched after starting robot driver and sensors (or any of its simulations in base_simulation).
+    If local dwa plugin is enabled, this will be an human aware navigation stack.
+    
+    I.e. 
+    roslaunch base_simulation iliad_sim_ncfm_no_human.launch gazeboGui:=false rviz_config_file:=`rospack find nav_simulation`/rviz/iliad_cititruck_dwa_nav.rviz 
+
+    Or if you want to use with human aware navigation
+    
+    roslaunch base_simulation iliad_sim_ncfm_short_walk.launch gazeboGui:=false rviz_config_file:=`rospack find hri_simulation`/rviz/iliad_cititruck_dwa_nav_hri.rviz 
+
+-->
+<launch>
+      
+      <arg name="prefix"        default="robot1"/>
+      <arg name="topic_prefix"  default="/robot1"/>
+      
+      <arg name="odom_topic" default="odom" />
+      <arg name="cmd_vel_topic" default="controller/cmd_vel" />
+
+      <group ns="$(arg prefix)">
+         <!-- 
+              This param needs to be set under this group, or 
+              robot_state_publisher wont publish tf properly 
+         -->  
+        <param name="tf_prefix" value="$(arg prefix)" />
+
+        <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+          <remap from="cmd_vel" to="move_base/cmd_vel"/> 
+          <remap from="odom" to="$(arg odom_topic)"/>
+          <remap from="$(arg topic_prefix)/map" to="/map" />
+          
+          <!-- common params -->
+          <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
+          <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
+          <rosparam file="$(find nav_simulation)/params/local_costmap_params.yaml" command="load" />
+          <rosparam file="$(find nav_simulation)/params/global_costmap_params.yaml" command="load" />
+
+          <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
+          <!-- How long to allow for oscillation before executing recovery behaviors.  0.0 == infinite timeout -->
+          <param name="oscillation_timeout" value="10.0" />  
+          <!-- How far to be considered not to be oscillating. Moving this far resets the timer counting up to the ~oscillation_timeout  -->
+          <param name="oscillation_distance" value="0.25" /> 
+          
+          <param name="base_global_planner" value="global_planner/GlobalPlanner" />
+          <param name="planner_frequency" value="1.0" />
+          <param name="planner_patience" value="5.0" />
+
+          <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+          <param name="controller_frequency" value="2.0" />
+          <param name="controller_patience" value="15.0" />
+
+          <rosparam file="$(find nav_simulation)/params/dwa_local_planner_params.yaml" command="load" />
+
+          <rosparam file="$(find nav_simulation)/params/move_base_params.yaml" command="load" />
+
+           <!-- change dwa parameters that is robot-dependant -->
+          <rosparam param="velocity_costmap_topic" subst_value="True">$(arg topic_prefix)/velocity_costmap_server/velocity_costmap</rosparam>
+
+      </node>
+     
+    </group>
+
+</launch>
