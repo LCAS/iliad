@@ -15,8 +15,8 @@
   <build_depend>roscpp</build_depend>
 
   <run_depend>geometry_msgs</run_depend>
-  <run_depend>teleop-twist-joy</run_depend>
-  <run_depend>ros-kinetic-joy</run_depend>
+  <run_depend>teleop_twist_joy</run_depend>
+  <run_depend>joy</run_depend>
   <run_depend>roscpp</run_depend>
 
   <export>

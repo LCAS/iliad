@@ -11,12 +11,12 @@
 
   <run_depend>map_server</run_depend>
   <run_depend>move_base</run_depend>
-  <run_depend>jsk-rviz-plugins</run_depend>
+  <run_depend>jsk_rviz_plugins</run_depend>
   <run_depend>robot_pose_publisher</run_depend>
-  <run_depend>ros-kinetic-global-planner</run_depend>
-  <run_depend>ros-kinetic-teb-local-planner</run_depend>
-  <run_depend>ros-kinetic-spencer-people-tracking-full</run_depend>
-  <run_depend>ros-kinetic-iliad-distribution</run_depend>
+  <run_depend>global_planner</run_depend>
+  <run_depend>teb_local_planner</run_depend>
+  <run_depend>spencer_people_tracking_full</run_depend>
+  <run_depend>iliad_distribution</run_depend>
 
   <export>
   </export>
