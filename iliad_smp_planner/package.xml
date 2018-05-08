@@ -20,12 +20,14 @@
     <build_depend>tf2_ros</build_depend>
     <build_depend>geometry_msgs</build_depend>
     <build_depend>tf2_geometry_msgs</build_depend>
+    <build_depend>orunav_msgs</build_depend>
     <!--<build_depend>angles</build_depend>-->
 
     <run_depend>roscpp</run_depend>
     <run_depend>pluginlib</run_depend>
     <run_depend>nav_core</run_depend>
     <run_depend>base_local_planner</run_depend>
+    <run_depend>orunav_msgs</run_depend>
 
     <export>
         <nav_core plugin="${prefix}/bgp_plugin.xml" />
