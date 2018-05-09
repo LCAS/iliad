@@ -20,9 +20,9 @@ private:
       nh.param<bool>("use_ct", use_ct_, true);
       
       // Service
-      service_server_ = nh.advertiseService("set_task", &EnvelopeManagerNode::setTaskCB, this);
+      service_server_ = nh.advertiseService("execute_task_coordinator", &EnvelopeManagerNode::setTaskCB, this);
       // Client
-      service_client_ = nh.serviceClient<orunav_msgs::SetTask>("set_task");
+      service_client_ = nh.serviceClient<orunav_msgs::SetTask>("execute_task");
     }
 
  

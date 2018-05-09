@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
- <!-- Based on iliad_sim_standard_nav.launch from demo package in iliad repo.
+ <!-- Based on iliad_sim_standard_nav.launch from nav_simulation package in iliad repo.
  but uses an standard ros navigation stack using  iliad_smp_planner -->
  
 <launch>
@@ -25,11 +25,11 @@
   <!-- INCLUDES .................................................... -->
 
 
-  <!-- LOAD WORLD use same file but in demo package to remove people ...  -->
+  <!-- LOAD WORLD use same file but in base_simulation package to remove people ...  -->
   <include file="$(find gazebo_worlds_oru)/launch/ncfm_world.launch" if="$(arg hasPeople)"/>
   
 
-  <include file="$(find demo)/launch/ncfm_world.launch" unless="$(arg hasPeople)">     
+  <include file="$(find base_simulation)/launch/iliad_sim_ncfm_no_human.launch" unless="$(arg hasPeople)">     
        <arg name="gui" value="$(arg gazeboGui)"/> 
   </include>
 
