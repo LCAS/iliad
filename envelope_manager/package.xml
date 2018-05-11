@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>envelope_manager</name>
+  <version>0.0.1</version>
+  <description>The orunav_coordinator_fake package</description>
+  <maintainer email="mfernandecarmona@lincoln.ac.uk">Manuel Fernandez</maintainer>
+  <license>TODO</license>
+
+  <build_depend>cmake_modules</build_depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>orunav_msgs</build_depend>
+  
+  <run_depend>roscpp</run_depend>
+  <run_depend>orunav_msgs</run_depend>
+  
+  <export>
+  </export>
+</package>
