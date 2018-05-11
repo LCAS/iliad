@@ -12,7 +12,7 @@
   -->
 
 
-<launch deprecated="WIP!!!!">
+<launch>
         <arg name="prefix"       default="robot1"/>
         <arg name="topic_prefix" default="/robot1"/>
    
@@ -185,22 +185,7 @@
 
 
         
-        <include file="$(find hrsi_launch)/launch/hrsi.launch">
-            <arg name="with_qsr_lib" value="true"/>
-            <arg name="with_qsr_prob_rep" value="true"/>
-            <arg name="goal_topic"   value="$(arg topic_prefix)/move_base/current_goal"/>
-            <arg name="ppl_topic"    value="$(arg filtered_positions)"/>
-            <arg name="qtc_topic"    value="$(arg topic_prefix)/qtc_state_predictor/prediction_array"/>
-            <arg name="vis_marker_topic"    value = "$(arg topic_prefix)/velocity_costmap_server/visualization_marker"/>
-            <arg name="vel_costmap_topic"   value = "$(arg topic_prefix)/velocity_costmap_server/velocity_costmap"/>
-            <arg name="origin_topic"        value = "$(arg topic_prefix)/velocity_costmap_server/~origin"/>
-            <arg name="base_link_tf"        value = "$(arg base_frame)"/>
-            <arg name="move_base_topic"     value = "$(arg topic_prefix)/move_base"/>
-            <arg name="qtc_arr_topic"       value = "$(arg topic_prefix)/online_qtc_creator/qtc_array"/>
-            <arg name="robot_topic"         value = "$(arg topic_prefix)/robot_pose"/>
-            <arg name="robotST_topic"       value = "$(arg topic_prefix)/robot_poseST"/>
-            
-        </include>
+
 
 
  </group>
