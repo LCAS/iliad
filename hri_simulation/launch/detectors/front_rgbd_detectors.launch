@@ -21,7 +21,8 @@ Could use other detectors than upper body
 	
 	<arg name="base_footprint" default="$(arg topic_prefix)base_footprint"/>
 
-    <arg name="hog" default="true"/>    
+    <!-- Couldn't make HOG compile ...-->
+    <arg name="hog" default="false"/>    
 
         <arg name="rgb_image" default="/hd/image_color_rect" />
         <arg name="depth_image" default="/sd/image_depth_rect" />

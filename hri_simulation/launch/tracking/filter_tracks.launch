@@ -8,6 +8,7 @@
 
 <launch>
     <arg name="topic_prefix" default=""/>
+    <arg name="hog" default="false"/>
     
     <group ns="$(arg topic_prefix)/spencer/perception_internal/people_tracking/post_processing/">
 
@@ -28,16 +29,6 @@
             <remap from="output_tracks" to="$(arg topic_prefix)/spencer/perception/tracked_persons_moving"/>
         </node>
 
-        <!-- Filter tracks which have been confirmed by HOG -->
-        <node name="filter_tracks_confirmed_by_HOG" pkg="spencer_tracking_utils" type="filter_visually_confirmed_tracks">
-            <rosparam param="min_matches_per_modality">
-                mono: 10
-            </rosparam>
-            <remap from="input_tracks" to="$(arg topic_prefix)/spencer/perception/tracked_persons_orientation_fixed"/>
-            <remap from="output_tracks" to="$(arg topic_prefix)/spencer/perception/tracked_persons_confirmed_by_HOG"/>
-            <remap from="composite_detected_persons" to="$(arg topic_prefix)/spencer/perception/detected_persons_composite"/>
-        </node>
-
         <!-- Filter tracks which have been confirmed by RGB-D (upper-body detector) -->
         <node name="filter_tracks_confirmed_by_upper_body" pkg="spencer_tracking_utils" type="filter_visually_confirmed_tracks">
             <rosparam param="min_matches_per_modality">
@@ -48,8 +39,18 @@
             <remap from="composite_detected_persons" to="$(arg topic_prefix)/spencer/perception/detected_persons_composite"/>
         </node>
 
+        <!-- Filter tracks which have been confirmed by HOG -->
+        <node name="filter_tracks_confirmed_by_HOG" pkg="spencer_tracking_utils" type="filter_visually_confirmed_tracks" if="$(arg hog)">
+            <rosparam param="min_matches_per_modality">
+                mono: 10
+            </rosparam>
+            <remap from="input_tracks" to="$(arg topic_prefix)/spencer/perception/tracked_persons_orientation_fixed"/>
+            <remap from="output_tracks" to="$(arg topic_prefix)/spencer/perception/tracked_persons_confirmed_by_HOG"/>
+            <remap from="composite_detected_persons" to="$(arg topic_prefix)/spencer/perception/detected_persons_composite"/>
+        </node>
+
         <!-- Filter tracks which have been visually confirmed by ANY visual detector -->
-        <node name="filter_tracked_persons_confirmed_by_HOG_or_upper_body" pkg="spencer_tracking_utils" type="filter_tracks_logically">
+        <node name="filter_tracked_persons_confirmed_by_HOG_or_upper_body" pkg="spencer_tracking_utils" type="filter_tracks_logically" if="$(arg hog)">
             <param name="logic_op" value="OR"/>
             <remap from="input_tracks1" to="$(arg topic_prefix)/spencer/perception/tracked_persons_confirmed_by_HOG"/>
             <remap from="input_tracks2" to="$(arg topic_prefix)/spencer/perception/tracked_persons_confirmed_by_upper_body"/>
@@ -57,7 +58,7 @@
         </node>
 
         <!-- Filter tracks which have NOT been visually confirmed by ANY detector -->
-        <node name="filter_tracked_persons_not_confirmed_by_HOG_or_upper_body" pkg="spencer_tracking_utils" type="filter_tracks_logically">
+        <node name="filter_tracked_persons_not_confirmed_by_HOG_or_upper_body" pkg="spencer_tracking_utils" type="filter_tracks_logically" if="$(arg hog)">
             <param name="logic_op" value="XOR"/>
             <remap from="input_tracks1" to="$(arg topic_prefix)/spencer/perception/tracked_persons_confirmed_by_HOG_or_upper_body"/>
             <remap from="input_tracks2" to="$(arg topic_prefix)/spencer/perception/tracked_persons_orientation_fixed"/>
@@ -66,7 +67,7 @@
 
 
         <!-- Filter tracks which have been visually confirmed by ALL visual detectors -->
-        <node name="filter_tracked_persons_confirmed_by_HOG_and_upper_body" pkg="spencer_tracking_utils" type="filter_tracks_logically">
+        <node name="filter_tracked_persons_confirmed_by_HOG_and_upper_body" pkg="spencer_tracking_utils" type="filter_tracks_logically" if="$(arg hog)">
             <param name="logic_op" value="AND"/>
             <remap from="input_tracks1" to="$(arg topic_prefix)/spencer/perception/tracked_persons_confirmed_by_HOG"/>
             <remap from="input_tracks2" to="$(arg topic_prefix)/spencer/perception/tracked_persons_confirmed_by_upper_body"/>
@@ -74,7 +75,7 @@
         </node>
 
         <!-- Filter tracks which have NOT been visually confirmed by ALL detectors -->
-        <node name="filter_tracked_persons_not_confirmed_by_HOG_and_upper_body" pkg="spencer_tracking_utils" type="filter_tracks_logically">
+        <node name="filter_tracked_persons_not_confirmed_by_HOG_and_upper_body" pkg="spencer_tracking_utils" type="filter_tracks_logically" if="$(arg hog)">
             <param name="logic_op" value="XOR"/>
             <remap from="input_tracks1" to="$(arg topic_prefix)/spencer/perception/tracked_persons_confirmed_by_HOG_and_upper_body"/>
             <remap from="input_tracks2" to="$(arg topic_prefix)/spencer/perception/tracked_persons_orientation_fixed"/>
@@ -83,7 +84,7 @@
 
 
         <!-- Filter tracks which have been visually confirmed by ANY detector OR are moving -->
-        <node name="filter_tracked_persons_confirmed_by_HOG_or_upper_body_or_moving" pkg="spencer_tracking_utils" type="filter_tracks_logically">
+        <node name="filter_tracked_persons_confirmed_by_HOG_or_upper_body_or_moving" pkg="spencer_tracking_utils" type="filter_tracks_logically " if="$(arg hog)">
             <param name="logic_op" value="OR"/>
             <remap from="input_tracks1" to="$(arg topic_prefix)/spencer/perception/tracked_persons_confirmed_by_HOG_or_upper_body"/>
             <remap from="input_tracks2" to="$(arg topic_prefix)/spencer/perception/tracked_persons_moving"/>
@@ -91,7 +92,7 @@
         </node>
 
         <!-- Filter tracks which have NOT been visually confirmed by ANY detector OR are moving -->
-        <node name="filter_tracked_persons_not_confirmed_by_HOG_or_upper_body_or_moving" pkg="spencer_tracking_utils" type="filter_tracks_logically">
+        <node name="filter_tracked_persons_not_confirmed_by_HOG_or_upper_body_or_moving" pkg="spencer_tracking_utils" type="filter_tracks_logically" if="$(arg hog)">
             <param name="logic_op" value="XOR"/>
             <remap from="input_tracks1" to="$(arg topic_prefix)/spencer/perception/tracked_persons_confirmed_by_HOG_or_upper_body_or_moving"/>
             <remap from="input_tracks2" to="$(arg topic_prefix)/spencer/perception/tracked_persons_orientation_fixed"/>

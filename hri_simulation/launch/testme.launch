@@ -27,6 +27,7 @@ Temporal file to configure parts of human aware navigation
 
         <arg name="target_frame" value="$(arg prefix)/base_link" />
         <arg name="base_frame" value="$(arg prefix)/base_link" />
+        <arg name="map_frame_id"  value="map" />  
 
         <arg name="camera_namespace" value="$(arg topic_prefix)/kinect2" />
         <arg name="camera_namespace_sd" value="$(arg camera_namespace)/sd" />
@@ -68,14 +69,15 @@ Temporal file to configure parts of human aware navigation
         <arg name="tf_target_frame" value="" />
 
 
-
+       <arg name="rgbd" value="true"/>
+       <arg name="hog" value="false"/> 
 
         <!-- ...............TESTED!............................................... -->
 
 
           <!-- Laser detectors:
                     -->  
-          <include file="$(find demo)/launch/detectors/laser_detectors.launch">
+          <include file="$(find hri_simulation)/launch/detectors/laser_detectors.launch">
                 <arg name="topic_prefix" value="$(arg topic_prefix)"/>
                 <arg name="laser"        value="$(arg topic_prefix)/safety_laser_fil"/>
           </include>
@@ -85,7 +87,7 @@ Temporal file to configure parts of human aware navigation
            as spencer_leg_detector_wrapper is not in deb and it depends on wg perception.
            Not really interesting, as is basically wrapping into spencer the same tracker strands had.
           
-          <include file="$(find demo)/launch/detectors/leg_detectors.launch">
+          <include file="$(find hri_simulation)/launch/detectors/leg_detectors.launch">
             <arg name="node_prefix" value="leg"/>
             <arg name="config_file" value="iliad.yaml"/>
             <arg name="robot_tf_prefix" default="robot1"/>
@@ -126,7 +128,9 @@ Temporal file to configure parts of human aware navigation
           </node>  
 
           <!-- RGB-D detectors -->
-          <include file="$(find demo)/launch/detectors/front_rgbd_detectors.launch">
+          <include file="$(find hri_simulation)/launch/detectors/front_rgbd_detectors.launch">
+                       
+                       <arg name="hog"        value="$(arg hog)"/>    
                        <arg name="topic_prefix" value="$(arg topic_prefix)"/>
                        <arg name="camera_frame" value="$(arg prefix)/kinect2_rgb_optical_frame"/>
                        <arg name="camera_namespace" value="$(arg camera_namespace)"/>
@@ -138,41 +142,17 @@ Temporal file to configure parts of human aware navigation
 
 
 
-        <!-- I have laser detectors and ub detector running. Lets fuse using parts of people tracking -->
-           <!-- People tracking 
-          <include file="$(find demo)/launch/tracking/freiburg_people_tracking.launch">
-               <arg name="rgbd" value="true"/>
+           <!-- People tracking  -->
+          <include file="$(find hri_simulation)/launch/tracking/freiburg_people_tracking.launch">
+               <arg name="topic_prefix" value="$(arg topic_prefix)"/>
+               <arg name="rgbd" value="$(arg rgbd)"/>
                <arg name="laser_low_confidence_detections" value="true"/>
                <arg name="base_frame" value="$(arg base_frame)" />
+               <arg name="hog" value="$(arg hog)"/> 
+               <arg name="map_frame_id"  value="$(arg map_frame_id)" />    
           </include>
-           -->
-       <arg name="rgbd" value="true"/>
-       <arg name="laser_low_confidence_detections" value="true"/>
-       <!-- add base_frame -->
+          
 
-
-
-       <arg name="static_map_filter" default="true"/>
-       <arg name="subscriber_queue_size" default="1"/>   
-       <arg name="tracker" default="true"/>
-       <arg name="occlusion_geodesics" default="false"/>
-
-       <!-- Detection-to-detection fusion pipeline.   -->
-       <!-- Resulting detections will be filtered by static map later on, see further below -->
-      <remap from="$(arg topic_prefix)/spencer/perception/detected_persons" 
-             to="$(arg topic_prefix)/spencer/perception/detected_persons_unfiltered" 
-             if="$(arg static_map_filter)"/>
-
-      <remap from="$(arg topic_prefix)/spencer/perception_internal/detected_person_association/lasers_high_recall_aggregated" 
-             to="$(arg topic_prefix)/spencer/perception_internal/detected_person_association/lasers_high_recall_aggregated_unfiltered" 
-             if="$(arg static_map_filter)"/>
-
-      <include file="$(find demo)/launch/person_association/detection_to_detection_fusion_pipeline.launch">
-          <!-- Also fuse RGB-D detector -->
-          <arg name="rgbd"       value="$(arg rgbd)"/>
-          <arg name="base_frame" value="$(arg base_frame)" />
-          <arg name="topic_prefix" value="$(arg topic_prefix)"/>
-      </include>
 
 
 

@@ -12,12 +12,13 @@
 
 -->
 
-
-
 <launch>
-        <arg name="prefix"       default="robot1"/>
-        <arg name="topic_prefix" default="/robot1"/>
-   
+
+       <arg name="prefix" default="robot1"/>
+       <arg name="topic_prefix" default="/robot1"/>
+
+
+
         <arg name="queue_size" value="5" />
 
         <arg name="ptu_state" value="$(arg topic_prefix)/ptu/state" />
@@ -26,8 +27,11 @@
 
         <arg name="target_frame" value="$(arg prefix)/base_link" />
         <arg name="base_frame" value="$(arg prefix)/base_link" />
+        <arg name="map_frame_id"  value="map" />  
 
         <arg name="camera_namespace" value="$(arg topic_prefix)/kinect2" />
+        <arg name="camera_namespace_sd" value="$(arg camera_namespace)/sd" />
+
 
         <arg name="rgb_image" value="/hd/image_color_rect" />
         <arg name="camera_info_rgb" value="/hd/camera_info" />
@@ -40,11 +44,11 @@
         <arg name="motion_parameters" value="$(arg topic_prefix)/visual_odometry/motion_matrix" />
         <arg name="visual_odometry" value="$(arg topic_prefix)/visual_odometry/motion_matrix" />
 
-        <arg name="upper_body_detections" value="$(arg topic_prefix)/upper_body_detector/detections" />
-        <arg name="upper_body_bb_centres" value="$(arg topic_prefix)/upper_body_detector/bounding_box_centres" />
-        <arg name="upper_body_image" value="$(arg topic_prefix)/upper_body_detector/image" />
-        <arg name="upper_body_markers" value="$(arg topic_prefix)/upper_body_detector/marker_array" />
-        <arg name="upper_body_roi" value="$(arg topic_prefix)/upper_body_detector/roi" />
+        <arg name="upper_body_detections"         value="$(arg topic_prefix)/upper_body_detector/detections" />
+        <arg name="upper_body_bb_centres"         value="$(arg topic_prefix)/upper_body_detector/bounding_box_centres" />
+        <arg name="upper_body_image"              value="$(arg topic_prefix)/upper_body_detector/image" />
+        <arg name="upper_body_markers"            value="$(arg topic_prefix)/upper_body_detector/marker_array" />
+        <arg name="upper_body_roi"                value="$(arg topic_prefix)/upper_body_detector/roi" />
         <arg name="upper_body_closest_bb_centres" value="$(arg topic_prefix)/upper_body_detector/closest_bounding_box_centre" />
 
 
@@ -66,7 +70,12 @@
 
         <group ns="$(arg prefix)">
 
-          <!-- Publish groundtruth tracks and detections from Gazebo -->
+       <arg name="rgbd" value="true"/>
+       <arg name="hog" value="false"/> 
+
+
+
+  <!-- Publish groundtruth tracks and detections from Gazebo -->
           <node name="groundtruth_tracks_from_gazebo" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true"/>
 
 
@@ -75,8 +84,8 @@
           <rosparam param="$(arg topic_prefix)/spencer/perception_internal/people_detection/laser_front/laser_detector/decision_threshold">-5.0 </rosparam>
 
           <include file="$(find hri_simulation)/launch/detectors/laser_detectors.launch">
-                <arg name="topic_prefix" value="/robot1"/>
-                <arg name="laser"        value="$(arg topic_prefix)/nav_laser_fil"/>
+                <arg name="topic_prefix" value="$(arg topic_prefix)"/>
+                <arg name="laser"        value="$(arg topic_prefix)/safety_laser_fil"/>
           </include>
 
           <!-- Leg detectors 
@@ -126,7 +135,9 @@
 
           <!-- RGB-D detectors -->
           <include file="$(find hri_simulation)/launch/detectors/front_rgbd_detectors.launch">
-                       <arg name="topic_prefix" value="/robot1"/>
+                       
+                       <arg name="hog"        value="$(arg hog)"/>    
+                       <arg name="topic_prefix" value="$(arg topic_prefix)"/>
                        <arg name="camera_frame" value="$(arg prefix)/kinect2_rgb_optical_frame"/>
                        <arg name="camera_namespace" value="$(arg camera_namespace)"/>
                        <arg name="rgb_image" value="/ld/image_color_rect" />
@@ -135,16 +146,18 @@
                        <arg name="base_footprint" value="$(arg base_frame)"/>
           </include>
 
-        <!-- ...............NOT TESTED! .......................................... -->
 
 
            <!-- People tracking -->
           <include file="$(find hri_simulation)/launch/tracking/freiburg_people_tracking.launch">
-               <arg name="topic_prefix" value="/robot1"/>
-               <arg name="rgbd" value="false"/>
-               <arg name="base_frame" value="$(arg base_frame)" />
+               <arg name="topic_prefix" value="$(arg topic_prefix)"/>
+               <arg name="rgbd" value="$(arg rgbd)"/>
                <arg name="laser_low_confidence_detections" value="true"/>
+               <arg name="base_frame" value="$(arg base_frame)" />
+               <arg name="hog" value="$(arg hog)"/> 
+               <arg name="map_frame_id"  value="$(arg map_frame_id)" />    
           </include>
+          
 
     <rosparam param="$(arg topic_prefix)/spencer/perception_internal/people_tracking/srl_nearest_neighbor_tracker/logic_initiator_min_velocity">0.0</rosparam>
     <rosparam param="$(arg topic_prefix)/spencer/perception_internal/people_tracking/srl_nearest_neighbor_tracker/overwrite_measurement_noise">true</rosparam>

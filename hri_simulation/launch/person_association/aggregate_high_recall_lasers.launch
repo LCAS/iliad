@@ -16,7 +16,7 @@
                 use final agregated topic instead
             <remap from="output" to="$(arg topic_prefix)/composite/laser_front_high_recall"/>
             -->
-            <remap from="output" to="composite/lasers_high_recall_aggregated"/>
+            <remap from="output" to="$(arg topic_prefix)/spencer/perception/composite/lasers_high_recall_aggregated"/>
 
 
             <param name="common_frame_id" value="$(arg common_frame_id)"/>
