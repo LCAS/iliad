@@ -44,3 +44,6 @@ https://github.com/code-iai/iai_kinect2
 * navigation_oru
 https://github.com/OrebroUniversity/navigation_oru-release
 
+* Spencer people tracking (iliad branch)
+https://github.com/LCAS/spencer_people_tracking/tree/ilidad-dev
+
