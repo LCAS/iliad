@@ -60,9 +60,9 @@ class vParser():
         # More convenient ...
         self.minCosP = math.cos(self.inPlacePhi)
 
-        self.in_cmd_topic = rospy.get_param('~in_cmd_topic', '/robot1/move_base/cmd_vel') 
-        self.out_cmd_topic = rospy.get_param('~out_cmd_topic', '/robot1/controller/cmd_vel')
-        self.steer_pose_cmd_topic = rospy.get_param('~steer_pose_cmd_topic', '/robot1/steer_pose')
+        self.in_cmd_topic = rospy.get_param('~in_cmd_topic', '/robot2/move_base/cmd_vel') 
+        self.out_cmd_topic = rospy.get_param('~out_cmd_topic', '/robot2/controller/cmd_vel')
+        self.steer_pose_cmd_topic = rospy.get_param('~steer_pose_cmd_topic', '/robot2/steer_pose')
 
     def initROS(self):
         rospy.Subscriber(self.steer_pose_cmd_topic, PoseStamped, self.steer_pose_callback, queue_size=1)

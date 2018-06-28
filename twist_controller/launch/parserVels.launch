@@ -7,7 +7,7 @@
 
 
 
-    <group ns="robot1">
+    <group ns="robot2">
         
         <node name="joy_node" pkg="joy" type="joy_node">
         </node>
@@ -22,8 +22,8 @@
           <param name="useOmega" value="True"/>
           <param name="moveWhileOrienting" value="True"/>
           <param name="steer_pose_cmd_topic" value="steer_pose"/>
-          <param name="in_cmd_topic" value="/robot1/cmd_vel"/>
-          <param name="out_cmd_topic" value="/robot1/controller/cmd_vel"/>
+          <param name="in_cmd_topic" value="/robot2/cmd_vel"/>
+          <param name="out_cmd_topic" value="/robot2/controller/cmd_vel"/>
       </node>
         
       <!-- Publishes relative motor wheel position related to robot frame coordinates. Used by velParser -->
