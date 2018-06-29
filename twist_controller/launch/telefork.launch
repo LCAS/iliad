@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+ <!-- Testing crude of steering/vel control in robot
+    
+  -->
+ 
+<launch>
+
+        <!-- Joy -->    
+        <node name="joy_node" pkg="joy" type="joy_node">
+        </node>
+   
+        <!-- joy cmd vel -->
+        <node name="tele_joy_node" pkg="teleop_twist_joy" type="teleop_node">
+		<param name="scale_angular" value="1.57"/>
+		<remap from="cmd_vel" to="z_cmd_vel"/>
+
+ 
+        </node>
+        
+
+        <!-- Changes default mode to odom/based navigation. 
+            We need to reset robot anyways                    -->
+        <node name="telnet_config" pkg="twist_controller" type="initOdomNav.py">
+        </node>
+                
+        <!-- Move robot using z_cmd_vel topic -->        
+        <node name="cmd_ctrl" pkg="twist_controller" type="tw_controller_node">
+        </node>
+    
+        <node pkg="orunav_mpc" type="controller_node" name="controller" output="screen">
+          <param name="robot_id" value="1" />
+        </node>
+
+</launch>
+ 
