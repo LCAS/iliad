@@ -1,4 +1,6 @@
 #include "tw_controller_node.h"
+#include <ros/console.h>
+
 
 double v;
 double rot;
@@ -14,9 +16,20 @@ void cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel)
 
 }
 
+void debugMode()
+{    
+
+	if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
+	   ros::console::notifyLoggerLevelsChanged();
+	}
+}
+
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "tw_controller_node");
+
+  debugMode();
 
   ros::NodeHandle n;
     
