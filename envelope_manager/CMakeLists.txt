@@ -13,7 +13,7 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_package(
-   INCLUDE_DIRS include
+#   INCLUDE_DIRS include
    CATKIN_DEPENDS dynamic_reconfigure roscpp rospy orunav_msgs
 )
 
