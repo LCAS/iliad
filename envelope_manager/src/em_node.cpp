@@ -1,7 +1,9 @@
 #include <ros/ros.h>
 
+#include <dynamic_reconfigure/server.h>
 #include <orunav_msgs/SetTask.h>
 
+#include <envelope_manager/envelopeManagerConfig.h>
 
 class EnvelopeManagerNode {
 
@@ -23,9 +25,25 @@ private:
       service_server_ = nh.advertiseService("execute_task_coordinator", &EnvelopeManagerNode::setTaskCB, this);
       // Client
       service_client_ = nh.serviceClient<orunav_msgs::SetTask>("execute_task");
+
+
+      dynamic_reconfigure::Server<envelope_manager::envelopeManagerConfig> dyn_srv;
+      dynamic_reconfigure::Server<envelope_manager::envelopeManagerConfig>::CallbackType f;
+      f = boost::bind(&EnvelopeManagerNode::dynamic_reconfigure_callback,this, _1, _2);
+      dyn_srv.setCallback(f);
+
+
     }
 
- 
+
+void dynamic_reconfigure_callback(envelope_manager::envelopeManagerConfig &config, uint32_t level)
+{
+  ROS_INFO("Reconfigure request : %f",
+           config.speed_factor);
+
+  // TODO do nothing for now
+}
+  
 
 
   // TODO this method is the same than the one in coordinator_fake_node.cpp
@@ -89,8 +107,7 @@ private:
     return true;
   }
 
-  
-  
+ 
 
 
 
@@ -106,6 +123,5 @@ int main(int argc, char** argv) {
     EnvelopeManagerNode cf(nh);
 
     ros::spin();
-
 
 }
