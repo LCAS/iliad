@@ -7,20 +7,24 @@
 <launch>
 
         <!-- Joy -->    
-   <!--     <node name="joy_node" pkg="joy" type="joy_node">
+        <node name="joy_node" pkg="joy" type="joy_node">
         </node>
-    -->
+   
         <!-- joy cmd vel -->
-   <!--     <node name="tele_joy_node" pkg="teleop_twist_joy" type="teleop_node">
+        <node name="tele_joy_node" pkg="teleop_twist_joy" type="teleop_node">
         </node>
-    -->
+        
         <!-- Parse cmd vel to steering -->
         <node name="vel_caster" pkg="twist_controller" type="velParser.py" output="screen">
-         <param name="twist_cmd_topic"      value="cmd_vel"/>     <!-- In -->
-         <param name="ackermann_cmd_topic"  value="z_cmd_vel"/>   <!-- out -->
-         <param name="distBtBackWheels"     value="0.5"/>         <!-- distance between forks -->
-         <param name="backWheelsRadius"     value="0.05"/>        <!-- wheel diameter -->
-         <param name="wheelsAxesDist"       value="1.2"/>         <!-- distance between front and rear wheels -->
+         <param name="in_cmd_topic"          value="cmd_vel"/>             <!-- In command -->
+         <param name="out_cmd_topic"         value="z_cmd_vel"/>           <!-- Out command -->
+         <param name="useOmega"              value="False"/>               <!-- Use steering wheel speeds instead of angles -->
+         <param name="moveWhileOrienting"    value="True"/>                <!-- Allow motor wheel to move while being reoriented -->
+         <param name="inPlacePhi"            value="1.57"/>      		   <!-- Max angle of the turning wheel before considering turning in place. in radians -->
+         <param name="steer_pose_cmd_topic"  value="/robot2/steer_pose"/>  <!-- Topic containing  steer angle  -->
+         <param name="distBtBackWheels"      value="0.5"/>                 <!-- distance between forks -->
+         <param name="backWheelsRadius"      value="0.05"/>                <!-- wheel diameter -->
+         <param name="wheelsAxesDist"        value="1.2"/>                 <!-- distance between front and rear wheels -->
         </node>
 
         <!-- Changes default mode to odom/based navigation. 
@@ -32,5 +36,9 @@
         <node name="cmd_ctrl" pkg="twist_controller" type="tw_controller_node">
         </node>
     
+        <node pkg="orunav_mpc" type="controller_node" name="controller" output="screen">
+          <param name="robot_id" value="1" />
+        </node>
+
 </launch>
  

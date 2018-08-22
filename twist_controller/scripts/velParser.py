@@ -137,7 +137,7 @@ class vParser():
               omega_m = angDiff * self.omegaFreq
           else:
               omega_m = des_y         
-
+              angDiff = 0 # we set the desired angle once
           msg.angular.z = omega_m
           
           self.pub.publish(msg)
