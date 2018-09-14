@@ -86,13 +86,13 @@
       <!-- Filters out laser points hitting robot frame/wheels-->
       <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="safety_filter">
         <rosparam command="load" file="$(find base_simulation)/params/safety_laser_filter.yaml" />
-        <remap from="scan" to="safety_laser" />
+        <remap from="scan" to="/$(arg prefix)/sensors/laser2d_floor" />
         <remap from="scan_filtered" to="safety_laser_fil" />
       </node>
       
       <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="nav_filter">
         <rosparam command="load" file="$(find base_simulation)/params/nav_laser_filter.yaml" />
-        <remap from="scan" to="nav_laser" />
+        <remap from="scan" to="/$(arg prefix)/sensors/laser2d_top" />
         <remap from="scan_filtered" to="nav_laser_fil" />
       </node>
       

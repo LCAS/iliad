@@ -15,7 +15,8 @@
      this to avoid having to utilize tf to get the map origin... change the .yaml file instead
 
  -->
-<node pkg="tf" type="static_transform_publisher" name="origin_broadcaster" 
+
+ <node pkg="tf" type="static_transform_publisher" name="origin_broadcaster" 
     args="$(arg robot_pose_x) $(arg robot_pose_y) $(arg robot_pose_z) $(arg robot_pose_roll) $(arg robot_pose_pitch) $(arg robot_pose_yaw)  /world map 100" />
 
 <node name="map_server" pkg="map_server" type="map_server" args="$(arg yaml_map_file)"/>
