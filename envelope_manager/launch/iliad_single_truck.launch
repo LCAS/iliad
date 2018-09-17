@@ -49,7 +49,7 @@
   </node>
 
   
-  <node pkg="envelope_manager" type="envelope_manager_node" name="envelope_manager_node" output="screen">  
+  <node pkg="envelope_manager" type="em_node" name="envelope_manager_node" output="screen">  
     <rosparam param="/use_ct">false</rosparam>
     <remap from="/execute_task_coordinator" to="/$(arg prefix)/execute_task_coordinator"/>
     <remap from="/execute_task" to="/$(arg prefix)/execute_task"/>
@@ -78,7 +78,7 @@
   <!--include file="$(find orunav_launch)/launch/motion_planning_and_control_smp.launch"-->
   <include file="$(find orunav_launch)/launch/motion_planning_and_control.launch">
     <arg name="prefix" value="robot1"/>
-    <arg name="robotid" value="1"/>
+    
   </include>
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cititruck_description)/launch/iliad_cititruck.rviz"/>

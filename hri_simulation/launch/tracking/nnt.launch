@@ -23,15 +23,13 @@
     <node name="srl_nearest_neighbor_tracker" type="nnt_node" pkg="srl_nearest_neighbor_tracker" output="screen" clear_params="true" launch-prefix=""> <!-- launch-prefix="gdb -ex run -args " -->
         <!-- Topic of secondary low-confidence detections that can be matched against an existing track, but not initiate a new one -->
 
+        <rosparam param="detected_persons_topic" 
+                subst_value="True">$(arg topic_prefix)/spencer/perception/detected_persons</rosparam>
+        <rosparam param="tracked_persons_topic" 
+                subst_value="True">$(arg topic_prefix)/spencer/perception/tracked_persons</rosparam>
+        <rosparam param="high_recall_aggregated_topic" 
+                subst_value="True">$(arg topic_prefix)/spencer/perception_internal/detected_person_association/lasers_high_recall_aggregated</rosparam>
 
-        <remap from="/spencer/perception/detected_persons" 
-                   to="$(arg topic_prefix)/spencer/perception/detected_persons"/>
-        <remap from="/spencer/perception/tracked_persons" 
-                   to="$(arg topic_prefix)/spencer/perception/tracked_persons"/>
-        <remap from="/spencer/perception_internal/detected_person_association/lasers_high_recall_aggregated" 
-                   to="$(arg topic_prefix)/spencer/perception_internal/detected_person_association/lasers_high_recall_aggregated"/>
-
-                   
         <param name="additional_low_confidence_detections" value="$(arg low_confidence_observations_topic)"/>
 
         <param name="min_distance_for_low_confidence_observations_to_tracks" value="0.5"/>

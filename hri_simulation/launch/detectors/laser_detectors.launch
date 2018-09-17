@@ -26,6 +26,7 @@ get laser properties
     <arg name="low_confidence_detections" default="true"/>
 
     <arg name="laser" default="$(arg topic_prefix)/spencer/sensors/laser_front/echo0"/>
+    <arg name="detected_persons_topic" default="$(arg topic_prefix)/spencer/perception_internal/detected_persons/laser_front"/>
 
 
     <group ns="$(arg topic_prefix)/spencer/perception_internal/people_detection">
@@ -34,7 +35,7 @@ get laser properties
             <include file="$(find srl_laser_detectors)/launch/learned_detector_with_segmentation.launch" ns="laser_front">
                 <arg name="model" value="$(arg detector_model)"/>
                 <arg name="type" value="$(arg detector_type)"/>
-                <arg name="detected_persons" value="$(arg topic_prefix)/spencer/perception_internal/detected_persons/laser_front"/>
+                <arg name="detected_persons" value="$(arg detected_persons_topic)"/>
                 <arg name="laser" value="$(arg laser)"/>
                 <arg name="max_avg_distance_from_sensor" value="$(arg laser_max_distance)"/>
                 <arg name="detection_id_offset" value="1"/>
@@ -45,7 +46,7 @@ get laser properties
             <!-- Front laser detector (Blob detector with high recall, but low precision) -->
             <!-- TODO: Use same segmentation as for high-precision detector -->
             <include file="$(find srl_laser_detectors)/launch/blob_detector.launch" ns="laser_front_high_recall" if="$(arg low_confidence_detections)">
-                <arg name="detected_persons" value="$(arg topic_prefix)/spencer/perception_internal/detected_persons/laser_front_high_recall"/>
+                <arg name="detected_persons" value="$(arg detected_persons_topic)_high_recall"/>
                 <arg name="laser" value="$(arg laser)"/>
                 <arg name="min_avg_distance_from_sensor" value="0.0"/>
                 <arg name="max_avg_distance_from_sensor" value="$(arg laser_max_distance)"/>

@@ -11,17 +11,22 @@
 
 <!-- TF prefix -->
 <arg name="tf_prefix" default="robot1"/>
+<arg name="robot_name" value="$(arg tf_prefix)" />                
 
 <!-- Enable/disable sensor simulation -->
 <arg name="velodyne" default="false"/>
 <arg name="kinect2"  default="false"/>
 <arg name="kinect1"  default="false"/>
+<arg name="gpu"      default="false"/>
 
 
 
     <!-- Run xacro -->
     <!-- this xacro has kinect2 facing opposite direction than the one defined in /cititruck_description  -->
-    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find base_simulation)/urdf/iliad_velodyne_cititruck.xacro' tf_prefix:=$(arg tf_prefix) velodyne:=$(arg velodyne) kinect2:=$(arg kinect2) kinect1:=$(arg kinect1)"/>
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find base_simulation)/urdf/iliad_uol_cititruck.xacro' use_fixed_joints:=true calib_file:=$(find iliad_launch_system)/config/calibration/$(arg robot_name)_calib.yaml
+     velodyne:=$(arg velodyne) kinect2:=$(arg kinect2) kinect1:=$(arg kinect1) kinect1_name:=asus_fork sick_name:=laser2d_floor ls2000_name:=laser2d_top kinect2_name:=kinect2 tf_prefix:=$(arg tf_prefix) controller_prefix:=control/controller/  sensor_prefix:=sensors/ gpu:=$(arg gpu)"/>  
+
+
 
     <!-- Spawn model in Gazebo -->
     <node name="spawn_cititruck_model" pkg="gazebo_ros" type="spawn_model" args="-unpause -urdf -param robot_description -model $(arg tf_prefix) -x $(arg robot_pose_x) -y $(arg robot_pose_y) -z $(arg robot_pose_z) -R $(arg robot_pose_roll) -P $(arg robot_pose_pitch) -Y $(arg robot_pose_yaw) -ros_namespace /gazebo" respawn="false" output="screen" />
