@@ -15,8 +15,27 @@
   <run_depend>robot_pose_publisher</run_depend>
   <run_depend>global_planner</run_depend>
   <run_depend>teb_local_planner</run_depend>
-  <run_depend>spencer_people_tracking_full</run_depend>
-  <run_depend>iliad_distribution</run_depend>
+
+  <!-- instead of spencer_people_tracking_full -->
+  <run_depend>spencer_bagfile_tools</run_depend>
+  <run_depend>spencer_control_msgs</run_depend>
+  <run_depend>spencer_detected_person_association</run_depend>
+  <run_depend>spencer_detected_person_conversion</run_depend>
+  <run_depend>spencer_diagnostics</run_depend>
+  <run_depend>spencer_group_tracking</run_depend>
+  <run_depend>spencer_human_attribute_msgs</run_depend>
+  <run_depend>spencer_leg_detector_wrapper</run_depend>
+  <run_depend>spencer_people_tracking_launch</run_depend>
+  <run_depend>spencer_perception_mocks</run_depend>
+  <run_depend>spencer_social_relation_msgs</run_depend>
+  <run_depend>spencer_social_relations</run_depend>
+  <run_depend>spencer_tracking_metrics</run_depend>
+  <run_depend>spencer_tracking_msgs</run_depend>
+  <run_depend>spencer_tracking_rviz_plugin</run_depend>
+  <run_depend>spencer_tracking_utils</run_depend>
+  <run_depend>spencer_vision_msgs</run_depend>
+
+  <!-- run_depend>iliad_distribution</run_depend -->
 
   <export>
   </export>
