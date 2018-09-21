@@ -13,6 +13,7 @@
         <!-- joy cmd vel -->
         <node name="tele_joy_node" pkg="teleop_twist_joy" type="teleop_node">
 		<param name="scale_angular" value="1.57"/>
+		<param name="scale_linear" value="0.2"/>
 		<remap from="cmd_vel" to="z_cmd_vel"/>
 
  
