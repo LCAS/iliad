@@ -422,12 +422,15 @@
     <!-- FIXME: We should rather attach the calibration assembly to the final link, otherwise we have a 3.7cm z offset during rotation, so need to split up the imported xacro -->
     <!-- FIXED: The name should be velodyne_link -->
     <xacro:if value="$(arg velodyne)">
-      <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
-      <VLP-16 parent="velodyne_base_link" prefix="$(arg tf_prefix)" name="velodyne_link" topic="$(arg sensor_prefix)/velodyne_points" hz="10" samples="440">
-          <origin xyz="0 0 0" rpy="0 0 0" /> <!-- given by calibration -->
-      </VLP-16>
-      <sensor_calibration_assembly sensor_id="velodyne" parent_link="base_link" final_link_suffix="base_link"/>
+      <xacro:include filename="$(find velodyne_description8)/urdf/VLP-16.urdf.xacro"/>
+      <VLP-16 parent="velodyne_base_link" gpu="true" name="velodyne_link" topic="/$(arg tf_prefix)/$(arg sensor_prefix)/velodyne/velodyne_points" hz="10" samples="440">
+          <origin xyz="0.8 0 0.95" rpy="0 0 0" />
+      </VLP-16>      
+     <sensor_calibration_assembly sensor_id="velodyne" parent_link="base_link" final_link_suffix="base_link"/>
     </xacro:if>
+
+
+
 
 
     <!-- Kinect v2 -->
