@@ -9,7 +9,7 @@ Panels:
         - /Grid1/Offset1
         - /TF1/Frames1
         - /TF1/Tree1
-        - /Kinect v21
+        - /Map2
       Splitter Ratio: 0.659217894
     Tree Height: 542
   - Class: rviz/Selection
@@ -30,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Kinect v2 image
+    SyncSource: Velodyne
 Visualization Manager:
   Class: ""
   Displays:
@@ -86,6 +86,10 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        kinect2_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         kinect2_depth_optical_frame:
           Alpha: 1
           Show Axes: false
@@ -99,7 +103,16 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+        laser2d_floor_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         laser2d_floor_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        laser2d_top_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -108,7 +121,6 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
         left_fork:
           Alpha: 1
           Show Axes: false
@@ -119,22 +131,26 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        robot1/velodyne:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        robot1/velodyne_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         sd_wheel_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
         steer_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        velodyne:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        velodyne_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        velodyne_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -180,13 +196,19 @@ Visualization Manager:
           Value: false
         robot1/fixed_right_wheel_link:
           Value: false
+        robot1/kinect2_base_link:
+          Value: true
         robot1/kinect2_depth_optical_frame:
           Value: true
         robot1/kinect2_link:
           Value: true
         robot1/kinect2_rgb_optical_frame:
           Value: true
+        robot1/laser2d_floor_base_link:
+          Value: true
         robot1/laser2d_floor_link:
+          Value: true
+        robot1/laser2d_top_base_link:
           Value: true
         robot1/laser2d_top_link:
           Value: true
@@ -196,14 +218,16 @@ Visualization Manager:
           Value: false
         robot1/right_fork:
           Value: false
-        robot1/robot1/velodyne:
-          Value: true
-        robot1/robot1/velodyne_base_link:
-          Value: true
         robot1/sd_wheel_link:
           Value: false
         robot1/steer_link:
           Value: false
+        robot1/velodyne:
+          Value: true
+        robot1/velodyne_base_link:
+          Value: true
+        robot1/velodyne_link:
+          Value: true
         world:
           Value: false
       Marker Scale: 0.800000012
@@ -226,21 +250,25 @@ Visualization Manager:
                 {}
               robot1/fixed_right_wheel_link:
                 {}
-              robot1/kinect2_link:
-                robot1/kinect2_depth_optical_frame:
+              robot1/kinect2_base_link:
+                robot1/kinect2_link:
+                  robot1/kinect2_depth_optical_frame:
+                    {}
+                  robot1/kinect2_rgb_optical_frame:
+                    {}
+              robot1/laser2d_floor_base_link:
+                robot1/laser2d_floor_link:
                   {}
-                robot1/kinect2_rgb_optical_frame:
-                  {}
-              robot1/laser2d_floor_link:
-                {}
-              robot1/laser2d_top_link:
-                {}
-              robot1/robot1/velodyne_base_link:
-                robot1/robot1/velodyne:
+              robot1/laser2d_top_base_link:
+                robot1/laser2d_top_link:
                   {}
               robot1/steer_link:
                 robot1/sd_wheel_link:
                   {}
+              robot1/velodyne_base_link:
+                robot1/velodyne_link:
+                  robot1/velodyne:
+                    {}
           robot1/odom_enc:
             {}
       Update Interval: 0
@@ -278,7 +306,7 @@ Visualization Manager:
       Size (Pixels): 4
       Size (m): 0.0299999993
       Style: Points
-      Topic: /robot1/velodyne_points
+      Topic: /robot1/sensors/velodyne/velodyne_points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -308,7 +336,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Points
-      Topic: /robot1/nav_laser
+      Topic: /robot1/sensors/laser2d_top
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -338,7 +366,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Points
-      Topic: /robot1/safety_laser
+      Topic: /robot1/sensors/laser2d_floor
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -404,6 +432,16 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: Kinect v2
+    - Alpha: 0.699999988
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /robot1/move_base/local_costmap/costmap
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -429,25 +467,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 9.56712818
+      Distance: 27.4860573
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 5.70638752
-        Y: 3.9107058
-        Z: -5.0989604
+        X: 2.55759978
+        Y: 4.0451107
+        Z: -4.12212896
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.634797215
+      Pitch: 0.694795966
       Target Frame: robot1/laser2d_top_link
       Value: Orbit (rviz)
-      Yaw: 3.74284601
+      Yaw: 4.60286045
     Saved: ~
 Window Geometry:
   Displays:
@@ -467,5 +505,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1855
-  X: 61
-  Y: 24
+  X: 1983
+  Y: 178

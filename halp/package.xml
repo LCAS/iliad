@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>halp</name>
+  <version>0.0.0</version>
+  <description>Human Aware Local Navigation package (halp)</description>
+
+  <maintainer email="mfernandezcarmona@lincoln.ac.uk">Manuel</maintainer>
+
+  <license>MIT</license>
+
+<author email="mfernandezcarmona@lincoln.ac.uk">Manuel</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>actionlib_msgs</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>orunav_msgs</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_export_depend>actionlib_msgs</build_export_depend>
+  <build_export_depend>dynamic_reconfigure</build_export_depend>
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>nav_msgs</build_export_depend>
+  <build_export_depend>orunav_msgs</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <exec_depend>actionlib_msgs</exec_depend>
+  <exec_depend>dynamic_reconfigure</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>orunav_msgs</exec_depend>
+  <exec_depend>rospy</exec_depend>
+
+
+  <export>
+  </export>
+</package>
