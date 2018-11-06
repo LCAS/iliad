@@ -31,6 +31,7 @@
     <xacro:property name="forks_low" value="0.08"/>
     <xacro:property name="forks_high" value="0.2"/>
     <xacro:property name="forks_maxeffort" value="1000"/>
+    <xacro:property name="PI" value="3.141592"/>
 
     <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin, navigation stack dedpends on this frame and KDL needs a root link without any intertia -->
     <link name="base_footprint"/>
@@ -118,7 +119,6 @@
 
 
     <!-- Forks -->
-
     <link name="left_fork">
         <inertial>
             <mass value="1"/>
@@ -435,8 +435,8 @@
     <xacro:if value="$(arg kinect2)">
 
     <xacro:include filename="$(find kinect2_description)/urdf/kinect2/kinect2.xacro"/>
-      <kinect2_sensor parent="kinect2_base_link" prefix="$(arg tf_prefix)/$(arg sensor_prefix)" name="kinect2" cam_px="0" cam_py="0" cam_pz="0" cam_or="-1.5707" cam_op="0" cam_oy="-1.5707"/>
-      
+      <kinect2_sensor parent="kinect2_base_link" prefix="$(arg tf_prefix)/$(arg sensor_prefix)" name="kinect2" cam_px="0" cam_py="0" cam_pz="0" cam_or="0" cam_op="0" cam_oy="0"/>
+
       <sensor_calibration_assembly sensor_id="kinect2" parent_link="base_link" final_link_suffix="base_link"/>
     </xacro:if>
 
