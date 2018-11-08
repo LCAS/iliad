@@ -117,10 +117,10 @@
         -->
 
         <!-- Resized color image with same resolution (512 x 424) than point cloud for quick representation  -->
-        <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager"/>  
+        <node pkg="nodelet" type="nodelet" name="spencer_nodelet_manager" args="manager"/>  
         <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load /$(arg prefix)/resize_kinect $(find hri_simulation)/config/nodelet_resize.yaml" />
 
-        <node pkg="nodelet" type="nodelet" name="resize_kinect" args="load image_proc/resize nodelet_manager --no-bond" respawn="true">
+        <node pkg="nodelet" type="nodelet" name="resize_kinect_spencer" args="load image_proc/resize spencer_nodelet_manager --no-bond" respawn="true">
               <remap from="image" to="$(arg camera_namespace)/hd/image_color_rect" />
               <remap from="camera_info" to="$(arg camera_namespace)/sd/camera_info" />
               <remap from="~image" to="$(arg camera_namespace)/ld/image_color_rect" />
