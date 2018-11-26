@@ -13,8 +13,8 @@ obstacle_layer:
  combination_method: 1
 
  observation_sources: safe_laser_scan_sensor nav_laser_scan_sensor
- safe_laser_scan_sensor: {data_type: LaserScan, topic: safety_laser_fil, marking: true, clearing: true}
- nav_laser_scan_sensor: {data_type: LaserScan, topic: nav_laser_fil, marking: true, clearing: true}
+ safe_laser_scan_sensor: {data_type: LaserScan, topic: /robot4/sensors/laser2d_floor_fil, marking: true, clearing: true}
+ nav_laser_scan_sensor: {data_type: LaserScan, topic: /robot4/sensors/laser2d_top_fil, marking: true, clearing: true}
 
 
 inflation_layer:
@@ -24,4 +24,4 @@ inflation_layer:
 
 static_layer:
   enabled:              true
-  map_topic:            "/map"
+  map_topic:            "/maps/map_laser2d"

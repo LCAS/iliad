@@ -14,9 +14,9 @@ class SpencerToBayes:
     """Converts Spencer Tracked Person Input to Bayes People Tracker Output"""
 
     def __init__(self):
-	person_topic         = rospy.get_param("~person_topic", "/robot1/spencer/perception/tracked_persons")
-        ppl_topic            = rospy.get_param("~ppl_topic", "/robot1/people_tracker_filter/positions")
-	self.target_frame    = rospy.get_param("~target_frame", "/robot1/base_link")
+	person_topic         = rospy.get_param("~person_topic", "/robot4/perception/tracked_persons")
+        ppl_topic            = rospy.get_param("~ppl_topic", "/robot4/people_tracker/positions")
+	self.target_frame    = rospy.get_param("~target_frame", "robot4/base_link")
 	self.listener        = tf.TransformListener()
 	self.pub             = rospy.Publisher(ppl_topic, PeopleTracker)#, queue_size=10)
 	self.last_msg        = PeopleTracker()
