@@ -35,7 +35,7 @@
             <arg name="qtc_arr_topic"       value = "$(arg topic_prefix)/online_qtc_creator/qtc_array"/>
             <arg name="robot_topic"         value = "$(arg topic_prefix)/robot_pose"/>
             <arg name="robotST_topic"       value = "$(arg topic_prefix)/robot_poseST"/>
-	    <arg name="target_frame"        value = "/map"/>	
+	    <arg name="target_frame"        value = "map_laser2d"/>	
             
         </include>
 
