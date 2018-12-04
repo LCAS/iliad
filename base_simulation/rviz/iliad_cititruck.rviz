@@ -156,8 +156,8 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: RobotModel
-      Robot Description: robot1/robot_description
-      TF Prefix: robot1
+      Robot Description: robot4/robot_description
+      TF Prefix: robot4
       Update Interval: 0
       Value: true
       Visual Enabled: true
@@ -186,47 +186,47 @@ Visualization Manager:
         All Enabled: false
         map:
           Value: true
-        robot1/base_footprint:
+        robot4/base_footprint:
           Value: true
-        robot1/base_fork:
+        robot4/base_fork:
           Value: false
-        robot1/base_link:
+        robot4/base_link:
           Value: false
-        robot1/fixed_left_wheel_link:
+        robot4/fixed_left_wheel_link:
           Value: false
-        robot1/fixed_right_wheel_link:
+        robot4/fixed_right_wheel_link:
           Value: false
-        robot1/kinect2_base_link:
+        robot4/kinect2_base_link:
           Value: true
-        robot1/kinect2_depth_optical_frame:
+        robot4/kinect2_depth_optical_frame:
           Value: true
-        robot1/kinect2_link:
+        robot4/kinect2_link:
           Value: true
-        robot1/kinect2_rgb_optical_frame:
+        robot4/kinect2_rgb_optical_frame:
           Value: true
-        robot1/laser2d_floor_base_link:
+        robot4/laser2d_floor_base_link:
           Value: true
-        robot1/laser2d_floor_link:
+        robot4/laser2d_floor_link:
           Value: true
-        robot1/laser2d_top_base_link:
+        robot4/laser2d_top_base_link:
           Value: true
-        robot1/laser2d_top_link:
+        robot4/laser2d_top_link:
           Value: true
-        robot1/left_fork:
+        robot4/left_fork:
           Value: false
-        robot1/odom_enc:
+        robot4/odom_enc:
           Value: false
-        robot1/right_fork:
+        robot4/right_fork:
           Value: false
-        robot1/sd_wheel_link:
+        robot4/sd_wheel_link:
           Value: false
-        robot1/steer_link:
+        robot4/steer_link:
           Value: false
-        robot1/velodyne:
+        robot4/velodyne:
           Value: true
-        robot1/velodyne_base_link:
+        robot4/velodyne_base_link:
           Value: true
-        robot1/velodyne_link:
+        robot4/velodyne_link:
           Value: true
         world:
           Value: false
@@ -239,43 +239,43 @@ Visualization Manager:
         world:
           map:
             {}
-          robot1/base_footprint:
-            robot1/base_link:
-              robot1/base_fork:
-                robot1/left_fork:
+          robot4/base_footprint:
+            robot4/base_link:
+              robot4/base_fork:
+                robot4/left_fork:
                   {}
-                robot1/right_fork:
+                robot4/right_fork:
                   {}
-              robot1/fixed_left_wheel_link:
+              robot4/fixed_left_wheel_link:
                 {}
-              robot1/fixed_right_wheel_link:
+              robot4/fixed_right_wheel_link:
                 {}
-              robot1/kinect2_base_link:
-                robot1/kinect2_link:
-                  robot1/kinect2_depth_optical_frame:
+              robot4/kinect2_base_link:
+                robot4/kinect2_link:
+                  robot4/kinect2_depth_optical_frame:
                     {}
-                  robot1/kinect2_rgb_optical_frame:
+                  robot4/kinect2_rgb_optical_frame:
                     {}
-              robot1/laser2d_floor_base_link:
-                robot1/laser2d_floor_link:
+              robot4/laser2d_floor_base_link:
+                robot4/laser2d_floor_link:
                   {}
-              robot1/laser2d_top_base_link:
-                robot1/laser2d_top_link:
+              robot4/laser2d_top_base_link:
+                robot4/laser2d_top_link:
                   {}
-              robot1/steer_link:
-                robot1/sd_wheel_link:
+              robot4/steer_link:
+                robot4/sd_wheel_link:
                   {}
-              robot1/velodyne_base_link:
-                robot1/velodyne_link:
-                  robot1/velodyne:
+              robot4/velodyne_base_link:
+                robot4/velodyne_link:
+                  robot4/velodyne:
                     {}
-          robot1/odom_enc:
+          robot4/odom_enc:
             {}
       Update Interval: 0
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /robot1/visualization_marker
+      Marker Topic: /robot4/visualization_marker
       Name: Marker
       Namespaces:
         {}
@@ -306,7 +306,7 @@ Visualization Manager:
       Size (Pixels): 4
       Size (m): 0.0299999993
       Style: Points
-      Topic: /robot1/sensors/velodyne/velodyne_points
+      Topic: /robot4/sensors/velodyne/velodyne_points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -336,7 +336,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Points
-      Topic: /robot1/sensors/laser2d_top
+      Topic: /robot4/sensors/laser2d_top
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -366,7 +366,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Points
-      Topic: /robot1/sensors/laser2d_floor
+      Topic: /robot4/sensors/laser2d_floor
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -377,7 +377,7 @@ Visualization Manager:
           Enabled: true
           Image Topic: ""
           Name: Kinect v2 frustum
-          Topic: /robot1/kinect2/depth/camera_info
+          Topic: /robot4/kinect2/depth/camera_info
           Unreliable: false
           Value: true
           alpha: 0.5
@@ -390,7 +390,7 @@ Visualization Manager:
           use image: false
         - Class: rviz/Image
           Enabled: true
-          Image Topic: /robot1/kinect2/hd/image_color_rect
+          Image Topic: /robot4/kinect2/hd/image_color_rect
           Max Value: 1
           Median window: 5
           Min Value: 0
@@ -425,7 +425,7 @@ Visualization Manager:
           Size (Pixels): 3
           Size (m): 0.00999999978
           Style: Flat Squares
-          Topic: /robot1/kinect2/sd/points
+          Topic: /robot4/kinect2/sd/points
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
@@ -438,7 +438,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /robot1/move_base/local_costmap/costmap
+      Topic: /robot4/move_base/local_costmap/costmap
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -459,7 +459,7 @@ Visualization Manager:
     - Class: rviz/SetInitialPose
       Topic: /initialpose
     - Class: rviz/SetGoal
-      Topic: /robot1/move_base_simple/goal
+      Topic: /robot4/move_base_simple/goal
     - Class: rviz/PublishPoint
       Single click: true
       Topic: /clicked_point
@@ -483,7 +483,7 @@ Visualization Manager:
       Name: Current View
       Near Clip Distance: 0.00999999978
       Pitch: 0.694795966
-      Target Frame: robot1/laser2d_top_link
+      Target Frame: robot4/laser2d_top_link
       Value: Orbit (rviz)
       Yaw: 4.60286045
     Saved: ~

@@ -23,7 +23,7 @@
   <arg name="yaml_map_file" default="$(find base_simulation)/maps/extra_room.yaml"/>
   <arg name="rviz_config_file" default="$(find base_simulation)/rviz/iliad_cititruck.rviz"/>
 
-  <arg name="robot_pose_x" default="7.23"/>
+  <arg name="robot_pose_x" default="7.53"/>
   <arg name="robot_pose_y" default="-2.7"/>
   <arg name="robot_pose_roll" default="0.0"/>
   <arg name="robot_pose_pitch" default="0.0"/>
@@ -74,6 +74,8 @@
     <arg name="robot_pose_roll" value="$(arg robot_pose_roll)"/>
     <arg name="robot_pose_pitch" value="$(arg robot_pose_pitch)"/>
     <arg name="robot_pose_yaw" value="$(arg robot_pose_yaw)"/>
+    <arg name="gpu"             value="true"/>
+    
   </include>
 
   <!-- This way I make gazebo receive data in the same topic than real robot -->
