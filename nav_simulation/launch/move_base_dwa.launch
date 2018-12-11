@@ -17,23 +17,36 @@
 -->
 <launch>
       
-      <arg name="prefix"        default="robot1"/>
-      <arg name="topic_prefix"  default="/robot1"/>
+      <arg name="prefix"        default="robot4"/>
+      <arg name="topic_prefix"  default="/robot4"/>
       
-      <arg name="odom_topic" default="odom" />
-      <arg name="cmd_vel_topic" default="controller/cmd_vel" />
+      <arg name="odom_topic" default="$(arg prefix)/odom_enc" />
+      <arg name="cmd_vel_topic" default="$(arg topic_prefix)/control/controller/cmd_vel" />
 
-      <group ns="$(arg prefix)">
+      <!--group ns="$(arg prefix)"-->
          <!-- 
               This param needs to be set under this group, or 
               robot_state_publisher wont publish tf properly 
          -->  
-        <param name="tf_prefix" value="$(arg prefix)" />
+        <!--param name="tf_prefix" value="$(arg prefix)" /-->
+
+	<!-- Filters out laser points hitting robot frame/wheels-->
+	<node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_2d_floor_filter">
+	  <rosparam command="load" file="$(find base_simulation)/params/safety_laser_filter.yaml" />
+	  <remap from="scan" to="$(arg topic_prefix)/sensors/laser2d_floor" />
+	  <remap from="scan_filtered" to="$(arg topic_prefix)/sensors/laser2d_floor_fil" />
+	</node>
+
+	<node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser2d_top_filter">
+	  <rosparam command="load" file="$(find base_simulation)/params/uol_nav_laser_filter.yaml" />
+	  <remap from="scan" to="$(arg topic_prefix)/sensors/laser2d_top" />
+	  <remap from="scan_filtered" to="$(arg topic_prefix)/sensors/laser2d_top_fil" />
+	</node>
 
         <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-          <remap from="cmd_vel" to="move_base/cmd_vel"/> 
+          <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/> 
           <remap from="odom" to="$(arg odom_topic)"/>
-          <remap from="$(arg topic_prefix)/map" to="/map" />
+          <remap from="$(arg topic_prefix)/map" to="/maps/map_laser2d" />
           
           <!-- common params -->
           <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
@@ -51,9 +64,11 @@
           <param name="planner_frequency" value="1.0" />
           <param name="planner_patience" value="5.0" />
 
-          <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+          <param name="base_local_planner" value="dwa_local_planner_constraint/DWAPlannerROS" />
           <param name="controller_frequency" value="2.0" />
           <param name="controller_patience" value="15.0" />
+
+	  <param name="map_frame" value="map_laser2d"/>
 
           <rosparam file="$(find nav_simulation)/params/dwa_local_planner_params.yaml" command="load" />
 
@@ -64,6 +79,6 @@
 
       </node>
      
-    </group>
+    <!--/group-->
 
 </launch>

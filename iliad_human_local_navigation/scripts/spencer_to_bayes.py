@@ -14,9 +14,9 @@ class SpencerToBayes:
     """Converts Spencer Tracked Person Input to Bayes People Tracker Output"""
 
     def __init__(self):
-	person_topic         = rospy.get_param("~person_topic", "/robot1/spencer/perception/tracked_persons")
-        ppl_topic            = rospy.get_param("~ppl_topic", "/robot1/people_tracker_filter/positions")
-	self.target_frame    = rospy.get_param("~target_frame", "/robot1/base_link")
+	person_topic         = rospy.get_param("~person_topic", "/robot4/perception/tracked_persons")
+        ppl_topic            = rospy.get_param("~ppl_topic", "/robot4/people_tracker/positions")
+	self.target_frame    = rospy.get_param("~target_frame", "robot4/base_link")
 	self.listener        = tf.TransformListener()
 	self.pub             = rospy.Publisher(ppl_topic, PeopleTracker)#, queue_size=10)
 	self.last_msg        = PeopleTracker()
@@ -128,18 +128,19 @@ class SpencerToBayes:
 		#a.distances.append(math.sqrt(math.pow(x,2)+math.pow(y,2)+math.pow(z,2)))
 		#a.angles.append(math.atan2(math.sqrt(math.pow(x,2)+math.pow(y,2)),z))
 	
-	a.min_distance = min(a.distances)
-	print("min distance: ")
-	print(a.min_distance)
-	i = 0
-	for d in a.distances:
-		if d == a.min_distance:
-			break
-		else:
-			i = i + 1
-	a.min_distance_angle = a.angles[i]
-	print("min distance angle: ")
-	print(a.min_distance_angle)
+	if len(a.distances) > 0:
+		a.min_distance = min(a.distances)
+		print("min distance: ")
+		print(a.min_distance)
+		i = 0
+		for d in a.distances:
+			if d == a.min_distance:
+				break
+			else:
+				i = i + 1
+		a.min_distance_angle = a.angles[i]
+		print("min distance angle: ")
+		print(a.min_distance_angle)
 		
 	print("I am publishing People Tracker object a.")
 	
