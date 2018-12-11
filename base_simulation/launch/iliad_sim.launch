@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
- <!-- 
+ <!--
      Launches a gazebo world and a forklift.
 -->
- 
-<launch>
-    
-  <!-- PARAMS ...................................................... -->
-  <arg name="gazeboGui" default="true"/> 
-  <arg name="rvizGui" default="true"/> 
 
+<launch>
+  <arg name="robot_id"  default="1"/>
   <!-- TF prefix of robot -->
-  <arg name="prefix" default="robot1"/>
+  <arg name="prefix" default="robot$(arg robot_id)"/>
+
+  <!-- PARAMS ...................................................... -->
+  <arg name="gazeboGui" default="true"/>
+  <arg name="rvizGui" default="true"/>
 
   <!-- Enable/disable sensor simulation -->
   <arg name="velodyne" default="true"/> <!-- requires velodyne_simulator -->
   <arg name="kinect2"  default="true"/>   <!-- Uses iai kinect2 description -->
   <arg name="kinect1"  default="false"/> <!-- deprecated (only used for pallet detection?) -->
-  
+
   <arg name="cmd_vel_topic" default="controller/cmd_vel" />
 
   <arg name="world_name" default="$(find base_simulation)/worlds/ncfm_model_1_actor_short.world"/>
@@ -55,34 +55,36 @@
   </include>
 
 
- <group ns="$(arg prefix)">
-     <!-- 
-          This param needs to be set under this group, or 
-          robot_state_publisher wont publish tf properly 
-     -->  
-    <param name="tf_prefix" value="$(arg prefix)" />
 
   <!-- LOAD GAZEBO Model  -->
-  <include file="$(find base_simulation)/launch/robots/cititruck_ncfm.launch">
-    <arg name="tf_prefix" value="$(arg prefix)"/>
-    <arg name="velodyne" value="$(arg velodyne)"/>
-    <arg name="kinect2" value="$(arg kinect2)"/>
-    <arg name="kinect1" value="$(arg kinect1)"/>
-
-    <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
-    <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
-    <arg name="robot_pose_roll" value="$(arg robot_pose_roll)"/>
-    <arg name="robot_pose_pitch" value="$(arg robot_pose_pitch)"/>
-    <arg name="robot_pose_yaw" value="$(arg robot_pose_yaw)"/>
-    <arg name="gpu"             value="true"/>
-    
+  <!-- This loads robot_description only -->
+  <include file="$(find iliad_launch_system)/launch/robots/cititruck/$(arg prefix)/$(arg prefix).launch">
+        <arg name="sim" value="true"/>
+        <arg name="software" value="false"/>
   </include>
+
+  <include file="$(find iliad_launch_system)/launch/robots/cititruck/cititruck_spawn.launch">
+          <arg name="robot_id"      value="$(arg robot_id)"/>
+          <arg name="robot_pose_x"   value="$(arg robot_pose_x)"/>
+          <arg name="robot_pose_y"   value="$(arg robot_pose_y)"/>
+          <arg name="robot_pose_yaw" value="$(arg robot_pose_yaw)"/>
+  </include>
+
+
+ <group ns="$(arg prefix)">
+     <!--
+          This param needs to be set under this group, or
+          robot_state_publisher wont publish tf properly
+     -->
+    <param name="tf_prefix" value="$(arg prefix)" />
+
+
 
   <!-- This way I make gazebo receive data in the same topic than real robot -->
   <node name="relay_pub" pkg="topic_tools" type="relay" args="controller/cmd_vel cmd_vel"/>
 
 
-  
+
 
 
       <!-- Filters out laser points hitting robot frame/wheels-->
@@ -91,13 +93,13 @@
         <remap from="scan" to="/$(arg prefix)/sensors/laser2d_floor" />
         <remap from="scan_filtered" to="safety_laser_fil" />
       </node>
-      
+
       <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="nav_filter">
-        <rosparam command="load" file="$(find base_simulation)/params/nav_laser_filter.yaml" />
+        <rosparam command="load" file="$(find base_simulation)/params/uol_nav_laser_filter.yaml" />
         <remap from="scan" to="/$(arg prefix)/sensors/laser2d_top" />
         <remap from="scan_filtered" to="nav_laser_fil" />
       </node>
-      
+
       <!-- Casts from vtrans,vrot from move base to robot (vtrans,vrot) for motrix wheel in robot  -->
       <node pkg="twist_controller" type="velParser.py" name="velParser_node" output="screen">
           <param name="wheelsAxesDist" value="1.2"/>
@@ -109,7 +111,7 @@
           <param name="in_cmd_topic" value="move_base/cmd_vel"/>
           <param name="out_cmd_topic" value="$(arg cmd_vel_topic)"/>
       </node>
-        
+
       <!-- Publishes relative motor wheel position related to robot frame coordinates. Used by velParser -->
       <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="steer_pose_publisher" output="screen">
           <param name="map_frame" value="$(arg prefix)/base_footprint"/>
@@ -118,7 +120,7 @@
           <remap from="robot_pose" to="steer_pose"/>
       </node>
 
-      
+
  </group>
 
 

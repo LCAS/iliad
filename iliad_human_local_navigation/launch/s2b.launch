@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+ <!--
+
+  -->
+
+<launch>
+
+        <!-- Publishes robot position related to map frame coordinates. Used by online_qtc_creator -->
+        <node pkg="iliad_human_local_navigation" type="spencer_to_bayes.py" name="spencer_to_bayes" output="log">
+              <param name="person_topic" value="/robot1/groundtruth/tracked_persons"/>
+              <param name="target_frame" value="map_laser2d"/>
+        </node>
+
+
+
+
+
+</launch>

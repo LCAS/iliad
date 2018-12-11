@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 
-<!--  
+<!--
 Only launches groundtruth
 -->
 
@@ -10,22 +10,20 @@ Only launches groundtruth
     <arg name="robot_id" default="4"/>
 
     <arg name="map_topic" default="/maps/map_2d_laser"/>
-    
+
 
     <arg name="prefix" default="robot$(arg robot_id)"/>
     <arg name="topic_prefix" default="/$(arg prefix)"/>
 
-  
+
 
     <group ns="$(arg prefix)">
         <!-- Publish groundtruth tracks and detections from Gazebo -->
         <node name="groundtruth_tracks_from_gazebo" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true">
-              <remap from="/groundtruth/detected_persons" to="$(arg topic_prefix)/groundtruth/detected_persons" />
-        </node>  
+              <remap from="/groundtruth/detected_persons" to="$(arg topic_prefix)/groundtruth/detected_persons"/>
+              <remap from="/groundtruth/tracked_persons" to="$(arg topic_prefix)/groundtruth/tracked_persons"/>            
+        </node>
 
     </group>
 
-</launch> 
-
-
-
+</launch>
