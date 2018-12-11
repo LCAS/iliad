@@ -11,6 +11,7 @@
 <launch>
     <arg name="prefix"       default="robot1"/>
     <arg name="topic_prefix" default="/robot1"/>
+    <arg name="map_frame" default="map"/>
 
 
     <group ns="$(arg prefix)">
@@ -41,14 +42,14 @@
 
         <!-- Publishes robot position related to map frame coordinates. Used by online_qtc_creator -->
         <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
-              <param name="map_frame" value="map"/>
+              <param name="map_frame" value="$(arg map_frame)"/>
               <param name="base_frame" value="$(arg prefix)/base_link"/>
               <param name="is_stamped" value="true"/>
               <remap from="robot_pose" to="robot_poseST"/>
         </node>
         <!-- Publishes robot position related to map frame coordinates. Used by online_qtc_creator -->
         <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_pose_publisher" output="screen">
-              <param name="map_frame" value="map"/>
+              <param name="map_frame" value="$(arg map_frame)"/>
               <param name="base_frame" value="$(arg prefix)/base_link"/>
               <param name="is_stamped" value="false"/>
         </node>
