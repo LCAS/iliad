@@ -38,8 +38,8 @@ private:
 
 void dynamic_reconfigure_callback(envelope_manager::envelopeManagerConfig &config, uint32_t level)
 {
-  ROS_INFO("Reconfigure request : %f",
-           config.speed_factor);
+  //ROS_INFO("Reconfigure request : %f",
+  //         config.speed_factor);
 
   // TODO do nothing for now
 }
