@@ -1,0 +1,20 @@
+
+init_cmd: source $HOME/network-scripts/ros-network.sh 192.168.100.101
+windows: 
+
+# which does the same as core for simulation
+# requires: nothing
+# provides:  should mimic real sensor and robot data sources.
+  - name: htop
+    panes: 
+      - htop
+
+# move_base and related.
+# requires: core|sim_core
+# provides: 
+  - name: coordination
+    panes:
+      - "#roslaunch nav_simulation move_base_dwa.launch"
+      - "#roslaunch hri_simulation hrsi.launch"
+
+

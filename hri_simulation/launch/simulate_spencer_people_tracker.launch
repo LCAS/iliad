@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+
+<!--  
+        We are having issues making people detector to work under simulation.
+        This is a shortcut to work on human aware navigation: I use Timm's ground truth tracks to feed the tracker
+        and obtain a tracked person topic.
+        No filtering, no oclusions. This is mostly to get a continuous tracked person output.
+-->
+
+<launch>
+
+    <arg name="robot_id" default="4"/>    
+
+    <!-- These are not likely to be changed ever...  -->
+    <arg name="prefix" default="robot$(arg robot_id)"/>
+    <arg name="topic_prefix" default="/$(arg prefix)"/>
+    <arg name="initiation_logic_param_file" default="logic_initiator.yaml"/>
+    <arg name="ekf_param_file" default="ekf_default.yaml"/>
+    <arg name="queue_size" value="5" />
+    <arg name="data_association_type" default="greedy_nearest_neighbor"/>
+
+    <group ns="$(arg prefix)">
+        <node name="groundtruth_tracks_from_gazebo" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true">
+              <remap from="/groundtruth/detected_persons" to="$(arg topic_prefix)/perception/detected_persons" />
+              <remap from="/groundtruth/tracked_persons" to="$(arg topic_prefix)/perception/tracked_persons" />
+        </node>  
+
+    </group>
+
+</launch> 
+
+
+

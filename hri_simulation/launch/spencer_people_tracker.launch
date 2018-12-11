@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+
+
+<!--  
+    To be used with hri_simulation iliad_sim_hri.launch
+    Purpose is to simulate people tracking to be used with strands human aware navigation
+
+    ODD things:
+    Uses source version of spencer people tracking.
+    spencer_detected_person_association  composite_detections_to_detections.py not present in deb
+    upper_body_detector complains about missing template file (even setting rosparam!!!).
+
+-->
+
+<launch>
+
+    <arg name="robot_id" default="4"/>
+
+    <arg name="map_topic" default="/maps/map_2d_laser"/>
+    
+
+    <arg name="prefix" default="robot$(arg robot_id)"/>
+    <arg name="topic_prefix" default="/$(arg prefix)"/>
+
+    <arg name="queue_size" value="5" />
+
+    <arg name="ptu_state" value="$(arg topic_prefix)/ptu/state" />
+    <arg name="ground_plane" value="$(arg topic_prefix)/ground_plane" />
+
+
+    <arg name="target_frame" value="$(arg prefix)/base_link" />
+    <arg name="base_frame" value="$(arg prefix)/base_link" />
+    <arg name="map_frame_id"  value="map_2d_laser" />  
+
+    <arg name="camera_namespace" value="$(arg topic_prefix)/sensors/kinect2" />
+    <arg name="camera_namespace_sd" value="$(arg camera_namespace)/sd" />
+
+    <arg name="rgb_image" value="/ld/image_color_rect" />
+
+    <arg name="camera_info_rgb" value="/hd/camera_info" />
+
+    <arg name="depth_image" value="/sd/image_depth_rect" />
+    <arg name="camera_info_depth" value="/depth/camera_info" />
+
+    <arg name="mono_image" value="/sd/image_ir_rect" />        
+
+    <arg name="motion_parameters" value="$(arg topic_prefix)/visual_odometry/motion_matrix" />
+    <arg name="visual_odometry" value="$(arg topic_prefix)/visual_odometry/motion_matrix" />
+
+    <arg name="upper_body_detections"         value="$(arg topic_prefix)/upper_body_detector/detections" />
+    <arg name="upper_body_bb_centres"         value="$(arg topic_prefix)/upper_body_detector/bounding_box_centres" />
+    <arg name="upper_body_image"              value="$(arg topic_prefix)/upper_body_detector/image" />
+    <!-- arg name="upper_body_markers"            value="$(arg topic_prefix)/upper_body_detector/marker_array" / -->
+    <!-- arg name="upper_body_roi"                value="$(arg topic_prefix)/upper_body_detector/roi" / -->
+    <!-- arg name="upper_body_closest_bb_centres" value="$(arg topic_prefix)/upper_body_detector/closest_bounding_box_centre" / -->
+
+
+    <arg name="positions"           value="$(arg topic_prefix)/people_tracker/positions" />
+    <arg name="pose"                value="$(arg topic_prefix)/people_tracker/pose" />
+    <arg name="pose_array"          value="$(arg topic_prefix)/people_tracker/pose_array" />
+    <arg name="people"              value="$(arg topic_prefix)/people_tracker/people" />
+    <arg name="marker"              value="$(arg topic_prefix)/people_tracker/marker_array" />
+
+    <arg name="filtered_positions"  value="$(arg topic_prefix)/people_tracker_filter/positions" />
+    <arg name="filtered_pose"       value="$(arg topic_prefix)/people_tracker_filter/pose" />
+    <arg name="filtered_pose_array" value="$(arg topic_prefix)/people_tracker_filter/pose_array" />
+    <arg name="filtered_people"     value="$(arg topic_prefix)/people_tracker_filter/people" />
+    <arg name="filtered_marker"     value="$(arg topic_prefix)/people_tracker_filter/marker_array" />
+
+
+
+    <arg name="tf_target_frame" value="" />
+
+    <group ns="$(arg prefix)">
+        <arg name="rgbd" value="true"/>
+
+        <!-- Publish groundtruth tracks and detections from Gazebo -->
+        <node name="groundtruth_tracks_from_gazebo" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true">
+              <remap from="/groundtruth/detected_persons" to="$(arg topic_prefix)/groundtruth/detected_persons" />
+        </node>  
+
+        <!-- Laser detectors:
+        -->  
+        <rosparam param="$(arg topic_prefix)/spencer/perception_internal/people_detection/laser_front/laser_detector/decision_threshold">-5.0 </rosparam>
+
+        <include file="$(find hri_simulation)/launch/detectors/laser_detectors.launch">
+          <arg name="topic_prefix" value="$(arg topic_prefix)"/>
+          <arg name="laser"        value="$(arg topic_prefix)/sensors/laser2d_floor_fil"/>
+          <arg name="detected_persons_topic" value="$(arg topic_prefix)/spencer/perception_internal/detected_persons/laser_front"/>
+
+        </include>
+
+        <!-- Leg detectors 
+            This is an alternative to laser detector, but requires installing spencer from sources,
+            as spencer_leg_detector_wrapper is not in deb and it depends on wg perception.
+            Not really interesting, as is basically wrapping into spencer the same tracker strands had.
+
+        <include file="$(find hri_simulation)/launch/detectors/leg_detectors.launch">
+            <arg name="node_prefix" value="leg"/>
+            <arg name="config_file" value="iliad.yaml"/>
+            <arg name="robot_tf_prefix" default="robot1"/>
+
+            <arg name="scan" value="$(arg topic_prefix)/safety_laser_fil"/>               
+        </include>
+        -->
+
+        <!-- Beware of topics
+        Published by Gazebo
+        * /robot1/kinect2/depth/camera_info [sensor_msgs/CameraInfo]
+        * /robot1/kinect2/sd/image_depth_rect [sensor_msgs/Image]
+        * /robot1/kinect2/hd/image_color_rect [sensor_msgs/Image]
+
+        Published by Kinect2
+        * /kinect2/sd/image_color_rect   
+        * /kinect2/sd/camera_info        
+        * /depth/image_rect
+        -->
+
+        <!-- Resized color image with same resolution (512 x 424) than point cloud for quick representation  -->
+        <node pkg="nodelet" type="nodelet" name="spencer_nodelet_manager" args="manager"/>  
+        <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load /$(arg prefix)/resize_kinect $(find hri_simulation)/config/nodelet_resize.yaml" />
+
+        <node pkg="nodelet" type="nodelet" name="resize_kinect_spencer" args="load image_proc/resize spencer_nodelet_manager --no-bond" respawn="true">
+              <remap from="image" to="$(arg camera_namespace)/hd/image_color_rect" />
+              <remap from="camera_info" to="$(arg camera_namespace)/sd/camera_info" />
+              <remap from="~image" to="$(arg camera_namespace)/ld/image_color_rect" />
+              <remap from="~camera_info" to="$(arg camera_namespace)/ld/camera_info" />
+        </node>  
+
+        <!-- RGB-D detectors -->
+        <remap from="$(arg topic_prefix)/sensors/kinect2/depth/image_rect" 
+                 to="$(arg topic_prefix)/sensors/kinect2/sd/image_depth_rect"/>
+
+        <include file="$(find hri_simulation)/launch/detectors/front_rgbd_detectors.launch">
+            <arg name="topic_prefix" value="$(arg topic_prefix)"/>
+            <arg name="camera_frame" value="$(arg prefix)/kinect2_rgb_optical_frame"/>
+            <arg name="camera_namespace" value="$(arg camera_namespace)"/>
+            <arg name="rgb_image" value="$(arg rgb_image)" />
+            <arg name="depth_image" value="$(arg depth_image)" />
+            <arg name="camera_info_depth" value="$(arg camera_info_depth)" />
+            <arg name="base_footprint" value="$(arg base_frame)"/>
+        </include>
+
+
+
+        <!-- People tracking -->
+        <include file="$(find hri_simulation)/launch/tracking/freiburg_people_tracking.launch">
+            <arg name="topic_prefix" value="$(arg topic_prefix)"/>
+            <arg name="rgbd" value="$(arg rgbd)"/>
+            <arg name="laser_low_confidence_detections" value="true"/>
+            <arg name="base_frame" value="$(arg base_frame)" />
+            <arg name="map_frame_id"  value="$(arg map_frame_id)" />    
+        </include>
+
+
+        <rosparam param="$(arg topic_prefix)/spencer/perception_internal/people_tracking/srl_nearest_neighbor_tracker/logic_initiator_min_velocity">0.0</rosparam>
+        <rosparam param="$(arg topic_prefix)/spencer/perception_internal/people_tracking/srl_nearest_neighbor_tracker/overwrite_measurement_noise">true</rosparam>
+        <rosparam param="$(arg topic_prefix)/spencer/perception_internal/people_tracking/srl_nearest_neighbor_tracker/logic_initiator_high_confidence_modalities">
+        - rgbd
+        - stereo
+        - laser2d
+        </rosparam>
+
+        <!-- 
+          People Tracker Filter:
+          Modified original one to use a different way to detect receiving map. 
+        -->
+        <include file="$(find hri_simulation)/launch/filter.launch">
+            <arg name="map_topic"           value="$(arg map_topic)"/>           
+            <arg name="positions"           value="$(arg positions)"/>           
+            <arg name="pose"                value="$(arg pose)"/>                
+            <arg name="pose_array"          value="$(arg pose_array)"/>          
+            <arg name="people"              value="$(arg people)"/>  
+            <arg name="filtered_positions"  value="$(arg filtered_positions)"/>  
+            <arg name="filtered_pose"       value="$(arg filtered_pose)"/>       
+            <arg name="filtered_pose_array" value="$(arg filtered_pose_array)"/> 
+            <arg name="filtered_people"     value="$(arg filtered_people)"/>     
+            <arg name="filtered_marker"     value="$(arg filtered_marker)"/>     
+        </include>
+
+    </group>
+
+</launch> 
+
+
+

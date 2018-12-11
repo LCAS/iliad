@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+ <!-- Based on iliad_sim_standard_nav.launch from nav_simulation package in iliad repo.
+ but uses an standard ros navigation stack using  iliad_smp_planner -->
+ 
+<launch>
+    
+  <!-- PARAMS ...................................................... -->
+  <arg name="gazeboGui" default="true"/> 
+  <arg name="rvizGui" default="true"/> 
+  
+  <arg name="hasPeople" default="false"/>
+
+  <!-- TF prefix of robot -->
+  <arg name="prefix" default="robot1"/>
+
+  <!-- Enable/disable sensor simulation -->
+  <arg name="velodyne" default="true"/> <!-- requires velodyne_simulator -->
+  <arg name="kinect2"  default="true"/>   <!-- Uses iai kinect2 description -->
+  <arg name="kinect1"  default="false"/> <!-- deprecated (only used for pallet detection?) -->
+
+  <rosparam command="load" file="$(find orunav_params)/config/global.cfg"/>
+  <rosparam command="load" file="$(find orunav_params)/config/citi1_simulation.cfg" />
+
+
+  <!-- INCLUDES .................................................... -->
+
+
+  <!-- LOAD WORLD use same file but in base_simulation package to remove people ...  -->
+  <include file="$(find gazebo_worlds_oru)/launch/ncfm_world.launch" if="$(arg hasPeople)"/>
+  
+
+  <include file="$(find base_simulation)/launch/iliad_sim_ncfm_no_human.launch" unless="$(arg hasPeople)">     
+       <arg name="gui" value="$(arg gazeboGui)"/> 
+  </include>
+
+
+
+  <!-- LOAD MAP -->
+  <include file="$(find gazebo_worlds_oru)/launch/ncfm_map_server.launch"/>
+
+  <!-- LOAD GAZEBO Model  -->
+  <include file="$(find cititruck_gazebo)/launch/cititruck_ncfm.launch">
+     <arg name="tf_prefix" value="$(arg prefix)"/>
+     <arg name="velodyne" value="$(arg velodyne)"/>
+     <arg name="kinect2" value="$(arg kinect2)"/>
+     <arg name="kinect1" value="$(arg kinect1)"/>
+  </include>
+
+
+ 
+ <group ns="$(arg prefix)">
+     <!-- 
+          This param needs to be set under this group, or 
+          robot_state_publisher wont publish tf properly 
+     -->  
+    <param name="tf_prefix" value="$(arg prefix)" />
+ 
+    <!-- This way I make gazebo receive data in the same topic than real robot -->
+    <node name="relay_pub" pkg="topic_tools" type="relay" args="controller/cmd_vel cmd_vel"/>
+
+
+   <!-- Move base: HERE IS THE BEEF! -->
+  <include file="$(find iliad_smp_planner)/launch/move_base_iliad_smp.launch"/>  
+   
+ 
+ </group>
+
+
+<!-- Visualization -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find iliad_smp_planner)/rviz/iliad_smp_nav.rviz" if="$(arg rvizGui)"/>
+
+</launch>

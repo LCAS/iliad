@@ -1,0 +1,7 @@
+iliad_smp_planner:
+
+# Change robot id if needed ...
+  load_operation: false
+  load_detect: false
+  robot_id: 1
+  service_name: '/robot1/move_base/iliad_smp_planner/get_path'

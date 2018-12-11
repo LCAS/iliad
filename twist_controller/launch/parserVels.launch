@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+ <!-- Based on iliad_single_truck.launch
+ I have removed orunav stack and replaced it with standard ros one -->
+ 
+<launch>
+
+
+
+
+    <group ns="robot2">
+        
+        <node name="joy_node" pkg="joy" type="joy_node">
+        </node>
+        <node name="tele_joy_node" pkg="teleop_twist_joy" type="teleop_node">
+        </node>
+
+      <!-- Casts from vtrans,vrot from move base to robot (vtrans,vrot) for motrix wheel in robot  -->
+      <node pkg="twist_controller" type="velParser.py" name="velParser_node" output="screen">
+          <param name="wheelsAxesDist" value="1.2"/>
+          <param name="inPlacePhi" value="1.57"/>
+          <param name="phiTol" value="0.01"/>
+          <param name="useOmega" value="True"/>
+          <param name="moveWhileOrienting" value="True"/>
+          <param name="steer_pose_cmd_topic" value="steer_pose"/>
+          <param name="in_cmd_topic" value="/robot2/cmd_vel"/>
+          <param name="out_cmd_topic" value="/robot2/controller/cmd_vel"/>
+      </node>
+        
+      <!-- Publishes relative motor wheel position related to robot frame coordinates. Used by velParser -->
+      <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="steer_pose_publisher" output="screen">
+          <param name="map_frame" value="$(arg prefix)/base_footprint"/>
+          <param name="base_frame" value="$(arg prefix)/steer_link"/>
+          <param name="is_stamped" value="true"/>
+          <remap from="robot_pose" to="steer_pose"/>
+      </node>
+      
+      
+
+
+        
+    </group>
+    
+</launch>
+ 
