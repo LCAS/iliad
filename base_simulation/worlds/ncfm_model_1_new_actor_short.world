@@ -3425,7 +3425,7 @@
     </spherical_coordinates>
 
 
-      <!--<actor name="actor1">
+      <actor name="actor1">
         <skin>
           <filename>walk.dae</filename>
           <scale>1.05</scale>
@@ -3435,9 +3435,9 @@
           <filename>walk.dae</filename>
           <interpolate_x>true</interpolate_x>
         </animation>
-        <script>-->
+        <script>
           <!--<delay_start>3.0</delay_start>-->
-          <!--<loop>true</loop>
+          <loop>true</loop>
           <auto_start>true</auto_start>
           <trajectory id="0" type="walking">
             <waypoint>
@@ -3463,7 +3463,7 @@
 
           </trajectory>
         </script>
-    </actor>-->
+    </actor>
 
 
 
