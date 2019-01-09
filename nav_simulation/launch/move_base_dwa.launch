@@ -17,7 +17,6 @@
 -->
 <launch>
 
-<<<<<<< HEAD
       <arg name="robot_id" default="5"/>
       
       <arg name="prefix"        default="robot$(arg robot_id)"/>
@@ -53,7 +52,6 @@
           <remap from="odom" to="$(arg prefix)/odom"/>
           <remap from="$(arg topic_prefix)/map" to="/maps/$(arg map_frame)" />
           
-=======
       <arg name="prefix"        default="robot1"/>
       <arg name="topic_prefix"  default="/robot1"/>
 
@@ -72,7 +70,6 @@
           <remap from="odom" to="$(arg odom_topic)"/>
           <remap from="$(arg topic_prefix)/map" to="/map" />
 
->>>>>>> c1c926f39dc66539d5ea7c65531f7e64befff6cc
           <!-- common params -->
           <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
           <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
@@ -103,12 +100,9 @@
           <rosparam param="velocity_costmap_topic" subst_value="True">$(arg topic_prefix)/velocity_costmap_server/velocity_costmap</rosparam>
 
       </node>
-<<<<<<< HEAD
      
     <!--/group-->
-=======
 
     </group>
->>>>>>> c1c926f39dc66539d5ea7c65531f7e64befff6cc
 
 </launch>

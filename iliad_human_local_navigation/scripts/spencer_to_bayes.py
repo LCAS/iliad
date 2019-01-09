@@ -15,7 +15,6 @@ class SpencerToBayes:
     """Converts Spencer Tracked Person Input to Bayes People Tracker Output"""
 
     def __init__(self):
-<<<<<<< HEAD
 	person_topic         = rospy.get_param("~person_topic", "/robot4/perception/tracked_persons")
         ppl_topic            = rospy.get_param("~ppl_topic", "/robot4/people_tracker/positions")
 	self.target_frame    = rospy.get_param("~target_frame", "robot4/base_link")
@@ -179,7 +178,6 @@ class SpencerToBayes:
 	#	a.uuids[] = msg.track_id
 	#	a.poses[] = msg.pose.pose[]
 	#return
-=======
         person_topic = rospy.get_param(
             "~person_topic", "/robot1/groundtruth/tracked_persons")  # "/robot1/spencer/perception/tracked_persons")
         ppl_topic = rospy.get_param("~ppl_topic", "/robot1/people_tracker_filter/positions")
@@ -346,7 +344,6 @@ class SpencerToBayes:
         #	a.uuids[] = msg.track_id
         #	a.poses[] = msg.pose.pose[]
         # return
->>>>>>> c1c926f39dc66539d5ea7c65531f7e64befff6cc
 
 
 if __name__ == "__main__":
