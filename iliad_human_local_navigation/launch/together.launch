@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="robot_id" default="5"/>
+	<arg name="map_frame" value="map_laser2d"/>
+
+	<arg name="prefix" default="robot$(arg robot_id)"/>
+	<arg name="topic_prefix" default="/$(arg prefix)"/>
+
+	<include file="$(find iliad_launch_system)/launch/sites/iliad_map_server.launch">
+		<arg name="mapserver_config_file" value="$(find iliad_launch_system)/maps/ncfm.yaml"/>
+	</include>
+
+	<include file="$(find rgbd_gpu_person_detector)/launch/iliad_kinect2.launch">
+		<arg name="robot_name" value="$(arg prefix)"/>
+	</include>
+
+	<include file="$(find iliad_human_perception_launch)/launch/tracking/person_tracking_pipeline.launch">
+		<arg name="robot_name" value="$(arg prefix)"/>
+	</include>
+
+	<include file="$(find nav_simulation)/launch/move_base_dwa.launch">
+		<arg name="robot_id" value="$(arg robot_id)"/>
+		<!--arg name="odom_topic" value="$(arg prefix)/odom"/-->
+		<!--arg name="cmd_vel_topic" value="$(arg topic_prefix)/control/controller/cmd_vel"/-->
+		<arg name="map_frame" value="$(arg map_frame)"/>
+	</include>
+
+	<include file="$(find hri_simulation)/launch/hrsi.launch">
+		<arg name="robot_id" value="$(arg robot_id)"/>
+		<arg name="base_frame" value="$(arg prefix)/base_link"/>
+		<arg name="ppl_topic" value="$(arg topic_prefix)/people_tracker/positions"/>
+		<arg name="person_topic" value="$(arg topic_prefix)/human_perception/tracked_persons"/>
+		<arg name="target_frame" value="$(arg prefix)/base_link"/>
+		<arg name="map_frame" value="$(arg map_frame)"/>
+	</include>
+</launch>
