@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+ <!--
+    add rosbag?
+  -->
+
+<launch>
+  <arg name="robot_id" default="1"/>
+  <arg name="map_frame" value = "map_laser2d"/>
+
+  <!-- dont change, use robot_id -->
+  <arg name="prefix" default="robot$(arg robot_id)"/>
+  <arg name="topic_prefix" default="/$(arg prefix)"/>
+
+
+  <include file="$(find base_simulation)/launch/iliad_sim_ncfm_short_walk.launch">
+      <arg name="robot_id" value="$(arg robot_id)"/>
+      <arg name="rviz_config_file" value="$(find iliad_human_local_navigation)/config/working_example.rviz"/>
+  </include>
+
+  <include file="$(find nav_simulation)/launch/move_base_dwa.launch">
+    <arg name="cmd_vel_topic_rel" default="control/controller/cmd_vel"/>
+  </include>
+
+  <include file="$(find hri_simulation)/launch/spencer_ground_truth.launch">
+      <arg name="robot_id" value = "$(arg robot_id)"/>
+  </include>
+
+  <include file="$(find hri_simulation)/launch/hrsi.launch">
+    <arg name="map_frame" value = "$(arg map_frame)"/>
+  </include>
+
+  <include file="$(find iliad_human_local_navigation)/launch/s2b.launch"/>
+
+</launch>

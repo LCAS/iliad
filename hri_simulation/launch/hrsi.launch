@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
- <!-- 
+ <!--
   requires:
     - a working forklift (or simulation): tfs, kinect2, velodyne, lasers ...
     - an human aware dwa local planner in a move_base stack.
@@ -9,6 +9,7 @@
   -->
 
 <launch>
+<<<<<<< HEAD
 
     <arg name="robot_id" default="5"/>
 
@@ -24,6 +25,12 @@
 	<arg name="person_topic" default="$(arg topic_prefix)/human_perception/tracked_persons"/>
 
    
+=======
+    <arg name="prefix"       default="robot1"/>
+    <arg name="topic_prefix" default="/robot1"/>
+    <arg name="map_frame" default="map"/>
+
+>>>>>>> c1c926f39dc66539d5ea7c65531f7e64befff6cc
 
     <group ns="$(arg prefix)">
 
@@ -31,6 +38,7 @@
 
 
         <include file="$(find hrsi_launch)/launch/hrsi.launch">
+            <arg name="target_frame" value="map_laser2d"/>
             <arg name="with_qsr_lib" value="true"/>
             <arg name="with_qsr_prob_rep" value="true"/>
             <arg name="goal_topic"   value="/move_base/current_goal"/>
@@ -46,6 +54,7 @@
             <arg name="qtc_arr_topic"       value = "$(arg topic_prefix)/online_qtc_creator/qtc_array"/>
             <arg name="robot_topic"         value = "$(arg topic_prefix)/robot_pose"/>
             <arg name="robotST_topic"       value = "$(arg topic_prefix)/robot_poseST"/>
+<<<<<<< HEAD
 	    <arg name="target_frame"        value = "$(arg target_frame)"/>
             
         </include>
@@ -56,6 +65,24 @@
 	    <param name="base_frame"	    value = "$(arg base_frame)"/>
 	    <param name="map_frame"	    value = "$(arg map_frame)"/>
 	</node>
+=======
+
+        </include>
+
+        <!-- Publishes robot position related to map frame coordinates. Used by online_qtc_creator -->
+        <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
+              <param name="map_frame" value="$(arg map_frame)"/>
+              <param name="base_frame" value="$(arg prefix)/base_link"/>
+              <param name="is_stamped" value="true"/>
+              <remap from="robot_pose" to="robot_poseST"/>
+        </node>
+        <!-- Publishes robot position related to map frame coordinates. Used by online_qtc_creator -->
+        <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_pose_publisher" output="screen">
+              <param name="map_frame" value="$(arg map_frame)"/>
+              <param name="base_frame" value="$(arg prefix)/base_link"/>
+              <param name="is_stamped" value="false"/>
+        </node>
+>>>>>>> c1c926f39dc66539d5ea7c65531f7e64befff6cc
 
 	<node pkg="robot_pose_publisher" name="robot_pose_publisher_stamped" type="robot_pose_publisher">
 	    <param name="robotST_topic"	    value = "$(arg topic_prefix)/robot_poseST"/>
@@ -65,6 +92,7 @@
 	    <remap from="$(arg topic_prefix)/robot_pose" to="$(arg topic_prefix)/robot_poseST"/>
 	</node>
 
+<<<<<<< HEAD
 	<node pkg="iliad_human_local_navigation" type="spencer_to_bayes.py" name="spencer_to_bayes">
 	    <param name="person_topic" value="$(arg person_topic)"/>
 	    <param name="target_frame" value="$(arg target_frame)"/>
@@ -74,8 +102,10 @@
 
     </group>
 
+=======
+>>>>>>> c1c926f39dc66539d5ea7c65531f7e64befff6cc
 
-</launch> 
 
 
 
+</launch>
