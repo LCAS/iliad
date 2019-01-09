@@ -16,12 +16,16 @@
 
 -->
 <launch>
+
+      <arg name="robot_id" default="5"/>
       
-      <arg name="prefix"        default="robot4"/>
-      <arg name="topic_prefix"  default="/robot4"/>
+      <arg name="prefix"        default="robot$(arg robot_id)"/>
+      <arg name="topic_prefix"  default="/$(arg prefix)"/>
       
-      <arg name="odom_topic" default="$(arg prefix)/odom_enc" />
-      <arg name="cmd_vel_topic" default="$(arg topic_prefix)/control/controller/cmd_vel" />
+      <!--arg name="odom_topic" default="$(arg prefix)/odom_enc" /-->
+      <!--arg name="cmd_vel_topic" default="$(arg topic_prefix)/control/controller/cmd_vel" /-->
+
+      <arg name="map_frame" default="map_laser2d"/>
 
       <!--group ns="$(arg prefix)"-->
          <!-- 
@@ -44,9 +48,9 @@
 	</node>
 
         <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-          <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/> 
-          <remap from="odom" to="$(arg odom_topic)"/>
-          <remap from="$(arg topic_prefix)/map" to="/maps/map_laser2d" />
+          <remap from="cmd_vel" to="$(arg topic_prefix)/control/controller/cmd_vel"/> 
+          <remap from="odom" to="$(arg prefix)/odom"/>
+          <remap from="$(arg topic_prefix)/map" to="/maps/$(arg map_frame)" />
           
           <!-- common params -->
           <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
@@ -68,7 +72,7 @@
           <param name="controller_frequency" value="2.0" />
           <param name="controller_patience" value="15.0" />
 
-	  <param name="map_frame" value="map_laser2d"/>
+	  <param name="map_frame" value="$(arg map_frame)"/>
 
           <rosparam file="$(find nav_simulation)/params/dwa_local_planner_params.yaml" command="load" />
 
