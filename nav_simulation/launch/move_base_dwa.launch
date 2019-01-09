@@ -17,7 +17,7 @@
 -->
 <launch>
 
-      <arg name="robot_id" default="5"/>
+      <arg name="robot_id" default="4"/>
       
       <arg name="prefix"        default="robot$(arg robot_id)"/>
       <arg name="topic_prefix"  default="/$(arg prefix)"/>
@@ -49,26 +49,9 @@
 
         <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
           <remap from="cmd_vel" to="$(arg topic_prefix)/control/controller/cmd_vel"/> 
-          <remap from="odom" to="$(arg prefix)/odom"/>
+          <remap from="odom" to="$(arg prefix)/odom_enc"/>
           <remap from="$(arg topic_prefix)/map" to="/maps/$(arg map_frame)" />
           
-      <arg name="prefix"        default="robot1"/>
-      <arg name="topic_prefix"  default="/robot1"/>
-
-      <arg name="odom_topic" default="odom" />
-      <arg name="cmd_vel_topic_rel" default="move_base/cmd_vel" />
-
-      <group ns="$(arg prefix)">
-         <!--
-              This param needs to be set under this group, or
-              robot_state_publisher wont publish tf properly
-         -->
-        <param name="tf_prefix" value="$(arg prefix)" />
-
-        <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-          <remap from="cmd_vel" to="$(arg cmd_vel_topic_rel)"/>
-          <remap from="odom" to="$(arg odom_topic)"/>
-          <remap from="$(arg topic_prefix)/map" to="/map" />
 
           <!-- common params -->
           <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
@@ -99,10 +82,6 @@
            <!-- change dwa parameters that is robot-dependant -->
           <rosparam param="velocity_costmap_topic" subst_value="True">$(arg topic_prefix)/velocity_costmap_server/velocity_costmap</rosparam>
 
-      </node>
+        </node>
      
-    <!--/group-->
-
-    </group>
-
 </launch>

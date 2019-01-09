@@ -10,7 +10,7 @@
 
 <launch>
 
-    <arg name="robot_id" default="5"/>
+    <arg name="robot_id" default="4"/>
 
     <arg name="prefix"       default="robot$(arg robot_id)"/>
     <arg name="topic_prefix" default="/$(arg prefix)"/>
@@ -21,21 +21,10 @@
 
 	<arg name="target_frame" default="map_laser2d"/>
 
-	<arg name="person_topic" default="$(arg topic_prefix)/human_perception/tracked_persons"/>
-
-   
-    <arg name="prefix"       default="robot1"/>
-    <arg name="topic_prefix" default="/robot1"/>
-    <arg name="map_frame" default="map"/>
-
-
-    <group ns="$(arg prefix)">
-
-
+	<arg name="person_topic" default="$(arg topic_prefix)/perception/tracked_persons"/>
 
 
         <include file="$(find hrsi_launch)/launch/hrsi.launch">
-            <arg name="target_frame" value="map_laser2d"/>
             <arg name="with_qsr_lib" value="true"/>
             <arg name="with_qsr_prob_rep" value="true"/>
             <arg name="goal_topic"   value="/move_base/current_goal"/>
@@ -62,21 +51,6 @@
 	    <param name="map_frame"	    value = "$(arg map_frame)"/>
 	</node>
 
-        </include>
-
-        <!-- Publishes robot position related to map frame coordinates. Used by online_qtc_creator -->
-        <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
-              <param name="map_frame" value="$(arg map_frame)"/>
-              <param name="base_frame" value="$(arg prefix)/base_link"/>
-              <param name="is_stamped" value="true"/>
-              <remap from="robot_pose" to="robot_poseST"/>
-        </node>
-        <!-- Publishes robot position related to map frame coordinates. Used by online_qtc_creator -->
-        <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_pose_publisher" output="screen">
-              <param name="map_frame" value="$(arg map_frame)"/>
-              <param name="base_frame" value="$(arg prefix)/base_link"/>
-              <param name="is_stamped" value="false"/>
-        </node>
 
 	<node pkg="robot_pose_publisher" name="robot_pose_publisher_stamped" type="robot_pose_publisher">
 	    <param name="robotST_topic"	    value = "$(arg topic_prefix)/robot_poseST"/>
@@ -91,12 +65,5 @@
 	    <param name="target_frame" value="$(arg target_frame)"/>
 	    <param name="ppl_topic" value="$(arg ppl_topic)"/>
 	</node>
-
-
-    </group>
-
-
-
-
 
 </launch>
