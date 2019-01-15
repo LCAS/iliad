@@ -53,6 +53,26 @@
         <rosparam file="$(find nav_simulation)/params/local_costmap_params.yaml" command="load" />
         <rosparam file="$(find nav_simulation)/params/global_costmap_params.yaml" command="load" />
 
+	<rosparam param="local_costmap/obstacle_layer/nav_laser_scan_sensor/topic" subst_value="True">
+               $(arg topic_prefix)/sensors/laser2d_top_fil
+        </rosparam>
+	<rosparam param="local_costmap/obstacle_layer/safe_laser_scan_sensor/topic" subst_value="True">
+               $(arg topic_prefix)/sensors/laser2d_floor_fil
+        </rosparam>
+	<rosparam param="local_costmap/robot_base_frame" subst_value="True">
+               $(arg prefix)/base_link
+        </rosparam>
+
+	<rosparam param="global_costmap/obstacle_layer/nav_laser_scan_sensor/topic" subst_value="True">
+               $(arg topic_prefix)/sensors/laser2d_top_fil
+        </rosparam>
+	<rosparam param="global_costmap/obstacle_layer/safe_laser_scan_sensor/topic" subst_value="True">
+               $(arg topic_prefix)/sensors/laser2d_floor_fil
+        </rosparam>
+	<rosparam param="global_costmap/robot_base_frame" subst_value="True">
+               $(arg prefix)/base_link
+        </rosparam>
+
         <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
         <!-- How long to allow for oscillation before executing recovery behaviors.  0.0 == infinite timeout -->
         <param name="oscillation_timeout" value="10.0" />

@@ -6,7 +6,7 @@ TebLocalPlannerROS:
  # configuration parameters are obtained from citi1_simulation.cfg in orunav_params package
 
 
- odom_topic: robot4/odom_enc
+ odom_topic: /odom_enc
  map_frame: map_laser2d
     
  # Trajectory
