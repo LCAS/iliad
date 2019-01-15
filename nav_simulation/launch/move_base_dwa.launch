@@ -69,6 +69,12 @@
 	  <rosparam param="local_costmap/robot_base_frame" subst_value="True">
                $(arg prefix)/base_link
           </rosparam>
+          <rosparam param="local_costmap/global_frame" subst_value="True">
+               $(arg map_frame)
+          </rosparam>
+          <rosparam param="local_costmap/static_layer/map_topic" subst_value="True">
+               /maps/$(arg map_frame)
+          </rosparam>
 
 	  <rosparam param="global_costmap/obstacle_layer/nav_laser_scan_sensor/topic" subst_value="True">
                $(arg topic_prefix)/sensors/laser2d_top_fil
@@ -78,6 +84,12 @@
           </rosparam>
 	  <rosparam param="global_costmap/robot_base_frame" subst_value="True">
                $(arg prefix)/base_link
+          </rosparam>
+          <rosparam param="global_costmap/global_frame" subst_value="True">
+               $(arg map_frame)
+          </rosparam>
+          <rosparam param="global_costmap/static_layer/map_topic" subst_value="True">
+               /maps/$(arg map_frame)
           </rosparam>
 
           <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
@@ -98,6 +110,10 @@
 	  <param name="base_frame" value="$(arg base_frame)"/>
 
           <rosparam file="$(find nav_simulation)/params/dwa_local_planner_params.yaml" command="load" />
+
+          <rosparam param="DWAPlannerROS/global_frame_id" subst_value="True">
+               $(arg map_frame)
+          </rosparam>
 
           <rosparam file="$(find nav_simulation)/params/move_base_params.yaml" command="load" />
 
