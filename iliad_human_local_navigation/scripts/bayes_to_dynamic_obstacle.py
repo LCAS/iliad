@@ -11,8 +11,10 @@ class BayesToDynamicObstacle:
 	"""Converts Bayes People Tracker input to Dynamic Obstacle output"""
 	
 	def __init__(self):
-		self.pub = rospy.Publisher('/test_optim_node/obstacles',ObstacleArrayMsg,queue_size=1)
-		rospy.Subscriber('/robot4/people_tracker/positions',PeopleTracker,callback=self.people_tracker_callback)
+		ppl_topic = rospy.get_param("~ppl_topic", "/robot4/people_tracker/positions")
+		obstacle_msg = rospy.get_param("~obstacle_msg", "/move_base/TebLocalPlannerROS/obstacles")
+		self.pub = rospy.Publisher(obstacle_msg,ObstacleArrayMsg,queue_size=1)
+		rospy.Subscriber(ppl_topic,PeopleTracker,callback=self.people_tracker_callback)
 
 	def people_tracker_callback(self, msg):
 		obstacle_msg = ObstacleArrayMsg()
