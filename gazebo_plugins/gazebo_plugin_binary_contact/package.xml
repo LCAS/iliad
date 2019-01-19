@@ -1,0 +1,44 @@
+<package>
+  <name>gazebo_plugin_binary_contact</name>
+  <version>0.0.1</version>
+  <description>
+	  Gazebo  basic binary contact sensor.
+
+  </description>
+  <maintainer email="mfernandezcarmona@lincoln.ac.uk">Manuel Fernandez-Carmona</maintainer>
+
+  <license>BSD</license>
+
+  <!-- <url type="bugtracker"></url> -->
+
+  <author email="mfernandezcarmona@lincoln.ac.uk">Manuel Fernandez-Carmona</author>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed to compile this package. -->
+  <build_depend>roscpp</build_depend>
+  <build_depend>gazebo</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>diagnostic_msgs</build_depend>
+  <build_depend>std_srvs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>message_generation</build_depend>  <!-- solves genjava gradle compiling error-->
+  <build_depend>message_runtime</build_depend>  <!-- solves genjava gradle compiling error-->
+  <build_depend>tf</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>roscpp</run_depend>
+  <run_depend>gazebo_ros</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>diagnostic_msgs</run_depend>
+  <run_depend>std_srvs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+
+</package>

@@ -1,57 +1,31 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(gazebo_plugin_actor_collision)
 
-## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS roscpp)
-include_directories(include ${catkin_INCLUDE_DIRS})
+find_package(catkin REQUIRED COMPONENTS
+  gazebo_plugins
+  gazebo_ros
+  roscpp
+)
 
-## Find gazebo
-find_package(gazebo REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
-include_directories(${GAZEBO_INCLUDE_DIRS})
-link_directories(${GAZEBO_LIBRARY_DIRS})
-
-
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if you package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
+find_package (gazebo REQUIRED)
 
 catkin_package(
-    DEPENDS gazebo
-    CATKIN_DEPENDS 
-    LIBRARIES
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS gazebo_plugins gazebo_ros roscpp
 )
 
 ###########
 ## Build ##
 ###########
 
-add_library(ActorCollisionsPlugin SHARED ActorCollisionsPlugin.cc)
-target_link_libraries(ActorCollisionsPlugin ${GAZEBO_LIBRARIES})
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
-
-#############
-## Install ##
-#############
-
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
+link_directories(${GAZEBO_LIBRARY_DIRS})
+include_directories(include)
+include_directories( ${catkin_INCLUDE_DIRS} 
+                     ${Boost_INCLUDE_DIR} 
+                     ${GAZEBO_INCLUDE_DIRS}
 )
 
-install(TARGETS
-  ActorCollisionsPlugin
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+add_library(ActorCollisionsPlugin src/ActorCollisionsPlugin.cc)
+
