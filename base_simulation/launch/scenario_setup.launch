@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+ <!--
+     Launches a world for taros experimenting
+-->
+
+<launch>
+  <arg name="scenario_id" default="1"/>
+  <!-- scenario_id == 1 Robot crossess left of human         -->
+  <!-- scenario_id == 2 Robot crossess right of human        -->
+  <!-- scenario_id == 3 Robot crossess is overtaken by human -->
+  <!-- scenario_id == 4 Robot crossess crosses human         -->
+
+  <arg name="world_file" value="$(find base_simulation)/worlds/ncfm_model_1_actor_scenario-1.world" if="$(eval arg('scenario_id') == 1)"/>
+  <arg name="world_file" value="$(find base_simulation)/worlds/ncfm_model_1_actor_scenario-2.world" if="$(eval arg('scenario_id') == 2)"/>
+  <arg name="world_file" value="$(find base_simulation)/worlds/ncfm_model_1_actor_scenario-3.world" if="$(eval arg('scenario_id') == 3)"/>
+  <arg name="world_file" value="$(find base_simulation)/worlds/ncfm_model_1_actor_scenario-4.world" if="$(eval arg('scenario_id') == 4)"/>
+
+  <!-- PARAMS ...................................................... -->
+  <arg name="gazeboGui" default="true"/>
+  <arg name="rvizGui" default="true"/>
+  <arg name="gazeboPause"  default="true"/>
+  <arg name="cmd_vel_topic" default="controller/cmd_vel" />
+
+  <arg name="robot_id"  default="1"/>
+  <arg name="prefix" default="robot$(arg robot_id)"/>
+
+  <arg name="rviz_config_file" default="$(find base_simulation)/rviz/iliad_cititruck.rviz"/>
+
+  <arg name="robot_pose_x" default="-20.0"/>
+  <arg name="robot_pose_y" default="3.3"/>
+  <arg name="robot_pose_roll" default="0.0"/>
+  <arg name="robot_pose_pitch" default="0.0"/>
+  <arg name="robot_pose_yaw" default="-1.57"/>
+
+  <include file="$(find base_simulation)/launch/iliad_sim.launch">
+        <arg name="world_name" value="$(arg world_file)"/>
+        <arg name="rviz_config_file" value="$(arg rviz_config_file)"/>
+        <arg name="yaml_map_file" value="$(find gazebo_worlds_oru)/maps/ncfm_sim.yaml"/>
+        <arg name="gazeboGui"  value="$(arg gazeboGui)"/>
+        <arg name="gazeboPause"  value="$(arg gazeboPause)"/>
+        <arg name="rvizGui"    value="$(arg rvizGui)"/>
+        <arg name="robot_id"     value="$(arg robot_id)"/>
+        <arg name="prefix" value="robot$(arg robot_id)"/>
+        <arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)"/>
+
+        <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
+        <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
+        <arg name="robot_pose_roll" value="$(arg robot_pose_roll)"/>
+        <arg name="robot_pose_pitch" value="$(arg robot_pose_pitch)"/>
+        <arg name="robot_pose_yaw" value="$(arg robot_pose_yaw)"/>
+  </include>
+
+  <include file="$(find contact_monitor)/launch/contactMonitor.launch"/>
+
+</launch>

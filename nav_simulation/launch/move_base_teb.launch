@@ -11,13 +11,15 @@
 
 -->
 <launch>
-	
-      <arg name="prefix"        default="robot1"/>
-      <arg name="topic_prefix"  default="/robot1"/>
+      <arg name="robot_id"        default="1"/>
+      <arg name="prefix"        default="robot$(arg robot_id)"/>
+      <arg name="topic_prefix"  default="/$(arg prefix)"/>
+      <arg name="tf_prefix" value="$(arg prefix)"/>
+
       
       <arg name="odom_topic" default="odom" />
       <arg name="cmd_vel_topic" default="controller/cmd_vel" />
-	
+    
       <group ns="$(arg prefix)"> 
          <!-- 
               This param needs to be set under this group, or 
