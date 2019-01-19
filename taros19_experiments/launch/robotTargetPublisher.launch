@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+ <!--
+
+-->
+
+<launch>
+  <arg name="robot_id"  default="1"/>
+
+  <arg name="target_x" default="7.53"/>
+  <arg name="target_y" default="-2.7"/>
+  <arg name="target_ox" default="0.0"/>
+  <arg name="target_oy" default="0.0"/>
+  <arg name="target_oz" default="0.0"/>
+  <arg name="target_ow" default="1.0"/>
+  <!-- INCLUDES .................................................... -->
+
+  <!-- TF prefix of robot -->
+  <arg name="prefix" default="robot$(arg robot_id)"/>
+
+  <!-- WORLD A variation of the original with only one person as described avobe  -->
+  <node pkg="rostopic" type="rostopic" name="robot_goal_pub"
+    args="pub /$(arg prefix)/move_base_simple/goal geometry_msgs/PoseStamped '{header: { seq: 0,   stamp: {secs: 0, nsecs: 0}, frame_id: 'world'}, pose: {  position: { x: $(arg target_x), y: $(arg target_y), z: 0.0}, orientation:{ x: $(arg target_ox),  y: $(arg target_oy), z: $(arg target_oz), w: $(arg target_ow)}}}' -1 --latch" output="screen"/>
+
+</launch>
