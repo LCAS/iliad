@@ -1,98 +1,72 @@
 <?xml version="1.0"?>
 
 <!--
-    Navigation stack 
+    Navigation stack
 
     This file is to be launched after starting robot driver and sensors (or any of its simulations in base_simulation).
     It is based upon click_n_pick launch
-    
+
+
+
+
+
+
+
+
+
 -->
-
 <launch>
-      <arg name="robot_id"        default="1"/>
-      <arg name="prefix"        default="robot$(arg robot_id)"/>
-      <arg name="topic_prefix"  default="/$(arg prefix)"/>
-      <arg name="tf_prefix" value="$(arg prefix)"/>
+    <arg name="robot_id"        default="1"/>
+    <arg name="prefix"        default="robot$(arg robot_id)"/>
+    <arg name="topic_prefix"  default="/$(arg prefix)"/>
+    <arg name="tf_prefix" value="$(arg prefix)"/>
 
-  <rosparam command="load" file="$(find orunav_params)/config/global.cfg"/>
-  <rosparam command="load" file="$(find orunav_params)/config/citi1_simulation.cfg" />
+    <!-- Unused. Only here to match other launchers  -->
+    <arg name="odom_topic" default="odom" />
+    <arg name="cmd_vel_topic_rel" default="move_base/cmd_vel" />
+    <arg name="map_frame" default="map_laser2d"/>
+    <arg name="map_topic" default="map_laser2d"/>
 
-  <node pkg="orunav_vehicle_execution" type="point_n_click_target_client" name="point_n_click_target_client_citi1" output="screen">
-    <param name="load_operation" value="true" />
-    <param name="load_detect" value="true" />
-    <rosparam param="robot_ids">[1]</rosparam>
-    <param name="multiple_vehicles" value="true" />
-  </node>
+    <arg name="base_frame" default="$(arg prefix)/base_link"/>
 
-  <node pkg="orunav_coordinator_fake" type="coordinator_fake_node" name="coordinator_fake_node" output="screen">
-    <param name="multiple_vehicles" value="true" />
-    <param name="use_ct" value="false" />  
-  </node>
+    <rosparam command="load" file="$(find nav_simulation)/params/oru_nav.yaml"/>
+    <rosparam command="load" file="$(find iliad_launch_system)/config/robots/$(arg prefix)_sim.yaml"/>
 
-  <!-- ALL ROBOT SPECIFIC TASKS -->
+    <include file="$(find iliad_launch_system)/launch/subsystems/coordination/coordination-scripted.launch">
+        <arg name="sim"      value="true"/>
+        <arg name="fake"   value="false"/>
+    </include>
 
-  <group ns="$(arg tf_prefix)">
-    <param name="tf_prefix" value="$(arg tf_prefix)" />
+    <include file="$(find iliad_launch_system)/launch/robots/get_path_service.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+    </include>
 
-    <node pkg="orunav_mpc" type="controller_node" name="controller" output="screen">
-        <param name="robot_id" value="$(arg robot_id)" />
-        <remap from="/$(arg tf_prefix)/cmd_vel" to ="/$(arg tf_prefix)/controller/cmd_vel"/>
-    </node>
-    <include file="$(find orunav_fork_control)/launch/fork_control_sim.launch"/>
+    <include file="$(find iliad_launch_system)/launch/robots/polygonconstraint_service.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+    </include>
 
-    <node pkg="orunav_motion_planner" type="get_path_service" name="get_path_service" output="screen">      
-        <param name="model" value="CiTiTruck_Expanded10+20_16_1_4.0_0.2.reduced"/>
-        <param name="motion_primitives_directory" value="$(find orunav_motion_planner)/Primitives/" />
-        <param name="lookup_tables_directory" value="$(find orunav_motion_planner)/LookupTables/" /> 
-        <param name="min_incr_path_dist" value="0.2" />
-        <param name="visualize" value="true" />
-    </node>
+    <include file="$(find iliad_launch_system)/launch/robots/smoothed_path_service.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+    </include>
 
-    <node pkg="orunav_constraint_extract" type="polygonconstraint_service" name="polygonconstraint_service" output="screen">
-        <param name="load_type" value="1" />
-        <param name="model_type" value="2" />
-        <param name="visualize" value="false" />
-        <param name="save_constraints_and_path" value="true" />
-        <param name="lookuptables_file" value="$(find orunav_constraint_extract)/tables/service_lookup_model2load1.dat" />
-        <param name="visualize_outer_constraints" value="false" />
-        <param name="visualize_only_invalid" value="false" />
-        <param name="skip_overlap" value="true" />
-        <param name="save_lookuptables" value="false" />
-    </node>  
+    <include file="$(find iliad_launch_system)/launch/robots/smoothed_straight_service.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+    </include>
 
-    <node pkg="orunav_path_smoother" type="smoothed_path_service" name="smoothed_path_service" output="screen">
-        <param name="visualize" value="true" />
-        <param name="visualize_deep" value="false" />
-        <param name="wheel_base" value="1.190" />
-        <param name="minimize_phi_and_dist" value="true" />
-        <param name="init_controls" value="true" />
-        <param name="use_th_constraints" value="true" />
-        <param name="use_xy_constraints" value="true" />
-        <param name="phi_min" value="-1.0" /> <!-- -0.9 -->
-        <param name="phi_max" value="1.0" />  <!-- 0.9 -->
-        <param name="reassign_constraints" value="true" />
-        <param name="reassign_iters" value="1" />
-        <param name="reassign_min_distance" value="0.1" />
-    </node>  
+    <include file="$(find iliad_launch_system)/launch/robots/deltatvec_service.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+    </include>
 
-    <node pkg="orunav_vehicle_execution" type="orunav_vehicle_execution_node" name="orunav_vehicle_execution_node_citi1" output="screen">
-        <param name="visualize" value="true" />
-        <param name="max_tracking_error" value="-1." />
-        <param name="use_forks" value="false" />
+    <include file="$(find iliad_launch_system)/launch/robots/fork_control.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+        <arg name="robot_type"   value="cititruck"/>
+    </include>
 
-        <param name="max_vel" value="0.3" />
-        <param name="max_rotational_vel" value="0.3" />
-        <param name="max_acc" value="0.1" />
-    </node>
-
-    <node pkg="orunav_path_smoother" type="smoothed_straight_path_service" name="smoothed_straight_path_service" output="screen">
-        <param name="visualize" value="true" />
-    </node>  
-
-    <node pkg="orunav_vehicle_execution" type="vehicle_execution_client" name="citi1_vehicle_client" output="screen">
-        <param name="targets_file_name" value="$(find orunav_vehicle_execution)/targets/basement_pallet_targets.dat" />
-    </node>
-    
-  </group>
+    <include file="$(find iliad_launch_system)/launch/robots/vehicle_execution_node.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+        <arg name="safety_laser_topic" value="/laser2d_floor_fil"/>
+        <arg name="safety_laser_topic2" value="/laser2d_top_fil"/>
+        <arg name="use_safetyregions" value="true"/>
+    </include>
 
 </launch>

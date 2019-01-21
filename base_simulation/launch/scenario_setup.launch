@@ -20,6 +20,9 @@
   <arg name="rvizGui" default="true"/>
   <arg name="gazeboPause"  default="true"/>
   <arg name="cmd_vel_topic" default="controller/cmd_vel" />
+  <arg name="useTwist" default="true"/>
+  <arg name="map_frame" default="map_laser2d"/>
+  <arg name="map_topic" default="map_laser2d"/>
 
   <arg name="robot_id"  default="1"/>
   <arg name="prefix" default="robot$(arg robot_id)"/>
@@ -42,6 +45,9 @@
         <arg name="robot_id"     value="$(arg robot_id)"/>
         <arg name="prefix" value="robot$(arg robot_id)"/>
         <arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)"/>
+        <arg name="map_frame" value="$(arg map_frame)"/>
+        <arg name="map_topic" value="$(arg map_topic)"/>
+        <arg name="useTwist" value="$(arg useTwist)"/>
 
         <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
         <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>

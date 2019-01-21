@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 
 '''
+Like velParser but decouples incoming command from applied command.
+Why? Because a single Vtrans,Vrot can mean different Vm,Omega depending on the
+current wheel orientation .
+
 
 Reads a Twist containing translational vel and rotational vel and casts to another where we have
 motor wheel linear velocity and turning speed (tricycle model)
 
 It was 'very' loosely inspired by:
 http://wiki.ros.org/teb_local_planner/Tutorials/Planning%20for%20car-like%20robots
-
-TODO: in some cases we get into a loop sending commands to the forklift: not a good thing...
 
 '''
 
@@ -34,7 +36,7 @@ class vParser():
             #print currentTopics
             isRunning = (topicFullName in currentTopics) or ('/'+topicFullName in currentTopics)
             if not isRunning:
-                rospy.logerr('Topic '+topicFullName+' not found. Waiting 2 secs ...')
+                rospy.loginfo('Topic '+topicFullName+' not found. Waiting 2 secs ...')
                 rospy.sleep(2.)
         return
 
@@ -48,16 +50,22 @@ class vParser():
         # Other config params
         self.rel_yaw = 0.0
         # when casting angle increment to rot speed, use this factor (Hz.)
-        self.omegaFreq = 0.2
-        self.maxSpeed = 1
-        self.maxRotSpeed = 2.5
+        self.omegaFreq = 20.0
+        self.publishTime = 1.0/self.omegaFreq
+        self.watchdogTime = 0.1
         # ................................................................
+        # initial state
+        self.v = 0
+        self.omega = 0
+        self.watchdogTimer = rospy.Timer(rospy.Duration(
+            self.watchdogTime), self.stopRobot, oneshot=True)
+
         # start ros subs/pubs/servs....
         self.initROS()
 
-        rospy.loginfo("[%s] Node started.\nListening to %s, publishing to %s.",
-                      rospy.get_name(), self.in_cmd_topic, self.out_cmd_topic)
-
+        rospy.loginfo("Node 'vel_parser' started.\nListening to %s, publishing to %s.",
+                      self.in_cmd_topic, self.out_cmd_topic)
+        self.periodicPublish(None)
         rospy.spin()
 
     def loadROSParams(self):
@@ -106,31 +114,10 @@ class vParser():
         else:
             # when turning in place, we can use this relation between speeds, as vtrans == 0
             vm = abs(vrot) * axesDist
-            rospy.logdebug("["+rospy.get_name()+"] " + 'Big turning angle ({0}), turning in place vm: ({1})'.format(
+            rospy.logdebug('Big turning angle ({0}), turning in place vm: ({1})'.format(
                 phi*180.0/math.pi, vm))
 
-        # GAZEBO UNDERSTANDS SPEEDS, NOT ANGLES. DO CONVERSION IF DEMANDED
-        if self.useOmega:
-            angDiff = self.wrapAngle(phi - self.getYaw())
-            if abs(angDiff) < self.phiTol:
-                angDiff = 0
-            omega_m = angDiff * self.omegaFreq
-        else:
-            omega_m = phi
-
-        if self.useOmega:
-            rospy.logdebug("["+rospy.get_name()+"] " +
-                           'Equals to (v_motrix, omega): ({0},{1})'.format(vm, omega_m))
-        else:
-            rospy.logdebug("["+rospy.get_name()+"] " +
-                           'Equals to (v_motrix, yaw): ({0},{1})'.format(vm, omega_m))
-
-        if vm > abs(self.maxSpeed):
-            vm = math.copysign(self.maxSpeed, vm)
-        if omega_m > abs(self.maxRotSpeed):
-            omega_m = math.copysign(self.maxRotSpeed, omega_m)
-
-        return (vm, omega_m)
+        return (vm, phi)
 
     def wrapAngle(self, a):
         phase = (a + math.pi) % (2 * math.pi) - math.pi
@@ -140,30 +127,49 @@ class vParser():
         return self.rel_yaw
 
     def cmd_callback(self, data):
+        # what I get from the incoming data
+        self.v = data.linear.x
+        self.omega = data.angular.z
+        rospy.logdebug('Received (vtrans, vrot): ({0},{1})'.format(self.v, self.omega))
+        self.watchdogTimer.shutdown()
+        self.watchdogTimer = rospy.Timer(rospy.Duration(
+            self.watchdogTime), self.stopRobot, oneshot=True)
 
+    def stopRobot(self, evt):
+        self.v = 0
+        self.omega = 0
+
+    def publish_speeds(self):
         msg = Twist()
 
-        # what I get from the incoming data
-        v = data.linear.x
-        omega = data.angular.z
-
-        rospy.logdebug("["+rospy.get_name()+"] " +
-                       'Received (vtrans, vrot): ({0},{1})'.format(v, omega))
-
         # if received 0,0 just stop. don't mind aligning the wheel...
-        if (v == omega == 0.0):
+        if (self.v == self.omega == 0.0):
             msg.linear.x = 0.0
             msg.angular.z = 0.0
             self.pub.publish(msg)
             return
 
         # equivalence to motor wheel speed and steering wheel angle.
-        (v_m, omega_m) = self.velsToMotrix(v, omega, self.wheelsAxesDist)
+        (v_m, des_y) = self.velsToMotrix(self.v, self.omega, self.wheelsAxesDist)
+
+        # GAZEBO UNDERSTANDS SPEEDS, NOT ANGLES. DO CONVERSION IF DEMANDED
+        if self.useOmega:
+            angDiff = self.wrapAngle(des_y - self.getYaw())
+            if abs(angDiff) < self.phiTol:
+                angDiff = 0
+            omega_m = 0.21 * angDiff / self.publishTime
+        else:
+            omega_m = des_y
+
+        if self.useOmega:
+            rospy.logdebug('Equals to (v_motrix, omega): ({0},{1})'.format(v_m, omega_m))
+        else:
+            rospy.logdebug('Equals to (v_motrix, yaw): ({0},{1})'.format(v_m, omega_m))
 
         msg.linear.x = v_m
         msg.angular.z = omega_m
         self.pub.publish(msg)
-        rospy.logdebug("["+rospy.get_name()+"] " + 'Sended (v_m,omega_m): ({0},{1})'.format(
+        rospy.logdebug('Sended (v_m,omega_m): ({0},{1})'.format(
             msg.linear.x, msg.angular.z))
 
     def prev_cmd_callback(self, data):
@@ -173,7 +179,7 @@ class vParser():
         v = data.linear.x
         omega = data.angular.z
 
-        rospy.logdebug("["+rospy.get_name()+"] " + 'Received (v,omega): ({0},{1})'.format(v, omega))
+        rospy.logdebug('Received (v,omega): ({0},{1})'.format(v, omega))
 
         # if received 0,0 just stop. don't mind aligning the wheel...
         if (v == omega == 0.0):
@@ -185,9 +191,8 @@ class vParser():
         # equivalence to motor wheel speed and steering wheel angle.
         (v_m, des_y) = self.velsToMotrix(v, omega, self.wheelsAxesDist)
 
-        rospy.logdebug("["+rospy.get_name()+"] " +
-                       'Equals to (v_m,des_y): ({0},{1})'.format(v_m, des_y))
-        rospy.logdebug("["+rospy.get_name()+"] " + 'Current (yaw): ({0})'.format(self.getYaw()))
+        rospy.logdebug('Equals to (v_m,des_y): ({0},{1})'.format(v_m, des_y))
+        rospy.logdebug('Current (yaw): ({0})'.format(self.getYaw()))
 
         # achieve command in two steps:
         # first step: turn motor wheel in place until we achieve desired orientation
@@ -214,7 +219,7 @@ class vParser():
 
                 self.pub.publish(msg)
                 hasTurned = abs(angDiff) < self.phiTol
-                rospy.logdebug("["+rospy.get_name()+"] " + 'Angle diff ({2}).Sending (v_m,omega_m): ({0},{1})'.format(
+                rospy.logdebug('Angle diff ({2}).Sending (v_m,omega_m): ({0},{1})'.format(
                     msg.linear.x, msg.angular.z, angDiff))
                 angDiffPrev = angDiff
 
@@ -229,7 +234,7 @@ class vParser():
         msg.angular.z = omega_m
 
         self.pub.publish(msg)
-        rospy.logdebug("["+rospy.get_name()+"] " + 'Achieved final angle ({2}).Sending (v_m,omega_m): ({0},{1})'.format(
+        rospy.logdebug('Achieved final angle ({2}).Sending (v_m,omega_m): ({0},{1})'.format(
             msg.linear.x, msg.angular.z, self.getYaw()))
 
     def steer_pose_callback(self, msg):
@@ -237,6 +242,11 @@ class vParser():
              msg.pose.orientation.z, msg.pose.orientation.w]
         (roll, pitch, yaw) = euler_from_quaternion(q)
         self.rel_yaw = yaw
+
+    def periodicPublish(self, evt):
+        self.publish_speeds()
+        rospy.logdebug("Next udpate in:"+str(self.publishTime))
+        rospy.Timer(rospy.Duration(self.publishTime), self.periodicPublish, oneshot=True)
 
 
 # Main function.

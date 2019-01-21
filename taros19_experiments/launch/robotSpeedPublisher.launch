@@ -5,7 +5,7 @@
 
 <launch>
   <arg name="robot_id"  default="1"/>
-  <arg name="trans_vel"  default="1"/>
+  <arg name="trans_vel"  default="0.25"/>
 
   <!-- TF prefix of robot -->
   <arg name="prefix" default="robot$(arg robot_id)"/>

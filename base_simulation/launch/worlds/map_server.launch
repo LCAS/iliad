@@ -2,7 +2,13 @@
 
 <launch>
   <arg name="yaml_map_file" default="$(find base_simulation)/maps/extra_room.yaml"/>
+  <arg name="frame_id" default="map"/>
+  <arg name="map_topic" default="map"/>
 
-  <node name="map_server" pkg="map_server" type="map_server" args="$(arg yaml_map_file)"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg yaml_map_file)">
+      <param name="frame_id" value="$(arg frame_id)"/>
+      <remap from="map" to="$(arg map_topic)"/>
+  </node>
+
 
 </launch>

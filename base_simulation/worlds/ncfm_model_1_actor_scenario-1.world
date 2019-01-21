@@ -3647,7 +3647,7 @@
             </contact>
           </sensor>
       </plugin>
-      <pose>-22 0.0 0 0 0 0</pose>
+      <pose>-22 -2.0 1.02 0 0 0</pose>
       <skin>
         <filename>walk.dae</filename>
         <scale>1.0</scale>
@@ -3658,7 +3658,7 @@
         <interpolate_x>true</interpolate_x>
       </animation>
       <script>
-        <delay_start>0.0</delay_start>
+        <delay_start>8.0</delay_start>
         <loop>false</loop>
         <auto_start>true</auto_start>
         <trajectory id="0" type="walking">
@@ -3668,7 +3668,7 @@
           </waypoint>
           <waypoint>
             <time>16</time>
-            <pose>-18 -2.0 0 0 0 0</pose>
+            <pose>-18.5 -2.0 0 0 0 0</pose>
           </waypoint>
         </trajectory>
       </script>

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export SCENARIO=${1:-1}
-export NAVIGATION=${2:-0}
+SCENARIO=${1:-1}
+NAVIGATION=${2:-0}
 
 case $SCENARIO in
 1)
@@ -45,9 +45,15 @@ session_name=$Message
 
 # you shouldn't need to change the following lines ...
 cd `rospack find taros19_experiments`/tmule/
+echo "------------------------------------------------------------------"
 echo "----------------- SYSTEM CONFIGURATION ---------------------------"
 echo "Scenario: ["$session_name"]"
+echo "------------------------------------------------------------------"
+echo "-  *  SETTING SCENARIO IN yaml file                              -"
+sed -i "s/SCENARIO=.*/\SCENARIO=\"$SCENARIO\"/g" ./experiment.yaml
+echo "-  *  SETTING NAVIGATION IN yaml file                            -"
+sed -i "s/NAVIGATION=.*/\NAVIGATION=\"$NAVIGATION\"/g" ./experiment.yaml
+echo "------------------------------------------------------------------"
 echo "--------------    LAUNCHING TMULE SCRIPT    ----------------------"
-
 tmule  --config experiment.yaml launch
 echo "------------------------------------------------------------------"

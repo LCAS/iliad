@@ -12,5 +12,7 @@ tmule  --config $TMULE_SCRIPT terminate
 
 echo "---------------- FORCING TMUX SESSION EXIT -----------------------"
 tmux kill-session -t tmule
-
+echo "--------------------- KILLING GAZEBO -----------------------------"
+pkill -9 gzclient
+pkill -9 gzserver
 echo "------------------------------------------------------------------"
