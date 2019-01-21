@@ -8,23 +8,23 @@ This should Crash!
 <launch>
   <!-- PARAMS ...................................................... -->
   <arg name="gazeboGui" default="true"/>
-  
-  
+  <arg name="rvizGui" default="true"/>
+  <arg name="robot_id" default="1"/>  
+
   <arg name="scenario_id" default="1"/>
   <!-- scenario_id == 1 Robot crossess left of human         -->
   <!-- scenario_id == 2 Robot crossess right of human        -->
   <!-- scenario_id == 3 Robot crossess is overtaken by human -->
   <!-- scenario_id == 4 Robot crossess crosses human         -->
-  
+
   <arg name="navigation_id" default="0"/>
   <!-- navigation_id == 0 No navigation stack  -->
   <!-- navigation_id == 1 DWA Navigation Stack -->
   <!-- navigation_id == 2 TEB Navigation Stack -->
   <!-- navigation_id == 3 MPC Navigation Stack -->
-  
-  <arg name="rvizGui" default="true"/>
-  <arg name="robot_id" default="1"/>
-    
+
+
+
   <!-- DERIVED ARGS ................................................ -->
   <!-- TF prefix of robot -->
   <arg name="prefix" default="robot$(arg robot_id)"/>
@@ -40,12 +40,12 @@ This should Crash!
   <arg name="rviz_config_file" value="$(find nav_simulation)/rviz/iliad_cititruck_dwa_nav.rviz" if="$(eval arg('navigation_id') == 1)"/>
   <arg name="rviz_config_file" value="$(find nav_simulation)/rviz/iliad_cititruck_teb_nav.rviz" if="$(eval arg('navigation_id') == 2)"/>
   <arg name="rviz_config_file" value="$(find nav_simulation)/rviz/iliad_cititruck_mpc_nav.rviz" if="$(eval arg('navigation_id') == 3)"/>
- 
- 
+
+
   <arg name="navigation_launch_file" value="$(find nav_simulation)/launch/move_base_dwa.launch" if="$(eval arg('navigation_id') == 1)"/>
   <arg name="navigation_launch_file" value="$(find nav_simulation)/launch/move_base_teb.launch" if="$(eval arg('navigation_id') == 2)"/>
   <arg name="navigation_launch_file" value="$(find nav_simulation)/launch/move_base_mpc.launch" if="$(eval arg('navigation_id') == 3)"/>
-      
+
   <!-- SET UP GAZEBO WORLD AND VISUALIZATION ....................... -->
   <include file="$(find base_simulation)/launch/scenario_setup.launch">
       <arg name="scenario_id" value="$(arg scenario_id)"/>
@@ -78,5 +78,5 @@ This should Crash!
 
   <node required="true" pkg="rosbag" type="record" name="recorder"
     args="record --duration=$(arg max_scenario_time) -o $(arg descriptor) /isColliding /$(arg prefix)/robot_pose /actor_pose" output="screen"/>
-    
+
 </launch>

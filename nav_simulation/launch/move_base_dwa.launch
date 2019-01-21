@@ -23,6 +23,10 @@
       <arg name="odom_topic" default="odom" />
       <arg name="cmd_vel_topic_rel" default="move_base/cmd_vel" />
 
+
+      <arg name="map_frame" default="map_laser2d"/>
+      <arg name="base_frame" default="$(arg prefix)/base_link"/>
+
       <group ns="$(arg prefix)">
          <!--
               This param needs to be set under this group, or
@@ -31,10 +35,10 @@
         <param name="tf_prefix" value="$(arg prefix)" />
 
         <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-          <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/> 
+          <remap from="cmd_vel" to="$(arg cmd_vel_topic_rel)"/>
           <remap from="odom" to="$(arg odom_topic)"/>
           <remap from="$(arg topic_prefix)/map" to="/maps/$(arg map_frame)" />
-          
+
 
           <!-- common params -->
           <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
@@ -75,5 +79,5 @@
           <rosparam param="velocity_costmap_topic" subst_value="True">$(arg topic_prefix)/velocity_costmap_server/velocity_costmap</rosparam>
 
         </node>
-
+     </group>
 </launch>
