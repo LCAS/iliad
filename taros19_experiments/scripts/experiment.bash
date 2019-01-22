@@ -14,8 +14,11 @@ case $SCENARIO in
   Message="Robot crossess is overtaken by human."
   ;;
 4)
-  Message="Robot crossess crosses human"
+  Message="Robot crossess crosses human."
   ;;
+5)
+    Message="No human at all."
+    ;;
 *)
   echo "Don't know Scenario "$SCENARIO"\n"
   exit

@@ -16,6 +16,7 @@ This should Crash!
   <!-- scenario_id == 2 Robot crossess right of human        -->
   <!-- scenario_id == 3 Robot crossess is overtaken by human -->
   <!-- scenario_id == 4 Robot crossess crosses human         -->
+  <!-- scenario_id == 5 No human at all                      -->
 
   <arg name="navigation_id" default="0"/>
   <!-- navigation_id == 0 No navigation stack  -->
@@ -43,8 +44,6 @@ This should Crash!
   <arg name="rviz_config_file" value="$(find nav_simulation)/rviz/iliad_cititruck_dwa_nav.rviz" if="$(eval arg('navigation_id') == 1)"/>
   <arg name="rviz_config_file" value="$(find nav_simulation)/rviz/iliad_cititruck_teb_nav.rviz" if="$(eval arg('navigation_id') == 2)"/>
   <arg name="rviz_config_file" value="$(find nav_simulation)/rviz/iliad_cititruck_mpc_nav.rviz" if="$(eval arg('navigation_id') == 3)"/>
-
-
 
   <arg name="navigation_launch_file" value="$(find nav_simulation)/launch/move_base_dwa.launch" if="$(eval arg('navigation_id') == 1)"/>
   <arg name="navigation_launch_file" value="$(find nav_simulation)/launch/move_base_teb.launch" if="$(eval arg('navigation_id') == 2)"/>
@@ -88,6 +87,6 @@ This should Crash!
   </node>
 
   <node required="true" pkg="rosbag" type="record" name="recorder"
-    args="record --duration=$(arg max_scenario_time) -o $(arg descriptor) /isColliding /$(arg prefix)/robot_pose /$(arg prefix)/control/report  /$(arg prefix)/move_base/status /actor_pose " output="screen"/>
+    args="record --duration=$(arg max_scenario_time) -o $(arg descriptor) /isColliding /$(arg prefix)/robot_pose /$(arg prefix)/control/report /$(arg prefix)/control/controller/reports  /$(arg prefix)/move_base/status /actor_pose " output="screen"/>
 
 </launch>
