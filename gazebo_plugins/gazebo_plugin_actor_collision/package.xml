@@ -22,11 +22,11 @@
   <build_depend>roscpp</build_depend>
   <build_depend>gazebo8</build_depend>
   <build_depend>gazebo8_ros</build_depend>
-  <build_depend>gazebo_plugins</build_depend>
+  <build_depend>gazebo8_plugins</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>roscpp</run_depend>
   <run_depend>gazebo8</run_depend>
   <run_depend>gazebo8_ros</run_depend>
-  <run_depend>gazebo_plugins</run_depend>run_depend>
+  <run_depend>gazebo8_plugins</run_depend>run_depend>
 </package>
