@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="robot_id" default="4"/>
+	<arg name="map_frame" value="map_laser2d"/>
+
+	<arg name="prefix" default="robot$(arg robot_id)"/>
+	<arg name="topic_prefix" default="/$(arg prefix)"/>
+	<arg name="base_frame" default="$(arg prefix)/base_link"/>
+
+	<include file="$(find nav_simulation)/launch/move_base_dwa.launch">
+		<arg name="robot_id" value="$(arg robot_id)"/>
+		<arg name="odom_topic" value="$(arg prefix)/odom_enc"/>
+		<arg name="cmd_vel_topic" value="$(arg topic_prefix)/control/controller/cmd_vel"/>
+		<arg name="map_frame" value="$(arg map_frame)"/>
+		<arg name="base_frame" value="$(arg base_frame)"/>
+	</include>
+
+	<include file="$(find hri_simulation)/launch/hrsi.launch">
+		<arg name="robot_id" value="$(arg robot_id)"/>
+		<arg name="base_frame" value="$(arg base_frame)"/>
+		<arg name="ppl_topic" value="$(arg topic_prefix)/people_tracker/positions"/>
+		<arg name="person_topic" value="$(arg topic_prefix)/perception/tracked_persons"/>
+		<arg name="target_frame" value="$(arg map_frame)"/>
+		<arg name="map_frame" value="$(arg map_frame)"/>
+	</include>
+</launch>

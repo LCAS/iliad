@@ -22,47 +22,49 @@
     <arg name="target_frame" default="map_laser2d"/>
 
     <arg name="person_topic" default="$(arg topic_prefix)/perception/tracked_persons"/>
+    <arg name="goal_topic" default="/move_base/current_goal"/>
 
     <group ns="$(arg prefix)">
-      <include file="$(find hrsi_launch)/launch/hrsi.launch">
-          <arg name="with_qsr_lib" value="true"/>
-          <arg name="with_qsr_prob_rep" value="true"/>
-          <arg name="goal_topic"   value="/move_base/current_goal"/>
-	  <!--<arg name="predictor_visualisation_file" value="$(find hrsi_state_prediction)/conf/visualisation.yaml"/>
-	  <arg name="model_dir" value="$(find hrsi_state_prediction)/models"/>-->
-          <arg name="ppl_topic"    value="$(arg ppl_topic)"/>
-          <arg name="qtc_topic"    value="$(arg topic_prefix)/qtc_state_predictor/prediction_array"/>
-          <arg name="vis_marker_topic"    value = "$(arg topic_prefix)/velocity_costmap_server/visualization_marker"/>
-          <arg name="vel_costmap_topic"   value = "$(arg topic_prefix)/velocity_costmap_server/velocity_costmap"/>
-          <arg name="origin_topic"        value = "$(arg topic_prefix)/velocity_costmap_server/origin"/>
-          <arg name="base_link_tf"        value = "$(arg base_frame)"/>
-          <arg name="move_base_topic"     value = "/move_base" />
-          <arg name="qtc_arr_topic"       value = "$(arg topic_prefix)/online_qtc_creator/qtc_array"/>
-          <arg name="robot_topic"         value = "$(arg topic_prefix)/robot_pose"/>
-          <arg name="robotST_topic"       value = "$(arg topic_prefix)/robot_poseST"/>
-	  <arg name="target_frame"        value = "$(arg target_frame)"/>            
-      </include>
+        <include file="$(find hrsi_launch)/launch/hrsi.launch">
+            <arg name="with_qsr_lib" value="true"/>
+            <arg name="with_qsr_prob_rep" value="true"/>
+            <arg name="qtc_type"            value="1"/>
+            <arg name="goal_topic"   value="$(arg goal_topic)"/>
+            <!--<arg name="predictor_visualisation_file" value="$(find hrsi_state_prediction)/conf/visualisation.yaml"/>
+            <arg name="model_dir" value="$(find hrsi_state_prediction)/models"/>-->
+            <arg name="ppl_topic"    value="$(arg ppl_topic)"/>
+            <arg name="qtc_topic"    value="$(arg topic_prefix)/qtc_state_predictor/prediction_array"/>
+            <arg name="vis_marker_topic"    value = "$(arg topic_prefix)/velocity_costmap_server/visualization_marker"/>
+            <arg name="vel_costmap_topic"   value = "$(arg topic_prefix)/velocity_costmap_server/velocity_costmap"/>
+            <arg name="origin_topic"        value = "$(arg topic_prefix)/velocity_costmap_server/origin"/>
+            <arg name="base_link_tf"        value = "$(arg base_frame)"/>
+            <arg name="move_base_topic"     value = "$(arg topic_prefix)/move_base" />
+            <arg name="qtc_arr_topic"       value = "$(arg topic_prefix)/online_qtc_creator/qtc_array"/>
+            <arg name="robot_topic"         value = "$(arg topic_prefix)/robot_pose"/>
+            <arg name="robotST_topic"       value = "$(arg topic_prefix)/robot_poseST"/>
+            <arg name="target_frame"        value = "$(arg target_frame)"/>
+        </include>
 
-      <node pkg="robot_pose_publisher" name="robot_pose_publisher" type="robot_pose_publisher">
-	  <param name="robot_topic"	    value = "$(arg topic_prefix)/robot_pose"/>
-	  <param name="is_stamped"	    value = "false"/>
-	  <param name="base_frame"	    value = "$(arg base_frame)"/>
-	  <param name="map_frame"	    value = "$(arg map_frame)"/>
-      </node>
+        <node pkg="robot_pose_publisher" name="robot_pose_publisher" type="robot_pose_publisher">
+            <param name="robot_topic"	    value = "$(arg topic_prefix)/robot_pose"/>
+            <param name="is_stamped"	    value = "false"/>
+            <param name="base_frame"	    value = "$(arg base_frame)"/>
+            <param name="map_frame"	    value = "$(arg map_frame)"/>
+        </node>
 
 
-      <node pkg="robot_pose_publisher" name="robot_pose_publisher_stamped" type="robot_pose_publisher">
-	  <param name="robotST_topic"	    value = "$(arg topic_prefix)/robot_poseST"/>
-	  <param name="is_stamped"	    value = "true"/>
-	  <param name="base_frame"	    value = "$(arg base_frame)"/>
-	  <param name="map_frame"	    value = "$(arg map_frame)"/>
-	  <remap from="$(arg topic_prefix)/robot_pose" to="$(arg topic_prefix)/robot_poseST"/>
-      </node>
+        <node pkg="robot_pose_publisher" name="robot_pose_publisher_stamped" type="robot_pose_publisher">
+            <param name="robotST_topic"	    value = "$(arg topic_prefix)/robot_poseST"/>
+            <param name="is_stamped"	    value = "true"/>
+            <param name="base_frame"	    value = "$(arg base_frame)"/>
+            <param name="map_frame"	    value = "$(arg map_frame)"/>
+            <remap from="$(arg topic_prefix)/robot_pose" to="$(arg topic_prefix)/robot_poseST"/>
+        </node>
 
-      <node pkg="iliad_human_local_navigation" type="spencer_to_bayes.py" name="spencer_to_bayes">
-	  <param name="person_topic" value="$(arg person_topic)"/>
-	  <param name="target_frame" value="$(arg target_frame)"/>
-	  <param name="ppl_topic" value="$(arg ppl_topic)"/>
-      </node>
+        <node pkg="iliad_human_local_navigation" type="spencer_to_bayes.py" name="spencer_to_bayes">
+            <param name="person_topic" value="$(arg person_topic)"/>
+            <param name="target_frame" value="$(arg target_frame)"/>
+            <param name="ppl_topic" value="$(arg ppl_topic)"/>
+        </node>
     </group>
 </launch>
