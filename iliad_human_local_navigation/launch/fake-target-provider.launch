@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+ <!--
+  reads the rosbag, looks for the last tf (a.k.a. where the robot goes) and republishes it as a goal
+-->
+
+<launch>
+  <arg name="robot_id" default="5"/>
+  <arg name="prefix" default="robot$(arg robot_id)"/>
+
+  <arg name="goal_pub_topic" default=""/>
+  <arg name="bagFilename" default="/home/manolofc/iliad/tj/S1-T1.1-A1.bag"/>
+  <arg name="robot_frame_id" default="robot5/base_footprint"/>
+  <arg name="world_frame_id" default="world"/>
+  <arg name="goal_topic" default="/($arg prefix)/move_base_simple/goal"/>
+
+
+  <node pkg="iliad_human_local_navigation" type="getLastRobotPose.py" name="fake_target_provider" output="screen">
+      <param name="bagFilename" value="$(arg bagFilename)"/>
+      <param name="robot_frame_id" value="$(arg robot_frame_id)"/>
+      <param name="world_frame_id" value="$(arg world_frame_id)"/>
+      <param name="goal_topic" value="$(arg goal_topic)"/>
+  </node>
+</launch>

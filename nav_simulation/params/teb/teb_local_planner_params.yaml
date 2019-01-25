@@ -4,9 +4,9 @@ TebLocalPlannerROS:
 
 
  odom_topic: odom
-    
+
  # Trajectory
-  
+
  teb_autosize: True
  dt_ref: 0.3
  dt_hysteresis: 0.03
@@ -15,18 +15,18 @@ TebLocalPlannerROS:
  max_global_plan_lookahead_dist: 3.0
  feasibility_check_no_poses: 0
  global_plan_viapoint_sep: 0.85
-    
+
  # Robot
-         
- max_vel_x: 1.5
- max_vel_x_backwards: 1.5
+
+ max_vel_x: 0.35
+ max_vel_x_backwards: 0.5
  max_vel_y: 0.0
- max_vel_theta: 1.5 # the angular velocity is also bounded by min_turning_radius in case of a carlike robot (r = v / omega)
- acc_lim_x: 0.5
- acc_lim_theta: 0.8
+ max_vel_theta: 5.0 # the angular velocity is also bounded by min_turning_radius in case of a carlike robot (r = v / omega)
+ acc_lim_x: 1.5
+ acc_lim_theta: 3.0
 
  # ********************** Carlike robot parameters ********************
- min_turning_radius: 0.1        # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
+ min_turning_radius: 0.01        # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
  wheelbase: 1.2                 # Wheelbase of our robot
  cmd_angle_instead_rotvel: False # gazebo simulator takes  rotvel (omega) as input (twist message)
  # ********************************************************************
@@ -43,13 +43,13 @@ TebLocalPlannerROS:
    vertices:  [ [-0.27,-0.25], [1.45,-0.25], [1.45,0.25], [-0.27,0.25] ]   # for type "polygon"
               #  xmin,ymin     xmax,ymin   xmax,ymax     xmin,ymax
  # GoalTolerance
-    
+
  xy_goal_tolerance: 0.2
  yaw_goal_tolerance: 0.2
  free_goal_vel: False
-    
+
  # Obstacles
-    
+
  min_obstacle_dist: 0.10 #Robot expansion is 0.25. If footprint_model is set to "line", this value must also include robot's expansion
  inflation_dist: 0.45 # buffer zone around obstacles with non 0 penalty cost. Should be bigger than min_obstacle_dist
 
@@ -62,7 +62,7 @@ TebLocalPlannerROS:
 
 
  # Optimization
-    
+
  no_inner_iterations: 5
  no_outer_iterations: 4
  optimization_activate: True
@@ -110,4 +110,3 @@ costmap_converter/CostmapToLinesDBSRANSAC:
    ransac_convert_outlier_pts: True
    ransac_filter_remaining_outlier_pts: False
    convex_hull_min_pt_separation: 0.1
-

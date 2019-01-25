@@ -1,0 +1,11 @@
+scan_filter_chain:
+- name: rightSteer
+  type: LaserScanAngularBoundsFilter
+  params:
+    lower_angle: 2.10
+    upper_angle: 2.30
+- name: leftSteer
+  type: LaserScanAngularBoundsFilter
+  params:
+    lower_angle: -2.30
+    upper_angle: -2.08

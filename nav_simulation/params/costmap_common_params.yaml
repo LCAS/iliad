@@ -1,4 +1,4 @@
-footprint:  [ [-0.27,-0.25], [1.45,-0.25], [1.45,0.25], [-0.27,0.25] ] 
+footprint:  [ [-0.27,-0.25], [1.45,-0.25], [1.45,0.25], [-0.27,0.25] ]
 
 
 transform_tolerance: 0.2
@@ -11,11 +11,11 @@ obstacle_layer:
  inflation_radius: 0.2
  track_unknown_space: false
  combination_method: 1
+ observation_sources: safe_laser_scan_sensor nav_laser_scan_sensor
 
 # observation_sources: safe_laser_scan_sensor nav_laser_scan_sensor
  safe_laser_scan_sensor: {data_type: LaserScan, topic: /sensors/laser2d_floor_fil, marking: true, clearing: true}
  nav_laser_scan_sensor: {data_type: LaserScan, topic: /sensors/laser2d_top_fil, marking: true, clearing: true}
-
 
 inflation_layer:
   enabled:              true

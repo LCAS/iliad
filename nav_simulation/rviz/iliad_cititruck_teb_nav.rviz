@@ -5,10 +5,11 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Grid1/Offset1
+        - /Map1
         - /TF1/Frames1
         - /TF1/Tree1
-        - /Kinect v21
-        - /TEB Planner1
+        - /TEB Planner1/LocalCostmap1
+        - /TEB Planner1/GlobalCostmap1
       Splitter Ratio: 0.659217894
     Tree Height: 775
   - Class: rviz/Selection
@@ -29,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Nav laser
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -85,16 +86,21 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        kinect2_depth_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        kinect2_link:
+        laser2d_floor_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        kinect2_rgb_optical_frame:
+        laser2d_floor_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        laser2d_top_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        laser2d_top_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -103,17 +109,7 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        nav_laser_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         right_fork:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        safety_laser_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -128,29 +124,19 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        velodyne:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        velodyne_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: RobotModel
       Robot Description: robot1/robot_description
       TF Prefix: robot1
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Alpha: 0.0700000003
+    - Alpha: 0.200000003
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /map
+      Topic: /maps/map_laser2d
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -159,7 +145,7 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        map:
+        map_laser2d:
           Value: true
         robot1/base_footprint:
           Value: true
@@ -171,29 +157,23 @@ Visualization Manager:
           Value: false
         robot1/fixed_right_wheel_link:
           Value: false
-        robot1/kinect2_depth_optical_frame:
+        robot1/laser2d_floor_base_link:
           Value: true
-        robot1/kinect2_link:
+        robot1/laser2d_floor_link:
           Value: true
-        robot1/kinect2_rgb_optical_frame:
+        robot1/laser2d_top_base_link:
+          Value: true
+        robot1/laser2d_top_link:
           Value: true
         robot1/left_fork:
           Value: false
-        robot1/nav_laser_link:
-          Value: true
         robot1/odom_enc:
           Value: false
         robot1/right_fork:
           Value: false
-        robot1/safety_laser_link:
-          Value: true
         robot1/sd_wheel_link:
           Value: false
         robot1/steer_link:
-          Value: false
-        robot1/velodyne:
-          Value: true
-        robot1/velodyne_base_link:
           Value: false
         world:
           Value: false
@@ -204,7 +184,7 @@ Visualization Manager:
       Show Names: false
       Tree:
         world:
-          map:
+          map_laser2d:
             {}
           robot1/base_footprint:
             robot1/base_link:
@@ -217,20 +197,14 @@ Visualization Manager:
                 {}
               robot1/fixed_right_wheel_link:
                 {}
-              robot1/kinect2_link:
-                robot1/kinect2_depth_optical_frame:
+              robot1/laser2d_floor_base_link:
+                robot1/laser2d_floor_link:
                   {}
-                robot1/kinect2_rgb_optical_frame:
+              robot1/laser2d_top_base_link:
+                robot1/laser2d_top_link:
                   {}
-              robot1/nav_laser_link:
-                {}
-              robot1/safety_laser_link:
-                {}
               robot1/steer_link:
                 robot1/sd_wheel_link:
-                  {}
-              robot1/velodyne_base_link:
-                robot1/velodyne:
                   {}
           robot1/odom_enc:
             {}
@@ -496,7 +470,7 @@ Visualization Manager:
           Topic: /robot1/move_base/GlobalPlanner/plan
           Unreliable: false
           Value: true
-        - Alpha: 0.699999988
+        - Alpha: 0.400000006
           Class: rviz/Map
           Color Scheme: costmap
           Draw Behind: false
@@ -542,7 +516,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Scale: 46.3829422
+      Scale: 65.1646957
       Target Frame: robot1/base_footprint
       Value: TopDownOrtho (rviz)
       X: -2.18762875
