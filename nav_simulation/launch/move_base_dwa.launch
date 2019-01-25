@@ -16,7 +16,7 @@
 
 -->
 <launch>
-      <arg name="robot_id" default="1"/>
+      <arg name="robot_id"        default="1"/>
       <arg name="prefix"        default="robot$(arg robot_id)"/>
       <arg name="topic_prefix"  default="/$(arg prefix)"/>
 

@@ -1,0 +1,29 @@
+# This is a really simple simulation to test urdf models and gazebo
+# Robot target is (-20.0 -2.0 0.0) ( 0.0 0.0 -1.57)
+
+---
+init_cmd: |
+  source ~/workspace/TAROS19/devel/setup.bash
+  SCENARIO="4"
+  NAVIGATION="3"
+  robot_id="1"
+  prefix="robot1"
+  target_x="-20"
+  target_y="-3.3"
+  target_ox="0.0"
+  target_oy="0.0"
+  target_oz="-0.707"
+  target_ow="0.707"
+
+windows:
+- name: roscore
+  panes:
+  - roscore
+- name: robot
+  panes:
+  - sleep 1; roslaunch taros19_experiments  experiment_setup.launch scenario_id:=$SCENARIO navigation_id:=$NAVIGATION  gazeboGui:=false rvizGui:=false
+  # Target needs to be published AFTER all is set, added wait to ensure all running.
+  # We need at least 5 secs to boot move_base but as ILIAD is slower,
+  # we use need more than 8 seconds to start
+  - sleep 9; if [[ $NAVIGATION != '0' ]]; then roslaunch taros19_experiments robotTargetPublisher.launch navigation_id:=$NAVIGATION robot_id:=$robot_id target_x:=$target_x target_y:=$target_y target_ox:=$target_ox target_oy:=$target_oy target_oz:=$target_oz target_ow:=$target_ow; fi
+  - sleep 6; if [[ $NAVIGATION == '0' ]]; then roslaunch taros19_experiments robotSpeedPublisher.launch; fi
