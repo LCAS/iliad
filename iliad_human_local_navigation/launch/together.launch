@@ -6,7 +6,7 @@ Launches all the necessary modules for the human aware navigation.
 To test this with tejas's NCFM bags:
 - Launch this launcher providing the addecuate bagFilename and map_file, i.e.
 
-	roslaunch iliad_human_local_navigation alone.launch bagFilename:=/home/manolofc/iliad/tj/S1-T2.1-A2.bag map_file:=/home/manolofc/iliad/tj/S1-T2.1-A2.yaml
+	roslaunch iliad_human_local_navigation together.launch bagFilename:=/home/manolofc/iliad/tj/S1-T2.1-A2.bag map_file:=/home/manolofc/iliad/tj/S1-T2.1-A2.yaml
 
 - Launch the rosbag player WITH CLOCK!
 	rosbag play /home/manolofc/iliad/tj/S1-T2.1-A2.bag - - clock
