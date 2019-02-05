@@ -58,6 +58,12 @@
         <arg name="robot_pose_yaw" value="$(arg robot_pose_yaw)"/>
   </include>
 
-  <include file="$(find contact_monitor)/launch/contactMonitor.launch"/>
+  <node pkg="contact_monitor" type="contactMonitor" name="contact" >
+        <param name="collisions_topic_name" value="/isColliding"/>
+        <param name="collision_names_topic_name" value="/collisionData"/>
+        <param name="gazebo_physics_contact_topic_name" value="/gazebo/default/physics/contacts"/>
+        <param name="robot_model_name" value="robot1"/>
+        <param name="actor_model_name" value="actor1"/>
+  </node>
 
 </launch>

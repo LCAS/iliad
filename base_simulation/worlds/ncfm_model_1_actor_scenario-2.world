@@ -3658,7 +3658,7 @@
         <interpolate_x>true</interpolate_x>
       </animation>
       <script>
-        <delay_start>8.0</delay_start>
+        <delay_start>8</delay_start>  <!-- sed marker 1 -->
         <loop>false</loop>
         <auto_start>true</auto_start>
         <trajectory id="0" type="walking">
@@ -3667,7 +3667,7 @@
             <pose>-18.5 -2.0 0 0 0 3.14</pose>
           </waypoint>
           <waypoint>
-            <time>16</time>
+            <time>16</time>   <!-- sed marker 2 -->
             <pose>-22 -2.0 0 0 0 3.14</pose>
           </waypoint>
         </trajectory>
