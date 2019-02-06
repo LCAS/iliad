@@ -2,6 +2,7 @@
 
 BAGS_FOLDER="/home/manolofc/iliad/tj/"
 ROS_WORKSPACE="/home/manolofc/workspace/taros/"
+SAVE_FOLDER="/home/manolofc/iliad/NCFM_HUMAN_BAGS_processed/"
 
 declare -a experiment_ids=("S1-T1.1-A1"
                            "S1-T1.1-A2"
@@ -21,6 +22,11 @@ declare -a experiment_ids=("S1-T1.1-A1"
                            "S1-T4.2-A2"
                            )
 
+source $ROS_WORKSPACE"devel/setup.bash"
+
+# you shouldn't need to change the following lines ...
+cd `rospack find taros19_experiments`/tmule/
+
 ## now loop through the above array
 for i in "${experiment_ids[@]}"
 do
@@ -35,6 +41,10 @@ do
    rosrun taros19_experiments kill-tmule.bash replay_ncfm.yaml
    sleep 5
    echo -e "done."
+   echo -e "Moving bag file to ["$SAVE_FOLDER"]"
+   mv *.bag $SAVE_FOLDER
+   echo -e "done."
+   echo -e "......................"
    echo -e "Wait 5 secs so you can try read this."
    sleep 5
    echo -e "done."

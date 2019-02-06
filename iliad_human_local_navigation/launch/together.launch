@@ -28,7 +28,8 @@ You should see rviz with all the data running.
 	<arg name="map_file"       default="/home/manolofc/iliad/tj/S1-T1.1-A2.yaml"/>
 	<arg name="robot_frame_id" default="robot5/base_footprint"/>
   <arg name="world_frame_id" default="world"/>
-  <arg name="goal_topic" default="/($arg prefix)/move_base_simple/goal"/>
+  <arg name="goal_topic" default="/$(arg prefix)/move_base_simple/goal"/>
+	<arg name="current_goal_topic" default="/$(arg prefix)/move_base/current_goal"/>
 
 	<!-- Publishes map and fake localization tf if wanted  .................-->
 	<include file="$(find iliad_launch_system)/launch/sites/iliad_map_server.launch">
@@ -135,6 +136,7 @@ You should see rviz with all the data running.
 		<arg name="person_topic" value="$(arg topic_prefix)/human_perception/tracked_persons"/>
 		<arg name="target_frame" value="$(arg base_frame_id)"/>
 		<arg name="map_frame" value="/$(arg map_frame_id)"/>
+		<arg name="goal_topic" value="$(arg current_goal_topic)"/>
 	</include>
 
 	<!-- Visualization stuff  ................. -->
@@ -145,7 +147,7 @@ You should see rviz with all the data running.
 		<param name="tracked_humans_topic" value="$(arg topic_prefix)/people_tracker/positions"/>
 	</node>
 
-<!-- the old rviz  ................. -->
+  <!-- the old rviz  ................. -->
 	<node pkg="rviz" type="rviz" name="view_me" args="-d $(find iliad_human_local_navigation)/config/ncfm_experiments.rviz"/>
 
 	<!-- This loads robot_description, for rviz -->
@@ -154,6 +156,21 @@ You should see rviz with all the data running.
         <arg name="software" value="false"/>
   </include>
 
+  <!-- This just publishes robot pose in odom coordiantes -->
+	<node pkg="robot_pose_publisher" name="robot_pose_publisher_stamped_odom" type="robot_pose_publisher">
+			<param name="robotST_topic"	    value = "$(arg topic_prefix)/robot_poseST"/>
+			<param name="is_stamped"	    value = "true"/>
+			<param name="base_frame"	    value = "$(arg base_frame_id)"/>
+			<param name="map_frame"	    value = "$(arg prefix)/odom"/>
+			<remap from="robot_pose" to="$(arg topic_prefix)/robot_pose_odom"/>
+	</node>
 
+	<!-- This just publishes robot pose in odom coordiantes -->
+	<!-- What's this for? Couldn't be done using robot_pose_publisher? -->
+    <node name="goal_republisher_odom" pkg="iliad_human_local_navigation" type="goal_frame_republisher.py" output="screen" respawn="true">
+      <param name="in_topic"    type="string"   value="$(arg current_goal_topic)_latched"/>
+      <param name="out_topic"     type="string"   value="$(arg current_goal_topic)_odom"/>
+			<param name="out_frame_id"  type="string"   value="$(arg prefix)/odom"/>
+    </node>
 
 </launch>
