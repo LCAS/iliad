@@ -13,11 +13,12 @@
 
 	The final map will be necessary with together.launch
 
+  <param name="/use_sim_time" value="true"/>
 -->
 
 <launch>
 	<arg name="robot_id" default="5"/>
-	<param name="/use_sim_time" value="true"/>
+
 
 	<arg name="prefix" default="robot$(arg robot_id)"/>
 
