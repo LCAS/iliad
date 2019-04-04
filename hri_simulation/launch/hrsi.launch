@@ -15,7 +15,7 @@
     <arg name="prefix"       default="robot$(arg robot_id)"/>
     <arg name="topic_prefix" default="/$(arg prefix)"/>
     <arg name="base_frame" default="$(arg prefix)/base_link" />
-
+    <arg name="uuid_list" default="[]"/>
     <arg name="ppl_topic"  default="$(arg topic_prefix)/people_tracker/positions" />
     <arg name="map_frame"  default="map_laser2d"/>
 
@@ -64,7 +64,13 @@
         <node pkg="iliad_human_local_navigation" type="spencer_to_bayes.py" name="spencer_to_bayes">
             <param name="person_topic" value="$(arg person_topic)"/>
             <param name="target_frame" value="$(arg target_frame)"/>
-            <param name="ppl_topic" value="$(arg ppl_topic)"/>
+            <param name="ppl_topic" value="$(arg ppl_topic)_raw"/>
+        </node>
+
+        <node pkg="iliad_human_local_navigation" type="filterBayesTracker.py" name="filter_bayes">
+            <param name="in_topic" value="$(arg ppl_topic)_raw"/>
+            <param name="out_topic" value="$(arg ppl_topic)"/>
+            <rosparam param="uuids" subst_value="True">$(arg uuid_list)</rosparam>
         </node>
     </group>
 </launch>

@@ -7,6 +7,7 @@ echo "------------------------------------------------------------------"
 echo "EVERYTHING IS BEING DESTROYED BY THE SHEER POWER OF MALEVOLENCE!  "
 echo "------------------------------------------------------------------"
 echo "-------------------- TERMINATING SYSTEM --------------------------"
+echo " Killin TMULE config:["$TMULE_SCRIPT"]"
 echo "------------------------------------------------------------------"
 tmule  --config $TMULE_SCRIPT terminate
 

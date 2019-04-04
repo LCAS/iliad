@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+
+<!--
+
+Test detectors...
+-->
+
+<launch>
+		<arg name="robot_id" default="5"/>
+		<arg name="map_frame_id" value="map_laser2d"/>
+		<param name="/use_sim_time" value="true"/>
+
+		<arg name="prefix" default="robot$(arg robot_id)"/>
+		<arg name="topic_prefix" default="/$(arg prefix)"/>
+
+		<arg name="ring" default="-1" />
+		<arg name="resolution" default="0.007" />
+
+		<!-- Filters out laser points hitting robot frame/wheels .................-->
+		<node pkg="laser_filters" type="scan_to_scan_filter_chain" name="safety_filter">
+			<rosparam command="load" file="$(find base_simulation)/params/safety_laser_filter_real.yaml" />
+			<remap from="scan" to="/$(arg prefix)/sensors/laser2d_floor" />
+			<remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_floor_fil" />
+		</node>
+		<node pkg="laser_filters" type="scan_to_scan_filter_chain" name="nav_filter">
+			<rosparam command="load" file="$(find base_simulation)/params/nav_laser_filter_real.yaml" />
+			<remap from="scan" to="/$(arg prefix)/sensors/laser2d_top" />
+			<remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_top_fil" />
+		</node>
+
+
+		<!-- Avoiding proper localisation ... -->
+		<node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 1 $(arg map_frame_id) $(arg topic_prefix)/odom  100" />
+
+		<!-- Get pointclouds from packets ... -->
+		<node pkg="velodyne_pointcloud" type="cloud_node" name="convert_veloscans">
+						<param name="calibration" value="$(find velodyne_pointcloud)/params/VLP16db.yaml" />
+						<remap from="/velodyne_packets" to="/$(arg prefix)/sensors/velodyne_packets" />
+						<remap from="/velodyne_points" to="/$(arg prefix)/sensors/velodyne_points" />
+		</node>
+
+		<!-- Velodyne detectors ... -->
+
+		  <!-- FLOBOT 3D Object Detector -->
+		  <node pkg="lidar_object_detection" name="adaptive_clustering" type="adaptive_clustering">
+		    <param name="sensor_model" value="VLP-16"/>
+		    <param name="frame_id" type="string" value="$(arg prefix)/velodyne"/>
+		    <param name="velodyne_topic" type="string" value="/$(arg prefix)/sensors/velodyne_points"/>
+		    <param name="cluster_pub" type="string" value="/$(arg prefix)/lidar_object_detection/clusters"/>
+		    <param name="marker_pub" type="string" value="/$(arg prefix)/lidar_object_detection/markers"/>
+		    <param name="z_axis_min" value="-0.9"/>
+		    <param name="object_size_limit" value="true"/>
+		    <param name="print_fps" value="true"/>
+		  </node>
+
+		  <!-- Deep Net Inference NOde -->
+		  <node pkg="lidar_object_detection" type="inference_node.py" name="inference_node" output="screen" respawn="false">
+		    <param name="tf_model_path" value="$(find lidar_object_detection)/script/ncfm_demo"/>
+		    <param name="velodyne_topic" type="string" value="$(arg prefix)/sensors/velodyne_points"/>
+		    <param name="cluster_sub" type="string" value="$(arg prefix)/lidar_object_detection/clusters"/>
+		    <param name="marker_sub" type="string" value="$(arg prefix)/lidar_object_detection/markers"/>
+		    <param name="marker_pub" type="string" value="$(arg prefix)/lidar_object_detection/object_markers"/>
+		    <param name="static_velodyne_topic" type="string" value="$(arg prefix)/lidar_object_detection/static_velodyne_points"/>
+		    <param name="detected_persons_pub" type="string" value="$(arg prefix)/lidar_object_detection/detected_persons"/>
+		    <param name="frame_id" type="string" value="$(arg prefix)/velodyne"/>
+		    <param name="target_frame" type="string" value="$(arg prefix)/odom"/>
+		  </node>
+
+		<!-- Leg detectors! ...
+		<include file="$(find hri_simulation)/launch/detectors/leg_detectors.launch">
+						<arg name="robot_id" value="$(arg robot_id)"/>
+						<arg name="config_file" value="$(find hri_simulation)/config/leg_detector.yaml"/>
+
+						<arg name="laser_namespace" value="safety_laser"/>
+						<arg name="scan" value="$(arg topic_prefix)/sensors/laser2d_floor_fil"/>
+						<arg name="detected_persons_topic" value="$(arg topic_prefix)/human_perception/safety_laser/detected_persons"/>
+		</include>
+    -->
+
+		<!-- People tracking  .................-->
+		<include file="$(find iliad_human_perception_launch)/launch/tracking/person_tracking_pipeline.launch">
+			<arg name="robot_name" value="$(arg prefix)"/>
+		</include>
+
+		<!-- the old rviz  .................-->
+		<node pkg="rviz" type="rviz" name="view_me" args="-d $(find hri_simulation)/rviz/check_detector.rviz"/>
+
+</launch>

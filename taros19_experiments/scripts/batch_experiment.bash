@@ -1,7 +1,7 @@
 #!/bin/bash
 
-
-# source here
+# Batch launcher for simulation experiment tmule script.
+# Creates the bags for the specified bag filenames
 
 
 for ((SCENARIO = 1; SCENARIO < 6; SCENARIO++)); do

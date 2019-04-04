@@ -1,17 +1,22 @@
 
 ---
 init_cmd: |
-  EXPERIMENT_ID="S1-T1.1-A2"
+  EXPERIMENT_ID="S1-T4.2-A2"
   BAGS_FOLDER="/home/manolofc/iliad/tj/"
   ROS_WORKSPACE="/home/manolofc/workspace/taros/"
+  selected_uuid="0"
+  initial_px="-9.06"
+  initial_py="-3.45"
+  initial_oz="-0.81"
+  initial_ow="0.58"
   source $ROS_WORKSPACE"devel/setup.bash"
-
 windows:
 - name: roscore
   panes:
   - roscore
 - name: robot
   panes:
-  - sleep 1; roslaunch iliad_human_local_navigation together.launch bagFilename:=$BAGS_FOLDER$EXPERIMENT_ID.bag map_file:=$BAGS_FOLDER$EXPERIMENT_ID.yaml
-  - sleep 10; rosbag record -o $EXPERIMENT_ID"_tiny" /tf /tf_static /robot5/robot_pose_odom /robot5/human_perception/tracked_persons /robot5/people_tracker/positions /robot5/move_base/current_goal_odom /robot5/online_qtc_creator/qtc_array
-  - sleep 15; rosbag play --clock  $BAGS_FOLDER$EXPERIMENT_ID.bag
+  - sleep 1; roslaunch iliad_human_local_navigation together.launch bagFilename:=$BAGS_FOLDER$EXPERIMENT_ID.bag "uuid_list:=['"$selected_uuid"']"
+  - sleep 10; #rosbag record -o $EXPERIMENT_ID"_tiny" /tf /tf_static /robot5/robot_pose_odom /robot5/human_perception/tracked_persons /robot5/people_tracker/positions /robot5/move_base/current_goal_odom /robot5/online_qtc_creator/qtc_array
+  - sleep 12; roslaunch taros19_experiments robotInitPosePublisher.launch initial_px:=$initial_px  initial_py:=$initial_py  initial_oz:=$initial_oz initial_ow:=$initial_ow
+  - sleep 15; rosbag play  $BAGS_FOLDER$EXPERIMENT_ID.bag # --pause --clock -r 0.1

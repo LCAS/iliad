@@ -8,8 +8,8 @@ To test this with tejas's NCFM bags:
 
 	roslaunch iliad_human_local_navigation together.launch bagFilename:=/home/manolofc/iliad/tj/S1-T2.1-A2.bag map_file:=/home/manolofc/iliad/tj/S1-T2.1-A2.yaml
 
-- Launch the rosbag player WITH CLOCK!
-	rosbag play /home/manolofc/iliad/tj/S1-T2.1-A2.bag - - clock
+- Launch the rosbag player WITHOUT CLOCK!
+	rosbag play /home/manolofc/iliad/tj/S1-T2.1-A2.bag
 
 You should see rviz with all the data running.
 -->
@@ -18,15 +18,18 @@ You should see rviz with all the data running.
 	<arg name="robot_id" default="5"/>
 	<arg name="map_frame_id" value="map_laser2d"/>
 	<arg name="map_topic" value="/maps/map_laser2d"/>
-	<param name="/use_sim_time" value="true"/>
+	<param name="/use_sim_time" value="false"/>
 
+  <arg name="uuid_list" default="[]"/>
 	<arg name="prefix" default="robot$(arg robot_id)"/>
 	<arg name="topic_prefix" default="/$(arg prefix)"/>
 	<arg name="base_frame_id" default="$(arg topic_prefix)/base_link"/>
 
-	<arg name="bagFilename"    default="/home/manolofc/iliad/tj/S1-T1.1-A2.bag"/>
-	<arg name="map_file"       default="/home/manolofc/iliad/tj/S1-T1.1-A2.yaml"/>
-	<arg name="robot_frame_id" default="robot5/base_footprint"/>
+	<arg name="bagFilename"    default="/home/manolofc/iliad/tj/S1-T1.1-A1.bag"/>
+	<arg name="map_file"       default="$(find graph_map)/maps/ncfm.yaml"/>
+	<arg name="map_file_jff"   default="/home/manolofc/iliad/tj/S1-T1.1-A1.jff"/>
+
+	<arg name="robot_frame_id" default="$(arg prefix)/base_footprint"/>
   <arg name="world_frame_id" default="world"/>
   <arg name="goal_topic" default="/$(arg prefix)/move_base_simple/goal"/>
 	<arg name="current_goal_topic" default="/$(arg prefix)/move_base/current_goal"/>
@@ -34,7 +37,7 @@ You should see rviz with all the data running.
 	<!-- Publishes map and fake localization tf if wanted  .................-->
 	<include file="$(find iliad_launch_system)/launch/sites/iliad_map_server.launch">
 		<arg name="mapserver_config_file" value="$(arg map_file)"/>
-		<arg name="fake_loc" value="false"/>
+		<arg name="fake_loc" value="true"/>
 		<arg name="map_frame_id" value="$(arg map_frame_id)"/>
 	</include>
 
@@ -50,50 +53,17 @@ You should see rviz with all the data running.
 		<remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_top_fil" />
 	</node>
 
-	<!-- Corrects localization  .................-->
-	<node pkg="amcl" type="amcl" name="amcl" output="screen">
-			  <remap from="scan" to="/$(arg prefix)/sensors/laser2d_floor_fil"/>
-				<remap from="map" to="$(arg map_topic)"/>
-				<param name="initial_pose_x" value="-21.8"/>
-				<param name="initial_pose_y" value="-38.62"/>
-				<param name="initial_pose_a" value="-0.628"/>
+<!-- Avoiding proper localisation ...
+<node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 1 $(arg map_frame_id) $(arg topic_prefix)/odom  100" />
+-->
 
-				<param name="use_map_topic" value="true"/>
-				<!-- Produces tf between map and world -->
-				<param name="odom_frame_id" type="string"  value="$(arg world_frame_id)"/>
-				<param name="base_frame_id" type="string"  value="$(arg base_frame_id)"/>
-				<param name="global_frame_id" type="string"  value="$(arg map_frame_id)"/>
-				<param name="gui_publish_rate" value="10.0"/>
+<!-- Localization  .................-->
+<include file="$(find iliad_launch_system)/launch/subsystems/localization/3d_mcl_ncfm2018.launch">
+	<arg name="robot_id" value="$(arg robot_id)"/>
+	<arg name="root_id" value="$(arg map_frame_id)"/>
+	<arg name="rviz_enabled" value="true"/>
+</include>
 
-			  <param name="laser_max_beams" value="55"/>
-			  <param name="min_particles" value="1000"/>
-			  <param name="max_particles" value="5000"/>
-			  <param name="kld_err" value="0.1"/>
-			  <param name="kld_z" value="0.9"/>
-				<param name="update_min_d" value="0.1"/>
-			  <param name="update_min_a" value="0.15"/>
-			  <param name="resample_interval" value="1"/>
-			  <param name="transform_tolerance" value="0.1"/>
-			  <param name="recovery_alpha_slow" value="0.0"/>
-			  <param name="recovery_alpha_fast" value="0.0"/>
-
-			  <param name="odom_model_type" value="diff"/>
-				<param name="odom_alpha1" value="0.8"/>
-				<param name="odom_alpha2" value="0.8"/>
-				<param name="odom_alpha3" value="0.9"/>
-				<param name="odom_alpha4" value="0.8"/>
-			  <param name="odom_alpha5" value="0.8"/>
-
-			  <param name="laser_z_hit" value="0.65"/>
-			  <param name="laser_z_short" value="0.05"/>
-			  <param name="laser_z_max" value="0.45"/>
-			  <param name="laser_z_rand" value="0.5"/>
-			  <param name="laser_sigma_hit" value="0.2"/>
-			  <param name="laser_lambda_short" value="0.1"/>
-			  <param name="laser_lambda_short" value="0.1"/>
-			  <param name="laser_model_type" value="likelihood_field_prob"/>
-			  <param name="laser_likelihood_max_dist" value="0.5"/>
-			</node>
 
 	<!-- Navigation  ................. -->
 	<include file="$(find nav_simulation)/launch/move_base_dwa.launch">
@@ -108,20 +78,79 @@ You should see rviz with all the data running.
 	<!-- Makes navigation believe we provide a target  ................. -->
 	<include file="$(find iliad_human_local_navigation)/launch/fake-target-provider.launch">
 		<arg name="bagFilename" value="$(arg bagFilename)"/>
-		<arg name="robot_frame_id" value="$(arg robot_frame_id)"/>
-		<arg name="world_frame_id" value="$(arg world_frame_id)"/>
+		<arg name="robot_frame_id" value="$(arg topic_prefix)/base_footprint"/>
+		<arg name="world_frame_id" value="$(arg topic_prefix)/odom"/>
 		<arg name="goal_topic" value="$(arg goal_topic)"/>
 	</include>
 
-	<!-- publishes kinect data in format compatible for  people detector  ................. -->
+	<!-- publishes kinect data in format compatible for  people detector  .................
+	Not using kinect detector
+
 	<include file="$(find kinect2_bagplayer)/launch/kinect_player.launch">
 		<arg name="robot_id" value="$(arg robot_id)"/>
 	</include>
+-->
+		<!-- Kinect 2 People detector  .................
+			Not using kinect detector
 
-		<!-- People detector  .................-->
 		<include file="$(find rgbd_gpu_person_detector)/launch/iliad_kinect2.launch">
 			<arg name="robot_name" value="$(arg prefix)"/>
 		</include>
+-->
+
+<!-- Laser 2d People detectors  .................
+	This one is not working particularly well...
+
+<include file="$(find hri_simulation)/launch/detectors/laser_detectors.launch">
+	<arg name="robot_id" value="$(arg robot_id)"/>
+	<arg name="laser_namespace" value="safety_laser"/>
+	<arg name="laser" value="$(arg topic_prefix)/sensors/laser2d_floor"/>
+	<arg name="detected_persons_topic" value="$(arg topic_prefix)/human_perception/safety_laser/detected_persons"/>
+</include>
+-->
+<include file="$(find hri_simulation)/launch/detectors/leg_detectors.launch">
+	<arg name="robot_id" value="$(arg robot_id)"/>
+	<arg name="config_file" value="$(find hri_simulation)/config/leg_detector.yaml"/>
+	<arg name="laser_namespace" value="safety_laser"/>
+	<arg name="scan" value="$(arg topic_prefix)/sensors/laser2d_floor_fil"/>
+	<arg name="detected_persons_topic" value="$(arg topic_prefix)/human_perception/safety_laser/detected_persons"/>
+</include>
+
+<!-- Cant use a leg detector with a laser this high ...
+<include file="$(find hri_simulation)/launch/detectors/laser_detectors.launch">
+	<arg name="robot_id" value="$(arg robot_id)"/>
+	<arg name="laser_namespace" value="reflex"/>
+	<arg name="laser" value="$(arg topic_prefix)/sensors/laser2d_top"/>
+	<arg name="detected_persons_topic" value="$(arg topic_prefix)/human_perception/reflex/detected_persons"/>
+</include>
+-->
+
+<!-- FLOBOT 3D Object Detector -->
+<node pkg="lidar_object_detection" name="adaptive_clustering" type="adaptive_clustering">
+	<param name="sensor_model" value="VLP-16"/>
+	<param name="frame_id" type="string" value="$(arg prefix)/velodyne"/>
+	<param name="velodyne_topic" type="string" value="/$(arg prefix)/sensors/velodyne_points"/>
+	<param name="cluster_pub" type="string" value="/$(arg prefix)/lidar_object_detection/clusters"/>
+	<param name="marker_pub" type="string" value="/$(arg prefix)/lidar_object_detection/markers"/>
+	<param name="z_axis_min" value="-0.9"/>
+	<param name="object_size_limit" value="true"/>
+	<param name="print_fps" value="true"/>
+</node>
+
+<!-- Deep Net Inference NOde -->
+<node pkg="lidar_object_detection" type="inference_node.py" name="inference_node" output="screen" respawn="false">
+	<param name="tf_model_path" value="$(find lidar_object_detection)/script/ncfm_demo"/>
+	<param name="velodyne_topic" type="string" value="$(arg prefix)/sensors/velodyne_points"/>
+	<param name="cluster_sub" type="string" value="$(arg prefix)/lidar_object_detection/clusters"/>
+	<param name="marker_sub" type="string" value="$(arg prefix)/lidar_object_detection/markers"/>
+	<param name="marker_pub" type="string" value="$(arg prefix)/lidar_object_detection/object_markers"/>
+
+	<param name="static_velodyne_topic" type="string" value="$(arg prefix)/lidar_object_detection/static_velodyne_points"/>
+	<param name="detected_persons_pub" type="string" value="$(arg prefix)/human_perception/velodyne/detected_persons"/>
+	<param name="frame_id" type="string" value="$(arg prefix)/velodyne"/>
+	<param name="target_frame" type="string" value="$(arg prefix)/odom"/>
+</node>
+
 
 	  <!-- People tracking  .................-->
 		<include file="$(find iliad_human_perception_launch)/launch/tracking/person_tracking_pipeline.launch">
@@ -137,6 +166,7 @@ You should see rviz with all the data running.
 		<arg name="target_frame" value="$(arg base_frame_id)"/>
 		<arg name="map_frame" value="/$(arg map_frame_id)"/>
 		<arg name="goal_topic" value="$(arg current_goal_topic)"/>
+		<arg name="uuid_list" value="$(arg uuid_list)"/>
 	</include>
 
 	<!-- Visualization stuff  ................. -->
@@ -147,8 +177,9 @@ You should see rviz with all the data running.
 		<param name="tracked_humans_topic" value="$(arg topic_prefix)/people_tracker/positions"/>
 	</node>
 
-  <!-- the old rviz  ................. -->
+  <!-- the old rviz  .................-->
 	<node pkg="rviz" type="rviz" name="view_me" args="-d $(find iliad_human_local_navigation)/config/ncfm_experiments.rviz"/>
+
 
 	<!-- This loads robot_description, for rviz -->
   <include file="$(find iliad_launch_system)/launch/robots/cititruck/$(arg prefix)/$(arg prefix).launch">
@@ -172,5 +203,12 @@ You should see rviz with all the data running.
       <param name="out_topic"     type="string"   value="$(arg current_goal_topic)_odom"/>
 			<param name="out_frame_id"  type="string"   value="$(arg prefix)/odom"/>
     </node>
+
+
+		<node pkg="velodyne_pointcloud" type="cloud_node" name="convert_veloscans">
+				<param name="calibration" value="$(find velodyne_pointcloud)/params/VLP16db.yaml" />
+				<remap from="/velodyne_packets" to="/$(arg prefix)/sensors/velodyne_packets" />
+				<remap from="/velodyne_points" to="/$(arg prefix)/sensors/velodyne_points" />
+		</node>
 
 </launch>
