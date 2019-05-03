@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!-- Allows launching in debug mode
+  http://wiki.ros.org/rosconsole#Configuration
+ -->
+  <env name="ROSCONSOLE_CONFIG_FILE"
+    value="$(find constrain_maps)/config/custom_rosconsole.conf"/>
+
+  <param name ="/use_sim_time" value="true"/>
+  <arg name="bag_file"     default="$(find constrain_maps)/bags/2019-04-26-10-06-43.bag"/>
+
+  <arg name="traj_topic_name"       default="/robot4/control/controller/trajectories_mpc"/>
+  <arg name="report_topic_name"     default="/robot4/control/controller/reports_mpc"/>
+  <arg name="grid_map_topic_name"   default="/constrain_grid"/>
+  <arg name="grid_map_frame_id"     default="/world"/>
+  <arg name="resolution"            default="0.05"/>
+  <arg name="size_x"                default="17.0"/>
+  <arg name="size_y"                default="15.0"/>
+  <arg name="orig_x"                default="0.0"/>
+  <arg name="orig_y"                default="0.0"/>
+  <arg name="lower_value"           default="0.0"/>
+  <arg name="upper_value"           default="1.0"/>
+  <arg name="map_update_period"     default="0.5"/>
+  <arg name="layerName"             default="global_constrain"/>
+
+
+  <node pkg="tf" type="static_transform_publisher" name="lala_broadcaster" args="0 0 0 0 0 0 world robot4 100"/>
+  <node pkg="rosbag" type="play" name="player" output="screen" args=" -- clock $(arg bag_file) -q -l"/>
+
+
+  <node pkg="constrain_maps" type="constrain_plotter_node" name="constrain_maps_node" output="screen">
+      <rosparam param="traj_topic_name"   subst_value="True">"$(arg traj_topic_name)"</rosparam>
+      <rosparam param="report_topic_name"   subst_value="True">"$(arg report_topic_name)"</rosparam>
+      <rosparam param="grid_map_topic_name"   subst_value="True">"$(arg grid_map_topic_name)"</rosparam>
+      <rosparam param="grid_map_frame_id"   subst_value="True">"$(arg grid_map_frame_id)"</rosparam>
+      <rosparam param="resolution"   subst_value="True">"$(arg resolution)"</rosparam>
+      <rosparam param="size_x"   subst_value="True">"$(arg size_x)"</rosparam>
+      <rosparam param="size_y"   subst_value="True">"$(arg size_y)"</rosparam>
+      <rosparam param="orig_x"   subst_value="True">"$(arg orig_x)"</rosparam>
+      <rosparam param="orig_y"   subst_value="True">"$(arg orig_y)"</rosparam>
+      <rosparam param="lower_value"   subst_value="True">"$(arg lower_value)"</rosparam>
+      <rosparam param="upper_value"   subst_value="True">"$(arg upper_value)"</rosparam>
+      <rosparam param="map_update_period"   subst_value="True">"$(arg map_update_period)"</rosparam>
+      <rosparam param="layerName"   subst_value="True">"$(arg layerName)"</rosparam>
+  </node>
+
+  <!-- Launch the grid map visualizer -->
+  <node pkg="grid_map_visualization" type="grid_map_visualization" name="grid_map_visualization" output="log">
+    <rosparam command="load" file="$(find constrain_maps)/config/visualization.yaml"/>
+    <rosparam param="grid_map_topic" subst_value="True">"$(arg grid_map_topic_name)"</rosparam>
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find constrain_maps)/rviz/rfid_gridmap_test.rviz" output="log"/>
+
+
+
+</launch>
