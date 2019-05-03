@@ -5,9 +5,9 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Grid1/Offset1
+        - /Map1
         - /TF1/Frames1
         - /TF1/Tree1
-        - /Kinect v21
         - /ROS Navigation1
       Splitter Ratio: 0.659217894
     Tree Height: 775
@@ -85,16 +85,21 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        kinect2_depth_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        kinect2_link:
+        laser2d_floor_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        kinect2_rgb_optical_frame:
+        laser2d_floor_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        laser2d_top_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        laser2d_top_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -103,17 +108,7 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        nav_laser_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         right_fork:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        safety_laser_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -128,29 +123,19 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        velodyne:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        velodyne_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: RobotModel
       Robot Description: robot1/robot_description
       TF Prefix: robot1
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Alpha: 0.0700000003
+    - Alpha: 0.200000003
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /map
+      Topic: /maps/map_laser2d
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -159,7 +144,7 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        map:
+        maps/map_laser2d:
           Value: true
         robot1/base_footprint:
           Value: true
@@ -171,29 +156,23 @@ Visualization Manager:
           Value: false
         robot1/fixed_right_wheel_link:
           Value: false
-        robot1/kinect2_depth_optical_frame:
+        robot1/laser2d_floor_base_link:
           Value: true
-        robot1/kinect2_link:
+        robot1/laser2d_floor_link:
           Value: true
-        robot1/kinect2_rgb_optical_frame:
+        robot1/laser2d_top_base_link:
+          Value: true
+        robot1/laser2d_top_link:
           Value: true
         robot1/left_fork:
           Value: false
-        robot1/nav_laser_link:
-          Value: true
         robot1/odom_enc:
           Value: false
         robot1/right_fork:
           Value: false
-        robot1/safety_laser_link:
-          Value: true
         robot1/sd_wheel_link:
           Value: false
         robot1/steer_link:
-          Value: false
-        robot1/velodyne:
-          Value: true
-        robot1/velodyne_base_link:
           Value: false
         world:
           Value: false
@@ -204,7 +183,7 @@ Visualization Manager:
       Show Names: false
       Tree:
         world:
-          map:
+          maps/map_laser2d:
             {}
           robot1/base_footprint:
             robot1/base_link:
@@ -217,20 +196,14 @@ Visualization Manager:
                 {}
               robot1/fixed_right_wheel_link:
                 {}
-              robot1/kinect2_link:
-                robot1/kinect2_depth_optical_frame:
+              robot1/laser2d_floor_base_link:
+                robot1/laser2d_floor_link:
                   {}
-                robot1/kinect2_rgb_optical_frame:
+              robot1/laser2d_top_base_link:
+                robot1/laser2d_top_link:
                   {}
-              robot1/nav_laser_link:
-                {}
-              robot1/safety_laser_link:
-                {}
               robot1/steer_link:
                 robot1/sd_wheel_link:
-                  {}
-              robot1/velodyne_base_link:
-                robot1/velodyne:
                   {}
           robot1/odom_enc:
             {}
@@ -299,7 +272,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Points
-      Topic: /robot1/nav_laser_fil
+      Topic: /robot1/sensors/laser2d_top_fil
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -329,7 +302,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Points
-      Topic: /robot1/safety_laser_fil
+      Topic: /robot1/sensors/laser2d_floor_fil
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -397,7 +370,7 @@ Visualization Manager:
       Name: Kinect v2
     - Class: rviz/Group
       Displays:
-        - Alpha: 0.5
+        - Alpha: 0.25
           Class: rviz/Map
           Color Scheme: costmap
           Draw Behind: false
@@ -514,11 +487,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Scale: 46.3829422
+      Scale: 63.1302261
       Target Frame: robot1/base_footprint
       Value: TopDownOrtho (rviz)
-      X: -3.27918005
-      Y: -2.52581167
+      X: 0.635059536
+      Y: -0.817476153
     Saved: ~
 Window Geometry:
   Displays:
@@ -528,7 +501,7 @@ Window Geometry:
   Hide Right Dock: true
   Kinect v2 image:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000033700000348fc020000000cfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000004100000348000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000c00430061006d00650072006100000002de000000160000000000000000fb0000001e004b0069006e00650063007400200076003200200069006d006100670065000000016a000001a00000000000000000fb0000001e004b0069006e00650063007400200076003200200069006d00610067006500000001e8000001a20000001600fffffffb0000000a0049006d0061006700650000000294000000f50000000000000000fb0000000a0049006d00610067006500000002f4000000950000000000000000000000010000010f0000032efc0200000004fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730000000041000000d50000006100fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000028000000a30000000000000000fb0000000a00560069006500770073000000011c00000253000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000077e0000003efc0100000002fb0000000800540069006d006501000000000000077e0000030000fffffffb0000000800540069006d00650100000000000004500000000000000000000004410000034800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000033700000348fc020000000cfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000004100000348000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000c00430061006d00650072006100000002de000000160000000000000000fb0000001e004b0069006e00650063007400200076003200200069006d006100670065000000016a000001a00000001600fffffffb0000001e004b0069006e00650063007400200076003200200069006d00610067006500000001e8000001a20000000000000000fb0000000a0049006d0061006700650000000294000000f50000000000000000fb0000000a0049006d00610067006500000002f4000000950000000000000000000000010000010f0000032efc0200000004fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730000000041000000d50000006100fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000028000000a30000000000000000fb0000000a00560069006500770073000000011c00000253000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000077e0000003efc0100000002fb0000000800540069006d006501000000000000077e0000030000fffffffb0000000800540069006d00650100000000000004500000000000000000000004410000034800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:

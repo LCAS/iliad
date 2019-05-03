@@ -1,8 +1,8 @@
 DWAPlannerROS:
 
 # Robot Configuration Parameters
-  max_vel_x: 5.0  # 0.55
-  min_vel_x: -5.0  # 0.0
+  max_vel_x: 0.25  # 0.55
+  min_vel_x: -0.5  # 0.0
 
   max_vel_y: 0.0  # non holonomic
   min_vel_y: 0.0  # non holonomic
@@ -13,9 +13,9 @@ DWAPlannerROS:
   max_rot_vel: 5.0
   min_rot_vel: -5.0  # could set this lower
   # DEPRECATED? min_in_place_vel_theta: 0.6  # TrajectoryPlannerRos
-  
+
   acc_lim_x: 1.5
-  acc_lim_theta: 1.0
+  acc_lim_theta: 3.0
   acc_lim_y: 0.0      # non holonomic
 
 # Goal Tolerance Parameters
@@ -44,11 +44,11 @@ DWAPlannerROS:
 # Debugging
   publish_traj_pc : true
   publish_cost_grid_pc: true
-  global_frame_id: map # this odd - it's used in the trajectory cloud frame id only and for us it refs /map, not /odom
+  global_frame_id: map_laser2d # this odd - it's used in the trajectory cloud frame id only and for us it refs /map, not /odom
 
 
 
-# Differential-drive robot configuration 
+# Differential-drive robot configuration
 holonomic_robot: false
 # Human aware navigation:
 velocity_costmap_topic: '/velocity_costmap'

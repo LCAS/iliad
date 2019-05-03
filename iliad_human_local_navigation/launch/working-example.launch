@@ -34,6 +34,8 @@
     <arg name="map_frame" value = "$(arg map_frame)"/>
   </include>
 
-  <include file="$(find iliad_human_local_navigation)/launch/s2b.launch"/>
+  <include file="$(find iliad_human_local_navigation)/launch/s2b.launch">
+    <arg name="person_topic" value="/robot1/groundtruth/tracked_persons"/>
+  </include>
 
 </launch>

@@ -14,6 +14,24 @@ Shows simulated forklift using ROS navigation stacks. Currently testing TEB plan
 ## hri_simulation
 Depends on base and navigatio simulation packages. It simulates human aware navigation. 
 
+## envelope_manager	
+C++ version for mpc constraints. Still an early stub.
+
+## gazebo_plugins	
+Actor collision plugin and binary contact sensor. The first is working nicely, the second was made redundant by contact_monitor (see correspoding repo at https://github.com/LCAS/gazebo-contactMonitor)
+
+## iliad_human_local_navigation	
+Experiments for the human aware local navigation
+
+## iliad_launch	
+Deprecated. Global launchers for ILIAD project are now at gitlab repos. 
+
+## iliad_smp_planner	
+Luigi Palmieri already did this. This is a proof of concept of a ROS-compatible ILIAD planner.
+
+## taros19_experiments	
+Launchers to create simulation experiments with same conditions but different navigation stacks. To be used in TAROS'19 paper.
+
 ## Source dependences:
 Remember to source after building with ``catkin_make -DCMAKE_BUILD_TYPE=Release``
 
@@ -47,3 +65,5 @@ https://github.com/OrebroUniversity/navigation_oru-release
 * Spencer people tracking (iliad branch)
 https://github.com/LCAS/spencer_people_tracking/tree/ilidad-dev
 
+* TF utilities for BAG files
+https://github.com/LCAS/tf_bag

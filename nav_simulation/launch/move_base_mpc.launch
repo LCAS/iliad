@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+
+<!--
+    Navigation stack
+
+    This file is to be launched after starting robot driver and sensors (or any of its simulations in base_simulation).
+    It is based upon click_n_pick launch
+
+
+
+
+
+
+
+
+
+-->
+<launch>
+    <arg name="robot_id"        default="1"/>
+    <arg name="prefix"        default="robot$(arg robot_id)"/>
+    <arg name="topic_prefix"  default="/$(arg prefix)"/>
+    <arg name="tf_prefix" value="$(arg prefix)"/>
+
+    <!-- Unused. Only here to match other launchers  -->
+    <arg name="odom_topic" default="odom" />
+    <arg name="cmd_vel_topic_rel" default="move_base/cmd_vel" />
+    <arg name="map_frame" default="map_laser2d"/>
+    <arg name="map_topic" default="map_laser2d"/>
+
+    <arg name="base_frame" default="$(arg prefix)/base_link"/>
+
+    <rosparam command="load" file="$(find nav_simulation)/params/oru_nav.yaml"/>
+    <rosparam command="load" file="$(find iliad_launch_system)/config/robots/$(arg prefix)_sim.yaml"/>
+
+    <include file="$(find iliad_launch_system)/launch/subsystems/coordination/coordination-scripted.launch">
+        <arg name="sim"      value="true"/>
+        <arg name="fake"   value="false"/>
+    </include>
+
+    <include file="$(find iliad_launch_system)/launch/robots/get_path_service.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+    </include>
+
+    <include file="$(find iliad_launch_system)/launch/robots/polygonconstraint_service.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+    </include>
+
+    <include file="$(find iliad_launch_system)/launch/robots/smoothed_path_service.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+    </include>
+
+    <include file="$(find iliad_launch_system)/launch/robots/smoothed_straight_service.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+    </include>
+
+    <include file="$(find iliad_launch_system)/launch/robots/deltatvec_service.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+    </include>
+
+    <include file="$(find iliad_launch_system)/launch/robots/fork_control.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+        <arg name="robot_type"   value="cititruck"/>
+    </include>
+
+    <include file="$(find iliad_launch_system)/launch/robots/vehicle_execution_node.launch">
+        <arg name="robot_id"   value="$(arg robot_id)"/>
+        <arg name="safety_laser_topic" value="/laser2d_floor_fil"/>
+        <arg name="safety_laser_topic2" value="/laser2d_top_fil"/>
+        <arg name="use_safetyregions" value="true"/>
+    </include>
+
+</launch>

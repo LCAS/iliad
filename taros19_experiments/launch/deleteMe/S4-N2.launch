@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<!--
+Launches Scenario 4 - Navigation 2: Robot  crosses  human, TEB navigation
+See description.txt for more details
+-->
+
+<launch>
+  <!-- PARAMS .............................................................. -->
+  <arg name="gazeboGui" default="true"/>
+  <arg name="descriptor" default="S1-N1"/>
+  <arg name="rvizGui" default="true"/>
+  <arg name="robot_id" default="1"/>
+  <!-- TF prefix of robot -->
+  <arg name="prefix" default="robot$(arg robot_id)"/>
+  <arg name="rviz_config_file" default="$(find nav_simulation)/rviz/iliad_cititruck_teb_nav.rviz"/>
+
+  <!-- SET UP GAZEBO WORLD AND VISUALIZATION .............................. -->
+  <include file="$(find base_simulation)/launch/scenario-4.launch">
+      <arg name="robot_id" value="$(arg robot_id)"/>
+      <arg name="prefix" value="$(arg prefix)"/>
+      <arg name="gazeboGui" value="$(arg gazeboGui)"/>
+      <arg name="rvizGui" value="$(arg rvizGui)"/>
+      <arg name="rviz_config_file" value="$(arg rviz_config_file)"/>
+      <arg name="cmd_vel_topic" value="control/controller/cmd_vel" />
+  </include>
+
+  <!-- SET UP NAVIGATION ...................................................-->
+  <include file="$(find nav_simulation)/launch/move_base_teb.launch">
+      <arg name="prefix" value="$(arg prefix)"/>
+  </include>
+
+  <!-- Things to record robot position can ge obtained from tf,  -->
+  <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="steer_pose_publisher" output="screen">
+    <param name="map_frame" value="world"/>
+    <param name="base_frame" value="$(arg prefix)/base_footprint"/>
+    <param name="is_stamped" value="true"/>
+    <remap from="robot_pose" to="/$(arg prefix)/robot_pose"/>
+  </node>
+
+  <node pkg="taros19_experiments" type="gazebo_model_pose_publisher.py" name="actor_pose_publisher" output="screen">
+    <param name="map_frame" value="world"/>
+    <param name="model_name" value="actor1"/>
+  </node>
+
+  <node required="true" pkg="rosbag" type="record" name="recorder"
+    args="record --duration=45 -o $(arg descriptor) /isColliding /$(arg prefix)/robot_pose /actor_pose" output="screen"/>
+
+</launch>

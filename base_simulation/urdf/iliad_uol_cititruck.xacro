@@ -194,7 +194,8 @@
         <parent link="base_link"/>
         <child link="base_fork"/>
         <axis xyz="0 0 1"/>
-        <limit effort="1000" lower="-1" upper="1" velocity="100"/>
+        <!-- lower was -1, making it collide with the wheels-->
+        <limit effort="1000" lower="0.05" upper="1" velocity="100"/>
     </joint>
 
 
