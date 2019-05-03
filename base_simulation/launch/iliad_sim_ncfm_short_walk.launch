@@ -10,6 +10,7 @@
   <!-- PARAMS ...................................................... -->
   <arg name="gazeboGui" default="true"/>
   <arg name="rvizGui" default="true"/>
+  <arg name="map_frame_id" default="map"/>
   <arg name="robot_id" default="1"/>
   <arg name="rviz_config_file" default="$(find base_simulation)/rviz/iliad_cititruck.rviz"/>
 
@@ -19,6 +20,7 @@
         <arg name="rviz_config_file" value="$(arg rviz_config_file)"/>
         <arg name="gazeboGui"  value="$(arg gazeboGui)"/>
         <arg name="rvizGui"    value="$(arg rvizGui)"/>
+        <arg name="map_frame_id" value="$(arg map_frame_id)"/>
   </include>
 
 </launch>

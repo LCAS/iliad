@@ -19,6 +19,9 @@
 
       <arg name="prefix"        default="robot1"/>
       <arg name="topic_prefix"  default="/robot1"/>
+      <arg name="map_frame"   default = "map"/>
+      <arg name="map_topic"   default = "/map"/>
+      <arg name="global_frame"   default = "map"/>
 
       <arg name="odom_topic" default="odom" />
       <arg name="cmd_vel_topic_rel" default="move_base/cmd_vel" />
@@ -33,13 +36,15 @@
         <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
           <remap from="cmd_vel" to="$(arg cmd_vel_topic_rel)"/>
           <remap from="odom" to="$(arg odom_topic)"/>
-          <remap from="$(arg topic_prefix)/map" to="/map" />
+          <remap from="$(arg topic_prefix)/map" to="/$(arg map_frame)" />
 
-          <!-- common params -->
-          <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
-          <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
-          <rosparam file="$(find nav_simulation)/params/local_costmap_params.yaml" command="load" />
+          <!-- GLOBAL COSTMAP -->
           <rosparam file="$(find nav_simulation)/params/global_costmap_params.yaml" command="load" />
+          <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
+
+          <!-- LOCAL COSTMAP -->
+          <rosparam file="$(find nav_simulation)/params/local_costmap_params.yaml" command="load" />
+          <rosparam file="$(find nav_simulation)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
 
           <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
           <!-- How long to allow for oscillation before executing recovery behaviors.  0.0 == infinite timeout -->
@@ -59,8 +64,20 @@
 
           <rosparam file="$(find nav_simulation)/params/move_base_params.yaml" command="load" />
 
-           <!-- change dwa parameters that is robot-dependant -->
+           <!-- change parameters that are robot-dependant -->
           <rosparam param="velocity_costmap_topic" subst_value="True">$(arg topic_prefix)/velocity_costmap_server/velocity_costmap</rosparam>
+
+          <!-- tunnable params -->
+          <rosparam param="DWAPlannerROS/global_frame_id" subst_value="true">"$(arg global_frame)"</rosparam>
+
+          <rosparam param="global_costmap/global_frame" subst_value="true">"$(arg global_frame)"</rosparam>
+          <rosparam param="global_costmap/static_layer/map_topic" subst_value="true">"$(arg map_topic)"</rosparam>
+
+          <rosparam param="local_costmap/static_layer/global_frame" subst_value="true">"$(arg global_frame)"</rosparam>
+          <rosparam param="local_costmap/static_layer/map_topic" subst_value="true">"$(arg map_topic)"</rosparam>
+
+
+
 
       </node>
 

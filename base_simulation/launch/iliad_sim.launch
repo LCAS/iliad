@@ -5,6 +5,8 @@
 
 <launch>
   <arg name="robot_id"  default="1"/>
+  <arg name="map_frame_id" default="map"/>
+
   <!-- TF prefix of robot -->
   <arg name="prefix" default="robot$(arg robot_id)"/>
 
@@ -52,6 +54,7 @@
     <arg name="robot_pose_roll" value="$(arg robot_pose_roll)"/>
     <arg name="robot_pose_pitch" value="$(arg robot_pose_pitch)"/>
     <arg name="robot_pose_yaw" value="$(arg robot_pose_yaw)"/>
+    <arg name="frame_id" value="$(arg map_frame_id)"/>
   </include>
 
 
