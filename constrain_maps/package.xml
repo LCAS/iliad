@@ -11,7 +11,6 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend>rfid_node</build_depend>
   <build_depend>grid_map_cv</build_depend>
   <build_depend>grid_map_loader</build_depend>
   <build_depend>grid_map_msgs</build_depend>

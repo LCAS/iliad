@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
 
 <launch>
+
   <arg name="robot_id" default="1"/>
   <!-- derived args -->
   <arg name="prefix" value="robot$(arg robot_id)"/>
-
-
   <arg name="traj_topic_name"       default="/$(arg prefix)/control/controller/trajectories_mpc"/>
   <arg name="report_topic_name"     default="/$(arg prefix)/control/controller/reports_mpc"/>
   <arg name="grid_map_topic_name"   default="/$(arg prefix)/constrain_grid"/>
@@ -19,11 +18,6 @@
   <arg name="upper_value"           default="1.0"/>
   <arg name="map_update_period"     default="0.5"/>
   <arg name="layerName"             default="global_constrain"/>
-
-
-  <!-- node pkg="tf" type="static_transform_publisher" name="lala_broadcaster" args="0 0 0 0 0 0 world robot4 100"/ -->
-  <!-- node pkg="rosbag" type="play" name="player" output="screen" args=" -!- clock $(arg bag_file) -q -l"/ -->
-
 
   <node pkg="constrain_maps" type="constrain_plotter_node" name="constrain_maps_node" output="screen">
       <rosparam param="traj_topic_name"   subst_value="True">"$(arg traj_topic_name)"</rosparam>

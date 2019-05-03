@@ -10,9 +10,18 @@
   <param name ="/use_sim_time" value="true"/>
   <arg name="bag_file"     default="$(find constrain_maps)/bags/2019-04-26-10-06-43.bag"/>
 
-  <arg name="traj_topic_name"       default="/robot4/control/controller/trajectories_mpc"/>
-  <arg name="report_topic_name"     default="/robot4/control/controller/reports_mpc"/>
-  <arg name="grid_map_topic_name"   default="/constrain_grid"/>
+  <node pkg="tf" type="static_transform_publisher" name="lala_broadcaster" args="0 0 0 0 0 0 world robot4 100"/>
+  <node pkg="rosbag" type="play" name="player" output="screen" args=" -- clock $(arg bag_file) -q -l"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find constrain_maps)/rviz/gridmap_test.rviz" output="log"/>
+
+
+  <arg name="robot_id" default="1"/>
+  <!-- derived args -->
+  <arg name="prefix" value="robot$(arg robot_id)"/>
+  <arg name="traj_topic_name"       default="/$(arg prefix)/control/controller/trajectories_mpc"/>
+  <arg name="report_topic_name"     default="/$(arg prefix)/control/controller/reports_mpc"/>
+  <arg name="grid_map_topic_name"   default="/$(arg prefix)/constrain_grid"/>
   <arg name="grid_map_frame_id"     default="/world"/>
   <arg name="resolution"            default="0.05"/>
   <arg name="size_x"                default="17.0"/>
@@ -23,11 +32,6 @@
   <arg name="upper_value"           default="1.0"/>
   <arg name="map_update_period"     default="0.5"/>
   <arg name="layerName"             default="global_constrain"/>
-
-
-  <node pkg="tf" type="static_transform_publisher" name="lala_broadcaster" args="0 0 0 0 0 0 world robot4 100"/>
-  <node pkg="rosbag" type="play" name="player" output="screen" args=" -- clock $(arg bag_file) -q -l"/>
-
 
   <node pkg="constrain_maps" type="constrain_plotter_node" name="constrain_maps_node" output="screen">
       <rosparam param="traj_topic_name"   subst_value="True">"$(arg traj_topic_name)"</rosparam>
@@ -50,9 +54,5 @@
     <rosparam command="load" file="$(find constrain_maps)/config/visualization.yaml"/>
     <rosparam param="grid_map_topic" subst_value="True">"$(arg grid_map_topic_name)"</rosparam>
   </node>
-
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find constrain_maps)/rviz/rfid_gridmap_test.rviz" output="log"/>
-
-
 
 </launch>
