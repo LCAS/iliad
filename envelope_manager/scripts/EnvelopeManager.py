@@ -3,6 +3,18 @@
 '''
 Connects to trajectory topic and report
 and publishes next goal in robot plan (geometry_msgs::PoseStamped)
+
+
+MPC controller receives the following from VEN
+1. a command activating a trajectory (2) with id_i
+2. a command starting tracking (3) with time t_i
+3. a trajectory (id_i)
+
+And MPC keeps sending to VEN (and coordinator)
+- reports, with chunk and step of trajectory id_i just completed
+
+EnvelopeManager intercepts commands and trajectory and sends
+
 '''
 
 import rospy
@@ -24,11 +36,10 @@ class EnvelopeManager():
 
         # ................................................................
         # Other config params
-        self.traj_mutex = Lock()
         self.commands = []
         self.local_traj_id = 0
         self.curr_chunk = -1
-        self.idle = True
+
         # ................................................................
         # start ros subs/pubs/servs....
         self.initROS()
@@ -86,29 +97,57 @@ class EnvelopeManager():
     def steering_velocity_callback(self, msg):
         self.steering_velocity = abs(msg.data)
 
-    def reports_callback(self, msg):
-        # you need it to be idle. Using 4 (finishing) didn't work well.
-        if (msg.status == 1):
-            self.sendNext()
-        else:
-            self.idle = False
+    '''
+    Reports are continously sent. They contain current controller status and
+    car state.
+    We will use them to trigger sucesive local trajectory transmissions
+    '''
 
-        self.translateChunks(msg)
-        self.reports_pub.publish(msg)
+    def reports_callback(self, msg):
+
+        has_sent = False
+
+        # you need it to be idle. Using CONTROLLER_STATUS_FINALIZE (finishing) didn't work well.
+        if (msg.status == ControllerReport.CONTROLLER_STATUS_WAIT):
+            has_sent = self.sendNext()
+
+        # if it didn't transsmit more trajectories
+        if not has_sent:
+            # We need to report in terms of the current reference trajectory,
+            # chunk and step, not the local ones.
+            msg = self.translateChunks(msg)
+            # and send them
+            self.reports_pub.publish(msg)
 
     def translateChunks(self, msg):
+        # what we just completed ...
         local_chunk_ind = msg.traj_chunk_sequence_num
         local_step_ind = msg.traj_step_sequence_num
+        if len(msg.traj_values) > 0:
+            local_traj_id = msg.traj_values[0].traj_id
 
+        # what we are telling VEN we just did
         global_chunk_ind = max(self.curr_chunk - 1, 0)
         global_step_ind = msg.traj_step_sequence_num
+        if len(msg.traj_values) > 0:
+            global_traj_id = self.trajectories.chunks[0].traj_id
 
-        msg.traj_chunk_sequence_num = int(global_chunk_ind)
-        msg.traj_step_sequence_num = int(global_step_ind)
+        # repopulate msg.
+        # finished transmitting...
+        if (self.curr_chunk == -1):
+            msg.traj_chunk_sequence_num = 0
+            msg.traj_step_sequence_num = 0
+            msg.traj_values = []
+        else:
+            msg.traj_chunk_sequence_num = int(global_chunk_ind)
+            msg.traj_step_sequence_num = int(global_step_ind)
+            if len(msg.traj_values) > 0:
+                msg.traj_values[0].traj_id = global_traj_id
+        return msg
 
     def command_callback(self, msg):
-
-        rospy.loginfo("Node [" + rospy.get_name() + "] command received. Just for the record")
+        rospy.loginfo("Node [" + rospy.get_name() + "] command (" +
+                      str(msg.command)+") received. Just for the record")
         self.commands.append(msg)
 
     def trajectory_callback(self, msg):
@@ -120,6 +159,7 @@ class EnvelopeManager():
         '''
         Let's divide 1 trajectory with N chunks into N trajectories with 1 chunk
         '''
+        ans = False
         # do we have anything to transmit?
         if (self.curr_chunk >= 0):
             # do we have any chunk to transmit?
@@ -141,47 +181,12 @@ class EnvelopeManager():
                 trajCV.chunks.append(chunk)
                 self.transmitCommands(chunk.traj_id)
                 self.retransmitTraj(trajCV)
+                ans = True
             # finished transmitting...
             else:
                 self.curr_chunk = -1
-
-    def getCurrentConstraints(self, myConstraints):
-
-        # All three arrays must be of the same length.
-        # Arrays can be empty.
-        '''
-        possible spatial constraints:
-        a0   a1     b
-        2x   +y <  14
-        -x   +y <   3
-        -x   -y <   5
-        3x -20y <  -1
-
-        '''
-        myConstraints.spatial_coef_a0 = [2,  -1, -1,   3]
-        myConstraints.spatial_coef_a1 = [1,   1, -1, -20]
-        myConstraints.spatial_coef_b = [14,   3,  5,  -1]
-
-        # Two numbers: minimal and maximal bounds // or an empty array]
-        # myConstraints.bounds_orientation =[ config["bounds_orientation_min"], config["bounds_orientation_max"]]
-        # Two numbers: minimal and maximal bounds // or an empty array]
-        # myConstraints.bounds_steering_velocity =[ config["bounds_steering_velocity_min"], config["bounds_steering_velocity_max"]]
-        # Two numbers: minimal and maximal bounds // or an empty array]
-        # myConstraints.bounds_tangential_velocity =[ config["bounds_tangential_velocity_min"], config["bounds_tangential_velocity_max"]]
-        # Two numbers: minimal and maximal bounds // or an empty array]
-        # myConstraints.bounds_tangential_acceleration =[ config["bounds_tangential_acceleration_min"], config["bounds_tangential_acceleration_max"]]
-        # One number or an empty array
-        # myConstraints.bounds_centripetal_acceleration = config["bounds_centripetal_acceleration_min"]
-
-        if hasattr(self, 'tangential_velocity'):
-            myConstraints.bounds_tangential_velocity = [
-                -self.tangential_velocity, self.tangential_velocity]
-
-        if hasattr(self, 'steering_velocity'):
-            myConstraints.bounds_steering_velocity = [
-                -self.steering_velocity, self.steering_velocity]
-
-        return myConstraints
+        # tells if has transmitted
+        return ans
 
     def transmitCommands(self, traj_id):
         comm = ControllerCommand()
@@ -205,19 +210,57 @@ class EnvelopeManager():
         ids = ','.join(ids)
         rospy.loginfo("Node [" + rospy.get_name() + "] retransmitted (traj,seq):"+ids)
 
-    def modulateStep(self, traject_ChV):
-        '''
-        takes a full chunk vector and mingles with its positions/speeds
-        controller accepts it
-        '''
-        for chunk in traject_ChV.chunks:
-            for step in chunk.steps:
-                step.velocities.tangential = 2.0 * step.velocities.tangential
-                step.velocities.steering = 2.0 * step.velocities.steering
-                step.state.position_x = 0.5 + step.state.position_x
-                step.state.position_y = 0.5 + step.state.position_y
+    def getCurrentConstraints(self, myConstraints):
 
-        self.retransmit(self.trajectories)
+        # All three arrays must be of the same length.
+        # Arrays can be empty.
+        '''
+        possible spatial constraints:
+        a0   a1     b
+        2x   +y <  14
+        -x   +y <   3
+        -x   -y <   5
+        3x -20y <  -1
+
+        '''
+        # myConstraints.spatial_coef_a0 = [2,  -1, -1,   3]
+        # myConstraints.spatial_coef_a1 = [1,   1, -1, -20]
+        # myConstraints.spatial_coef_b = [14,   3,  5,  -1]
+
+        # Two numbers: minimal and maximal bounds // or an empty array]
+        # myConstraints.bounds_orientation =[ config["bounds_orientation_min"], config["bounds_orientation_max"]]
+        # Two numbers: minimal and maximal bounds // or an empty array]
+        # myConstraints.bounds_steering_velocity =[ config["bounds_steering_velocity_min"], config["bounds_steering_velocity_max"]]
+        # Two numbers: minimal and maximal bounds // or an empty array]
+        # myConstraints.bounds_tangential_velocity =[ config["bounds_tangential_velocity_min"], config["bounds_tangential_velocity_max"]]
+        # Two numbers: minimal and maximal bounds // or an empty array]
+        # myConstraints.bounds_tangential_acceleration =[ config["bounds_tangential_acceleration_min"], config["bounds_tangential_acceleration_max"]]
+        # One number or an empty array
+        # myConstraints.bounds_centripetal_acceleration = config["bounds_centripetal_acceleration_min"]
+
+        if hasattr(self, 'tangential_velocity'):
+            myConstraints.bounds_tangential_velocity = [
+                -self.tangential_velocity, self.tangential_velocity]
+
+        if hasattr(self, 'steering_velocity'):
+            myConstraints.bounds_steering_velocity = [
+                -self.steering_velocity, self.steering_velocity]
+
+        return myConstraints
+
+    # def modulateStep(self, traject_ChV):
+    #     '''
+    #     takes a full chunk vector and mingles with its positions/speeds
+    #     controller accepts it
+    #     '''
+    #     for chunk in traject_ChV.chunks:
+    #         for step in chunk.steps:
+    #             step.velocities.tangential = 2.0 * step.velocities.tangential
+    #             step.velocities.steering = 2.0 * step.velocities.steering
+    #             step.state.position_x = 0.5 + step.state.position_x
+    #             step.state.position_y = 0.5 + step.state.position_y
+    #
+    #     self.retransmit(self.trajectories)
 
 
 # Main function.
