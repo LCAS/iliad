@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>envelope_manager</name>
+  <name>dynamic_constraints</name>
   <version>0.0.1</version>
   <description>The orunav_coordinator_fake package</description>
   <maintainer email="mfernandezcarmona@lincoln.ac.uk">Manuel Fernandez</maintainer>

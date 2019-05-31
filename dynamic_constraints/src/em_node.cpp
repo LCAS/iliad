@@ -3,9 +3,9 @@
 #include <dynamic_reconfigure/server.h>
 #include <orunav_msgs/SetTask.h>
 
-#include <envelope_manager/envelopeManagerConfig.h>
+#include <dynamic_constraints/constraintSettingsConfig.h>
 
-class EnvelopeManagerNode {
+class DynamicConstraintsNode {
 
 private:
   ros::ServiceClient service_client_;
@@ -15,28 +15,28 @@ private:
   orunav_msgs::Task task_;
   
  public:
-  EnvelopeManagerNode(ros::NodeHandle &nh)
+  DynamicConstraintsNode(ros::NodeHandle &nh)
   {
       // Parameters
       // TODO this param should be loaded from the coordinator_fake_node
       nh.param<bool>("use_ct", use_ct_, true);
       
       // Service
-      service_server_ = nh.advertiseService("execute_task_coordinator", &EnvelopeManagerNode::setTaskCB, this);
+      service_server_ = nh.advertiseService("execute_task_coordinator", &DynamicConstraintsNode::setTaskCB, this);
       // Client
       service_client_ = nh.serviceClient<orunav_msgs::SetTask>("execute_task");
 
 
-      dynamic_reconfigure::Server<envelope_manager::envelopeManagerConfig> dyn_srv;
-      dynamic_reconfigure::Server<envelope_manager::envelopeManagerConfig>::CallbackType f;
-      f = boost::bind(&EnvelopeManagerNode::dynamic_reconfigure_callback,this, _1, _2);
+      dynamic_reconfigure::Server<dynamic_constraints::constraintSettingsConfig> dyn_srv;
+      dynamic_reconfigure::Server<dynamic_constraints::constraintSettingsConfig>::CallbackType f;
+      f = boost::bind(&DynamicConstraintsNode::dynamic_reconfigure_callback,this, _1, _2);
       dyn_srv.setCallback(f);
 
 
     }
 
 
-void dynamic_reconfigure_callback(envelope_manager::envelopeManagerConfig &config, uint32_t level)
+void dynamic_reconfigure_callback(dynamic_constraints::constraintSettingsConfig &config, uint32_t level)
 {
   //ROS_INFO("Reconfigure request : %f",
   //         config.speed_factor);
@@ -50,21 +50,21 @@ void dynamic_reconfigure_callback(envelope_manager::envelopeManagerConfig &confi
   bool validTaskMsg(const orunav_msgs::Task &task) const {
     // Any path points?
     if (task.path.path.size() < 3) {
-      ROS_ERROR_STREAM("[EnvelopeManagerNode] Not a valid task: path to short, current length : " << task.path.path.size()); 
+      ROS_ERROR_STREAM("[DynamicConstraintsNode] Not a valid task: path to short, current length : " << task.path.path.size()); 
       return false;
     }
     if (use_ct_) {
       if (task.dts.dts.size() < 2) { // 2- the fastest and slowest
-        ROS_ERROR_STREAM("[EnvelopeManagerNode] Not a valid task: no dts vectors, current length: " << task.dts.dts.size());
+        ROS_ERROR_STREAM("[DynamicConstraintsNode] Not a valid task: no dts vectors, current length: " << task.dts.dts.size());
         return false;
       }
       if (task.path.path.size() != task.dts.dts[0].dt.size()) {
-        ROS_ERROR_STREAM("[EnvelopeManagerNode] Not a valid task: dts[0] length different from path length: " << task.dts.dts[0].dt.size());
+        ROS_ERROR_STREAM("[DynamicConstraintsNode] Not a valid task: dts[0] length different from path length: " << task.dts.dts[0].dt.size());
         return false;
       }
     }
     if (task.path.path.size() < task.constraints.constraints.size()) {
-      ROS_ERROR_STREAM("[EnvelopeManagerNode] Not a valid task: amount of constraints larger the path length: " << task.constraints.constraints.size());
+      ROS_ERROR_STREAM("[DynamicConstraintsNode] Not a valid task: amount of constraints larger the path length: " << task.constraints.constraints.size());
       return false;
     }
     return true;
@@ -77,13 +77,13 @@ void dynamic_reconfigure_callback(envelope_manager::envelopeManagerConfig &confi
     orunav_msgs::Task inTask = req.task;
     orunav_msgs::SetTask outSetTask;
     
-    ROS_INFO("[EnvelopeManagerNode] RID:%d - received setTask", (int) inTask.target.robot_id);
+    ROS_INFO("[DynamicConstraintsNode] RID:%d - received setTask", (int) inTask.target.robot_id);
 
     // Verify the received task
     
 
     if (!validTaskMsg(inTask)) {
-      ROS_ERROR("[EnvelopeManagerNode] received invalid task.");
+      ROS_ERROR("[DynamicConstraintsNode] received invalid task.");
       return false;
     }
 
@@ -95,12 +95,12 @@ void dynamic_reconfigure_callback(envelope_manager::envelopeManagerConfig &confi
     outSetTask.request.task = inTask;
               
     if (service_client_.call(outSetTask)) {
-      ROS_INFO("[EnvelopeManagerNode] - set_task sucessfull");
+      ROS_INFO("[DynamicConstraintsNode] - set_task sucessfull");
     }else{
-      ROS_ERROR("[EnvelopeManagerNode] - Failed to call service: set_task");
+      ROS_ERROR("[DynamicConstraintsNode] - Failed to call service: set_task");
       return false;
     }
-      ROS_INFO_STREAM("[EnvelopeManagerNode] - set_task return value : " << outSetTask.response.result);
+      ROS_INFO_STREAM("[DynamicConstraintsNode] - set_task return value : " << outSetTask.response.result);
 
     // and finally propagate back the response
     res = outSetTask.response;
@@ -117,10 +117,10 @@ void dynamic_reconfigure_callback(envelope_manager::envelopeManagerConfig &confi
 
 int main(int argc, char** argv) {
 
-    ros::init(argc,argv,"envelope_manager");
+    ros::init(argc,argv,"dynamic_constraints");
     ros::NodeHandle nh;
 
-    EnvelopeManagerNode cf(nh);
+    DynamicConstraintsNode cf(nh);
 
     ros::spin();
 

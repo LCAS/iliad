@@ -76,7 +76,7 @@ namespace constrain_maps {
       ROS_DEBUG("layerName: \"%s\"", layerName.c_str());
 
       ROS_DEBUG("ROS Params________________________");
-      ROS_DEBUG("constrains (by EnvelopeManager) read from: \"%s\"", traj_topic_name.c_str());
+      ROS_DEBUG("constrains (by DynamicConstraints) read from: \"%s\"", traj_topic_name.c_str());
       ROS_DEBUG("reports (by mpc controller) read from: \"%s\"", report_topic_name.c_str());
       ROS_DEBUG("grid map published at: \"%s\"", grid_map_topic_name.c_str());
       ROS_DEBUG("map published every: %2.2f seconds", map_update_period);

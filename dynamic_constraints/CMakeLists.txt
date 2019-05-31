@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(envelope_manager)
+project(dynamic_constraints)
 
 find_package(catkin REQUIRED COMPONENTS
 #  dynamic_reconfigure
@@ -10,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 #generate_dynamic_reconfigure_options(
-#   cfg/envelopeManager.cfg
+#   cfg/constraintSettings.cfg
 #)
 
 catkin_package(
@@ -40,6 +40,6 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
-  scripts/EnvelopeManager.py
+  scripts/dynamic_constraints_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

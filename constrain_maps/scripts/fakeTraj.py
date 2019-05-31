@@ -62,9 +62,9 @@ class FakeTraj():
 
 # Main function.
 if __name__ == '__main__':
-    rospy.init_node('EnvelopeManager')  # , log_level=rospy.DEBUG)
+    rospy.init_node('dynamic_constraints_node')  # , log_level=rospy.DEBUG)
     # Go to class functions that do all the heavy lifting. Do error checking.
     try:
-        goGo = EnvelopeManager()
+        goGo = DynamicConstraints()
     except rospy.ROSInterruptException:
         pass

@@ -13,7 +13,7 @@ Shows simulated forklift using ROS navigation stacks. Currently testing TEB plan
 ## hri_simulation
 Depends on base and navigation simulation packages. It simulates human aware navigation.
 
-## envelope_manager
+## dynamic_constraints
 Dynamic mpc constraints manager. Captures trajectories from the execution node to the controller node and modifies the spatial and speed constraints.
 
 ## gazebo_plugins
