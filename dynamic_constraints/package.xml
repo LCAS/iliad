@@ -52,11 +52,13 @@
   <build_depend>orunav_msgs</build_depend>
   <build_depend>driver_base</build_depend>
   <!--  build_export_depend  dynamic_reconfigure  /build_export_depend -->
-  
+
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <exec_depend>driver_base</exec_depend>
   <exec_depend>orunav_msgs</exec_depend>
+  <exec_depend>rqt_ez_publisher</exec_depend>
+
   <!-- exec_depend   dynamic_reconfigure   /exec_depend -->
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
