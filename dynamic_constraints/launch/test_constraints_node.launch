@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+    <!--
+
+      Sets up a simulation with a walking human and a mocked human tracking.
+      Should show some QSRs
+
+   -->
+<launch>
+    <!-- Using other values requires some digging ... -->
+    <arg name="robot_id" value="1"/>
+
+    <arg name="rviz_config_file" value="$(find dynamic_constraints)/cfg/test_constraints.rviz"/>
+
+    <arg name="scenario_id" default="1"/>
+    <!-- scenario_id == 1 Robot crossess left of human         -->
+    <!-- scenario_id == 2 Robot crossess right of human        -->
+    <!-- scenario_id == 3 Robot crossess is overtaken by human -->
+    <!-- scenario_id == 4 Robot crossess crosses human         -->
+    <!-- scenario_id == 5 No human at all                      -->
+
+    <!-- derived args -->
+    <arg name="prefix" value="robot$(arg robot_id)"/>
+
+    <!-- launch gazebo world -->
+    <include file="$(find taros19_experiments)/launch/experiment_setup.launch">
+      <arg name="robot_id" value="$(arg robot_id)"/>
+      <arg name="scenario_id" value="$(arg scenario_id)"/>
+      <arg name="gazeboGui" value="true"/>
+      <arg name="rvizGui" value="true"/>
+      <arg name="rviz_config_file" value="$(arg rviz_config_file)"/>
+      <arg name="navigation_id" value="3"/>
+      <arg name="do_recording" value="false"/>
+    </include>
+
+    <!-- launch fake human tracker -->
+    <include file="$(find hri_simulation)/launch/simulate_spencer_people_tracker.launch">
+      <arg name="robot_id" value="$(arg robot_id)"/>
+    </include>
+
+    <!-- NODE UNDER TEST
+    <node name="QSR2VW" pkg="dynamic_constraints" type="QSR2constraints_node.py">
+      <param name="robot_id" value="$(arg robot_id)"/>
+      <param name="velocity_constraints_topic" value="/$(arg prefix)/velocity_constraints"/>
+      <param name="human_tracking_topic" value="/$(arg prefix)/perception/tracked_persons"/>
+      <param name="velocity_constraints_topic" value="/$(arg prefix)/velocity_constraints"/>
+      <param name="reports_topic" value="/$(arg prefix)/control/controller/reports"/>
+      <param name="base_frame" value="/$(arg prefix)/base_link"/>
+      <param name="sampling_time" value="0.6"/>
+      <param name="tf_timeout" value="1"/>
+    </node>
+-->
+
+</launch>
