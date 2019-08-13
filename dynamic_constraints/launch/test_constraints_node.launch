@@ -38,16 +38,9 @@
     </include>
 
     <!-- NODE UNDER TEST
-    <node name="QSR2VW" pkg="dynamic_constraints" type="QSR2constraints_node.py">
-      <param name="robot_id" value="$(arg robot_id)"/>
-      <param name="velocity_constraints_topic" value="/$(arg prefix)/velocity_constraints"/>
-      <param name="human_tracking_topic" value="/$(arg prefix)/perception/tracked_persons"/>
-      <param name="velocity_constraints_topic" value="/$(arg prefix)/velocity_constraints"/>
-      <param name="reports_topic" value="/$(arg prefix)/control/controller/reports"/>
-      <param name="base_frame" value="/$(arg prefix)/base_link"/>
-      <param name="sampling_time" value="0.6"/>
-      <param name="tf_timeout" value="1"/>
-    </node>
+    <include file="$(find dynamic_constraints)/launch/dynamic_constraints.launch">
+      <arg name="robot_id" value="$(arg robot_id)"/>
+    </include>
 -->
 
 </launch>
