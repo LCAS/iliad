@@ -7,7 +7,7 @@
 <launch>
 
     <arg name="robot_id" default="4"/>
-    <arg name="useQSRconstraints" default="true"/>
+    <arg name="use_qsr" default="true"/>
 
     <!-- derived args -->
     <arg name="prefix" value="robot$(arg robot_id)"/>
