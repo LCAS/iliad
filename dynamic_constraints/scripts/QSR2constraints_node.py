@@ -169,11 +169,11 @@ class DynamicConstraintsNode():
         # we either use spencer or bayes ...
 
 
-        if self.human_detection_method is 'peopletracker':
+        if self.human_detection_method=='peopletracker':
             rospy.Subscriber(self.peopletracker_topic, PoseArray,
                          self.peopletracker_callback, queue_size=1)
 
-        elif self.human_detection_method is 'trackedpersons':
+        elif self.human_detection_method=='trackedpersons':
             rospy.Subscriber(self.human_tracking_topic, TrackedPersons,
                          self.spencer_human_tracking_callback, queue_size=1)
         else:
