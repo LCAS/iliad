@@ -15,7 +15,7 @@
     <!-- node itself -->
     <group ns="$(arg prefix)">
 
-      <node name="QSR2VW" pkg="dynamic_constraints" type="QSR2constraints_node.py" if="$(arg useQSRconstraints)">
+      <node name="QSR2VW" pkg="dynamic_constraints" type="QSR2constraints_node.py" output="screen" if="$(arg useQSRconstraints)">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="velocity_constraints_topic" value="/$(arg prefix)/velocity_constraints"/>
 
@@ -24,7 +24,7 @@
 
         <param name="peopletracker_topic" value="/$(arg prefix)/people_tracker/positions"/>
         <param name="human_tracking_topic" value="/$(arg prefix)/perception/tracked_persons"/>
-        
+
         <param name="velocity_constraints_topic" value="/$(arg prefix)/velocity_constraints"/>
         <param name="reports_topic" value="/$(arg prefix)/control/controller/reports"/>
         <param name="base_frame" value="/$(arg prefix)/base_link"/>
