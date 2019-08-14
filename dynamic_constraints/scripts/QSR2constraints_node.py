@@ -9,7 +9,7 @@ QSR2constraints for ros!
 
 import rospy
 import numpy as np
-from geometry_msgs.msg import Vector3Stamped, PoseStamped, PoseWithCovarianceStamped, TwistStamped, TwistWithCovarianceStamped, Point
+from geometry_msgs.msg import Vector3Stamped, PoseStamped, PoseArray, Pose, PoseWithCovarianceStamped, TwistStamped, TwistWithCovarianceStamped, Point
 from std_msgs.msg import Header
 from spencer_tracking_msgs.msg import TrackedPersons, TrackedPerson
 from tf.transformations import euler_from_quaternion, quaternion_from_euler, translation_matrix, quaternion_matrix
@@ -101,9 +101,17 @@ class DynamicConstraintsNode():
         self.velocity_constraints_topic = rospy.get_param(
             '~velocity_constraints_topic', '/robot'+str(self.robot_id)+'/velocity_constraints')
 
-        # human tracking
+        # human detection method: peopletracker OR trackedpersons
+        self.human_detection_method = rospy.get_param(
+            '~human_detection_method', 'trackedpersons')
+
+        # human tracking trackedpersons topic
         self.human_tracking_topic = rospy.get_param(
             '~human_tracking_topic', '/robot'+str(self.robot_id)+'/perception/tracked_persons')
+
+        # human detections using bayes peopletracker
+        self.peopletracker_topic = rospy.get_param(
+            '~peopletracker_topic', '/robot'+str(self.robot_id)+'/people_tracker/positions')
 
         # MPC reports with current robot state
         self.velocity_constraints_topic = rospy.get_param(
@@ -157,8 +165,21 @@ class DynamicConstraintsNode():
         # subscribers and listeners
         rospy.Subscriber(self.reports_topic, ControllerReport,
                          self.reports_callback, queue_size=1)
-        rospy.Subscriber(self.human_tracking_topic, TrackedPersons,
+
+        # we either use spencer or bayes ...
+
+
+        if self.human_detection_method is 'peopletracker':
+            rospy.Subscriber(self.peopletracker_topic, PoseArray,
+                         self.peopletracker_callback, queue_size=1)
+
+        elif self.human_detection_method is 'trackedpersons':
+            rospy.Subscriber(self.human_tracking_topic, TrackedPersons,
                          self.spencer_human_tracking_callback, queue_size=1)
+        else:
+            rospy.logerr("Node [" + rospy.get_name() + "] Provided detection method  ("+self.human_detection_method+") is not peopletracker/trackedpersons. Defaulting to trackedpersons")
+            rospy.Subscriber(self.human_tracking_topic, TrackedPersons,
+                        self.spencer_human_tracking_callback, queue_size=1)
 
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
@@ -236,6 +257,54 @@ class DynamicConstraintsNode():
         self.updateVisuals()
         self.updateConstraints()
         self.sendNewConstraints()
+
+
+    #  this method mostly mimics previous spencer one. CAN BE IMPROVED!!!
+    def peopletracker_callback(self, msg):
+        # after each callback, reset cosests
+        self.closest_human_pose = None
+        self.closest_human_twist = None
+        min_dist = np.inf
+        min_i = -1
+
+        # TODO: Maybe it's better if we low pass filter these tracks to keep
+        #       just humans that have been detected for a minimum period of time
+        for i, pose_i in enumerate(msg.poses):
+            # Create the stamped object
+            human_pose = PoseWithCovarianceStamped()
+            # msg contains a header with the frame id for all poses
+            human_pose.header = msg.header
+            human_pose.pose = pose_i
+
+            # from the list of tracked persons, find the closest ...
+            (dist, human_pose_base) = self.getDistToHuman(human_pose)
+            if dist < min_dist:
+                min_i = i
+                self.closest_human_pose = human_pose_base
+                twist_i = Twist()
+                twist_i.linear.x = velocities[i].x
+                twist_i.linear.y = velocities[i].y
+                twist_i.linear.z = velocities[i].z
+
+                self.closest_human_twist = self.getTwistInBaseFrame(twist_i, msg.header)
+
+                (xh0, yh0, hh0, vh0, wh0) = self.getHumanState()
+
+                rospy.logdebug_throttle(5, "Node [" + rospy.get_name() + "] " +
+                                        "Closest human at: Pose ( " +
+                                        str(xh0) + ", " + str(yh0) + ", " +
+                                        str(hh0*180.0/np.pi) + " deg), " +
+                                        "Speed ( " +
+                                        str(vh0) + " m/sec, " +
+                                        str(wh0*180.0/np.pi) + " deg/sec) "
+                                        )
+
+        self.updateVisuals()
+        self.updateConstraints()
+        self.sendNewConstraints()
+
+
+
 
     # ..............................
     # based on http://docs.ros.org/hydro/api/tf/html/c++/transform__listener_8cpp_source.html
