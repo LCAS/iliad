@@ -232,6 +232,7 @@ class DynamicConstraintsNode():
 
         # TODO: Maybe it's better if we low pass filter these tracks to keep
         #       just humans that have been detected for a minimum period of time
+        #rospy.loginfo("...........................................................")
         for i, trk_person in enumerate(msg.tracks):
             # Create the stamped object
             human_pose = PoseWithCovarianceStamped()
@@ -241,8 +242,10 @@ class DynamicConstraintsNode():
 
             # from the list of tracked persons, find the closest ...
             (dist, human_pose_base) = self.getDistToHuman(human_pose)
+            #rospy.loginfo("ID: "+str(i)+" Dist: "+str(dist) +" Pose:\n"+str(human_pose))
             if dist < min_dist:
                 min_i = i
+                min_dist = dist
                 self.closest_human_pose = human_pose_base
                 self.closest_human_twist = self.getTwistInBaseFrame(trk_person.twist, msg.header)
 
@@ -256,7 +259,7 @@ class DynamicConstraintsNode():
                                         str(vh0) + " m/sec, " +
                                         str(wh0*180.0/np.pi) + " deg/sec) "
                                         )
-
+        #rospy.loginfo("...........................................................")
         self.updateVisuals()
         self.updateConstraints()
         self.sendNewConstraints()
@@ -455,7 +458,7 @@ class DynamicConstraintsNode():
             msg.data.append(self.constraint_v)
             msg.data.append(self.constraint_w)
             self.velocity_constraints_pub.publish(msg)
-            rospy.logdebug("Node [" + rospy.get_name() + "] " +
+            rospy.loginfo("Node [" + rospy.get_name() + "] " +
                            "New speed Constraints sent : V ( " +
                            str(self.constraint_v) + " m/s), " +
                            "W ( " +
