@@ -6,12 +6,13 @@ from geometry_msgs.msg import Vector3
 QSR2constraints for ros!
 
 '''
-
+import uuid
 import rospy
 import numpy as np
-from geometry_msgs.msg import Vector3Stamped, PoseStamped, PoseArray, Pose, PoseWithCovarianceStamped, TwistStamped, TwistWithCovarianceStamped, Point
-from std_msgs.msg import Header
+from geometry_msgs.msg import Vector3Stamped, PoseStamped, PoseWithCovarianceStamped, TwistStamped, TwistWithCovarianceStamped, Point
+from std_msgs.msg import Header, UInt64
 from spencer_tracking_msgs.msg import TrackedPersons, TrackedPerson
+from bayes_people_tracker.msg import PeopleTracker
 from tf.transformations import euler_from_quaternion, quaternion_from_euler, translation_matrix, quaternion_matrix
 from orunav_msgs.msg import ControllerState, ControllerReport
 from std_msgs.msg import Float64MultiArray
@@ -79,7 +80,7 @@ class DynamicConstraintsNode():
         # start ros subs/pubs/servs....
         self.initROS()
 
-        rospy.loginfo("Node [" + rospy.get_name() + "] STARTED")
+        rospy.loginfo("Node [" + rospy.get_name() + "] entering spin...")
 
         rospy.spin()
 
@@ -166,11 +167,14 @@ class DynamicConstraintsNode():
         rospy.Subscriber(self.reports_topic, ControllerReport,
                          self.reports_callback, queue_size=1)
 
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+
+        # topic publishers ...
+
         # we either use spencer or bayes ...
-
-
         if self.human_detection_method=='peopletracker':
-            rospy.Subscriber(self.peopletracker_topic, PoseArray,
+            rospy.Subscriber(self.peopletracker_topic, PeopleTracker,
                          self.peopletracker_callback, queue_size=1)
 
         elif self.human_detection_method=='trackedpersons':
@@ -181,8 +185,7 @@ class DynamicConstraintsNode():
             rospy.Subscriber(self.human_tracking_topic, TrackedPersons,
                         self.spencer_human_tracking_callback, queue_size=1)
 
-        self.tfBuffer = tf2_ros.Buffer()
-        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+
 
         # service servers
 
@@ -259,52 +262,43 @@ class DynamicConstraintsNode():
         self.sendNewConstraints()
 
 
-    #  this method mostly mimics previous spencer one. CAN BE IMPROVED!!!
     def peopletracker_callback(self, msg):
-        # after each callback, reset cosests
-        self.closest_human_pose = None
-        self.closest_human_twist = None
-        min_dist = np.inf
-        min_i = -1
+        spencer_msg = self.bayes2spencer(msg)
+        self.spencer_human_tracking_callback(spencer_msg)
 
-        # TODO: Maybe it's better if we low pass filter these tracks to keep
-        #       just humans that have been detected for a minimum period of time
-        for i, pose_i in enumerate(msg.poses):
-            # Create the stamped object
-            human_pose = PoseWithCovarianceStamped()
-            # msg contains a header with the frame id for all poses
-            human_pose.header = msg.header
-            human_pose.pose = pose_i
-
-            # from the list of tracked persons, find the closest ...
-            (dist, human_pose_base) = self.getDistToHuman(human_pose)
-            if dist < min_dist:
-                min_i = i
-                self.closest_human_pose = human_pose_base
-                twist_i = Twist()
-                twist_i.linear.x = velocities[i].x
-                twist_i.linear.y = velocities[i].y
-                twist_i.linear.z = velocities[i].z
-
-                self.closest_human_twist = self.getTwistInBaseFrame(twist_i, msg.header)
-
-                (xh0, yh0, hh0, vh0, wh0) = self.getHumanState()
-
-                rospy.logdebug_throttle(5, "Node [" + rospy.get_name() + "] " +
-                                        "Closest human at: Pose ( " +
-                                        str(xh0) + ", " + str(yh0) + ", " +
-                                        str(hh0*180.0/np.pi) + " deg), " +
-                                        "Speed ( " +
-                                        str(vh0) + " m/sec, " +
-                                        str(wh0*180.0/np.pi) + " deg/sec) "
-                                        )
-
-        self.updateVisuals()
-        self.updateConstraints()
-        self.sendNewConstraints()
+    #  There is some info here that may be not accurate
+    def bayes2spencer(self,bayes_msg):
+        spencer_msg=TrackedPersons()
+        spencer_msg.header = bayes_msg.header
 
 
+        for i, pose in enumerate(bayes_msg.poses):
+            track=TrackedPerson()
+            track.track_id = self.string2uint64(bayes_msg.uuids[i])
+            # PoseWithCovariance
+            track.pose.pose.position = pose.position
+            track.pose.pose.orientation = pose.orientation
+            # TwistWithCovariance
+            track.twist.twist.linear = bayes_msg.velocities[i]
+            # Data not in bayes. Not sure about these ...
+            track.pose.covariance = (np.random.normal(0.3,0.1)* np.identity(6)).flatten().tolist()
+            track.twist.covariance = (np.random.normal(0.3,0.1)* np.identity(6)).flatten().tolist()
+            # we assume 0 here
+            # track.twist.twist.angular
+            track.is_occluded = False
+            track.is_matched = False
+            track.detection_id = self.string2uint64(bayes_msg.uuids[i])
+            track.age = 0
 
+            spencer_msg.tracks.append(track)
+
+
+        return spencer_msg
+
+    def string2uint64(self, in_string):        
+        ans=UInt64(uuid.UUID(in_string).int)
+
+        return ans
 
     # ..............................
     # based on http://docs.ros.org/hydro/api/tf/html/c++/transform__listener_8cpp_source.html
@@ -666,7 +660,7 @@ class DynamicConstraintsNode():
 
 # Main function.
 if __name__ == '__main__':
-    rospy.init_node('DynamicConstraintsNode', log_level=rospy.DEBUG)
+    rospy.init_node('DynamicConstraintsNode')#, log_level=rospy.DEBUG)
     # Go to class functions that do all the heavy lifting. Do error checking.
     try:
         goGo = DynamicConstraintsNode()
