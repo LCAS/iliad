@@ -1,11 +1,23 @@
+# this is for the simulated robot
 scan_filter_chain:
-- name: wheelBox
-  type: LaserScanAngularBoundsFilter
+- name: MotorWheel1
+  type: laser_filters/LaserScanAngularBoundsFilterInPlace
   params:
-    lower_angle: -3.1416
-    upper_angle:  -2.73
-- name: wheelBox2
-  type: LaserScanAngularBoundsFilter
+    lower_angle: 2.70
+    upper_angle: 3.20
+- name: MotorWheel2
+  type: laser_filters/LaserScanAngularBoundsFilterInPlace
   params:
-    lower_angle:  2.73
-    upper_angle:  3.1416
+    lower_angle: -3.20
+    upper_angle: -2.70 
+# For some reason, fork wheels are hideden.       
+# - name: rightFork
+#   type: LaserScanAngularBoundsFilter
+#   params:
+#     lower_angle: 2.85
+#     upper_angle: 3.14
+# - name: leftFork
+#   type: LaserScanAngularBoundsFilter
+#   params:
+#     lower_angle: -3.14
+#     upper_angle: -2.7

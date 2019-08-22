@@ -20,8 +20,7 @@
       <arg name="robot_id"        default="1"/>
       <arg name="prefix"        default="robot$(arg robot_id)"/>
       <arg name="topic_prefix"  default="/$(arg prefix)"/>
-      <arg name="map_frame"   default = "map"/>
-      <arg name="map_topic"   default = "/map"/>
+      
       <arg name="global_frame"   default = "map"/>
 
       <arg name="odom_topic" default="odom" />
