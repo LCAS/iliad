@@ -1,9 +1,4 @@
 footprint: [[-0.2, -0.3], [-0.2, 0.3], [1.7, 0.3], [1.7, -0.3]] # previously defined ad 1.9, for citi trucks
-footprint:
-- [-0.27, -0.25]
-- [1.45, -0.25]
-- [1.45, 0.25]
-- [-0.27, 0.25]
 global_frame: map_laser2d
 height: 8
 inflation_layer: {cost_scaling_factor: 10, enabled: true, inflation_radius: 2.5}

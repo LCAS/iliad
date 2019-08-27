@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   tf
+  tf2
   orunav_msgs
   pluginlib
   nav_core
@@ -23,7 +24,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   #LIBRARIES iliad_local_planner
-  CATKIN_DEPENDS #roscpp  tf geometry_msgs sensor_msgs  nav_msgs
+  CATKIN_DEPENDS #roscpp  tf tf2 geometry_msgs sensor_msgs  nav_msgs
   #DEPENDS 
 )
 

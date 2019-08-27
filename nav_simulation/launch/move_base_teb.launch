@@ -24,9 +24,9 @@
       <arg name="cmd_vel_topic_rel" default="move_base/cmd_vel" />
 
 
-      <arg name="map_frame" default="map_laser2d"/>
-      <arg name="map_topic" default="map_laser2d"/>
-      <arg name="base_frame" default="$(arg prefix)/base_link"/>
+      <arg name="map_frame" default="/map_laser2d"/>
+      <arg name="map_topic" default="/maps/map_laser2d"/>
+      <arg name="base_frame" default="/$(arg prefix)/base_link"/>
 
       <group ns="$(arg prefix)">
          <!--
