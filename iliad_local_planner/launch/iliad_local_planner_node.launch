@@ -12,8 +12,12 @@
     <arg name="map_frame" default="/map_laser2d"/>
     <arg name="map_topic" default="map_laser2d"/>
     <arg name="base_frame" default="/$(arg prefix)/base_link"/>
-    <arg name="planner_plugin" default="teb_local_planner/TebLocalPlannerROS"/>
-    <!-- dwa_local_planner_constraint/DWAPlannerROS  Filters out laser points hitting robot frame/wheels .................-->
+    
+      
+    <arg name="planner_plugin" default="dwa_local_planner_constraint/DWAPlannerROS"/>
+    <!-- <arg name="planner_plugin" default="teb_local_planner/TebLocalPlannerROS"/> -->
+
+    <!-- Filters out laser points hitting robot frame/wheels .................-->
     <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="safety_filter">
       <rosparam command="load" file="$(find base_simulation)/params/safety_laser_filter.yaml" />
       <remap from="scan" to="/$(arg prefix)/sensors/laser2d_floor" />
@@ -32,6 +36,8 @@
     <rosparam param="/$(arg prefix)/local_planner/local_costmap/obstacle_layer/scan_top/topic" subst_value="True">/$(arg prefix)/sensors/laser2d_top</rosparam>
 
     <!-- local planner config -->
+    <rosparam param="/$(arg prefix)/local_planner/DWAPlannerROS/sim_time" subst_value="True">1.8</rosparam>
+
 
     <group ns="$(arg prefix)">
         <node pkg="iliad_local_planner" type="iliad_local_planner_node" name="local_planner" output="screen">
@@ -41,6 +47,6 @@
 
     </group>
     
--->
+
 
 </launch>

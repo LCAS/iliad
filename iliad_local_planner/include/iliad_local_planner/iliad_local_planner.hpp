@@ -22,7 +22,8 @@
 #include <nav_msgs/Odometry.h>
 
 // ROS - ORU
-#include <orunav_msgs/ControllerState.h>
+#include <orunav_msgs/ControllerReport.h>
+#include <orunav_msgs/RobotReport.h>
 #include <orunav_msgs/Task.h>
 #include <orunav_msgs/PoseSteering.h>
 #include <orunav_msgs/ExecuteTask.h>
@@ -67,15 +68,18 @@ class local_planner
 
     private:
     
-
-
-
       boost::shared_ptr<nav_core::BaseLocalPlanner> local_planner_ptr_;
       pluginlib::ClassLoader<nav_core::BaseLocalPlanner> local_planner_loader_;
       costmap_2d::Costmap2DROS* local_costmap_ptr_;
       std::string local_planner_class_name_;
       std::vector<geometry_msgs::PoseStamped> global_plan_;
       
+      int robot_status_;
+      int controller_status_;
+      ros::Subscriber robot_robot_report_sub_;
+      std::string robot_robot_report_topic_name_;
+      void robot_robot_report_callback(const orunav_msgs::RobotReport::ConstPtr& report_msg);
+
       ros::Timer updateTimer_;
       double controller_frequency_;
       void updateLocalPathCallback(const ros::TimerEvent&);
@@ -91,17 +95,32 @@ class local_planner
       std::string teb_via_points_topic_name_;
       ros::Publisher teb_via_points_topic_name_pub_;
       
-      std::string execute_task_srv_name_;
-      ros::ServiceClient execute_task_srv_client_;
-      
-      ros::Publisher temp_pub_;
+      // used to send ven the tasks.
+      std::string ven_execute_task_srv_client_name_;
+      ros::ServiceClient ven_execute_task_srv_client_;
+
+      // used to get incoming tasks from coordinator
+      std::string coord_execute_task_srv_name_;
+      ros::ServiceServer coord_execute_task_srv_;
+      bool coord_execute_task_callback(orunav_msgs::ExecuteTask::Request &req, orunav_msgs::ExecuteTask::Response &res);
+      std::vector<orunav_msgs::PoseSteering> cast2PoseSteering(std::vector<geometry_msgs::PoseStamped> path_ros, double wheelbase); 
+
+      //ros::Publisher temp_pub_;
 
       double getDist(geometry_msgs::PoseStamped poseStA, geometry_msgs::PoseStamped poseStB);
       nav_msgs::Path linear_subsample(nav_msgs::Path inputPath, unsigned int outLen);
       geometry_msgs::PoseStamped transformPose(std::string frame_id, geometry_msgs::PoseStamped poseIn);
       void printSuspicius(std::vector<geometry_msgs::PoseStamped> inV);
 
+      void  robot_controller_reports_callback(const orunav_msgs::ControllerReport::ConstPtr& report_msg);
 
+      std::vector<double> steeringAngles(std::vector<geometry_msgs::PoseStamped> path, double wheelbase);
+
+      std::vector<double> curvature(std::vector<geometry_msgs::PoseStamped> path) ;
+
+      double getYaw(geometry_msgs::Quaternion q0);
+      void printPoseSteering(std::vector<orunav_msgs::PoseSteering> inV);
+      void printPoseStamped(std::vector<geometry_msgs::PoseStamped> inV);
 
       //! ROS nodehandle.
       ros::NodeHandle& nodeHandle_;
@@ -115,6 +134,14 @@ class local_planner
 
       //! Robot odometry topic name (robotX/odom by default)
       std::string robot_odometry_topic_name_;
+
+      //! ROS subscriber to robot controller reports (we get state/steering_angle from it)
+      ros::Subscriber robot_controller_reports_sub_;
+
+      //! Robot controller reports topic name (robotX/control/controller/commands by default)
+      std::string robot_controller_reports_topic_name_;
+
+      double steering_;
 
       //! Robot Current task (from coordinator).
       orunav_msgs::Task current_task_;
@@ -132,7 +159,7 @@ class local_planner
       tf2_ros::Buffer tfBuffer2_;
       tf2_ros::TransformListener tf2_listener_;
       geometry_msgs::TransformStamped pose_to_frame_tf_; 
-
+      ros::Time task_timestamp_;
       
       //! global frame id (world?). Is the one "implictly" used in coordinator
       std::string global_frame_;

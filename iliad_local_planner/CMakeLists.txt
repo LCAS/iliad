@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   nav_core
   #geometry_msgs
-  #sensor_msgs  
+  tf2_geometry_msgs  
   costmap_2d
   base_local_planner
   nav_msgs
@@ -24,7 +24,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   #LIBRARIES iliad_local_planner
-  CATKIN_DEPENDS #roscpp  tf tf2 geometry_msgs sensor_msgs  nav_msgs
+  CATKIN_DEPENDS #roscpp  tf tf2 geometry_msgs sensor_msgs  nav_msgs tf2_geometry_msgs
   #DEPENDS 
 )
 

@@ -21,7 +21,7 @@ namespace iliad_local_planner {
       printROSParams();
 
       // init other stuff
-      robot_frame_id_="/world";
+      robot_frame_id_="robot4/base_footprint";
       // ...................................................................................................
       // Load plugins according to given ROS parameters
 
@@ -63,8 +63,8 @@ namespace iliad_local_planner {
       // .....................................................
       // after comm structure is in place, some periodic stuff
       ros::Duration durTimer(1.0/controller_frequency_);         
+      
       updateTimer_ = nodeHandle_.createTimer(durTimer,  &local_planner::updateLocalPathCallback,this,false);
-
 
       ROS_INFO("[%s]: Initialization complete. Entering spin...",ros::this_node::getName().c_str() );
       ros::spin();       
@@ -98,9 +98,14 @@ namespace iliad_local_planner {
         ROS_WARN("[%s]: Can't find (%s). Using default",ros::this_node::getName().c_str(),"local_planner_plugin");
       }
 
-      if (!nodeHandle_.getParam("execute_task_srv_name", execute_task_srv_name_)){
-        execute_task_srv_name_ ="/robot"+std::to_string(robot_id_)+"/execute_task";
-        ROS_WARN("[%s]: Can't find (%s). Using default",ros::this_node::getName().c_str(),"execute_task_srv_name");
+      if (!nodeHandle_.getParam("ven_execute_task_srv_client_name", ven_execute_task_srv_client_name_)){
+        ven_execute_task_srv_client_name_ ="/robot"+std::to_string(robot_id_)+"/ven_execute_task";
+        ROS_WARN("[%s]: Can't find (%s). Using default",ros::this_node::getName().c_str(),"ven_execute_task_srv_client_name");
+      }
+
+      if (!nodeHandle_.getParam("coord_execute_task_srv_name", coord_execute_task_srv_name_)){
+        coord_execute_task_srv_name_ ="/robot"+std::to_string(robot_id_)+"/execute_task";
+        ROS_WARN("[%s]: Can't find (%s). Using default",ros::this_node::getName().c_str(),"coord_execute_task_srv_name");
       }
 
       if (!nodeHandle_.getParam("robot_odometry_topic_name_", robot_odometry_topic_name_)){        
@@ -108,7 +113,15 @@ namespace iliad_local_planner {
         ROS_WARN("[%s]: Can't find (%s). Using default",ros::this_node::getName().c_str(),"robot_odometry_topic_name");
       }
 
+      if (!nodeHandle_.getParam("robot_controller_reports_topic_name", robot_controller_reports_topic_name_)){        
+        robot_controller_reports_topic_name_ = "/robot"+std::to_string(robot_id_)+"/control/controller/reports";
+        ROS_WARN("[%s]: Can't find (%s). Using default",ros::this_node::getName().c_str(),"robot_controller_reports_topic_name");
+      }
 
+      if (!nodeHandle_.getParam("robot_robot_report_topic_name", robot_robot_report_topic_name_)){        
+        robot_robot_report_topic_name_ = "/robot"+std::to_string(robot_id_)+"/control/report";
+        ROS_WARN("[%s]: Can't find (%s). Using default",ros::this_node::getName().c_str(),"robot_robot_report_topic_name");
+      }
 
     }
 
@@ -120,11 +133,17 @@ namespace iliad_local_planner {
       ROS_INFO("[%s]: -----------------------------------------------------.",ros::this_node::getName().c_str());
       ROS_INFO("[%s]: robot_id (%d)",ros::this_node::getName().c_str(),robot_id_);
       ROS_INFO("[%s]: global_frame (%s)",ros::this_node::getName().c_str(),global_frame_.c_str());
+      ROS_INFO("[%s]: robot_controller_reports_topic_name (%s)",ros::this_node::getName().c_str(),robot_controller_reports_topic_name_.c_str());
+      ROS_INFO("[%s]: robot_robot_report_topic_name (%s)",ros::this_node::getName().c_str(),robot_robot_report_topic_name_.c_str());
+
       ROS_INFO("[%s]: current_task_topic_name (%s)",ros::this_node::getName().c_str(),current_task_topic_name_.c_str());
       ROS_INFO("[%s]: controller_frequency (%3.3f)",ros::this_node::getName().c_str(),controller_frequency_);
       ROS_INFO("[%s]: local_planner_plugin (%s)",ros::this_node::getName().c_str(),local_planner_class_name_.c_str());
-      ROS_INFO("[%s]: execute_task_srv__name (%s)",ros::this_node::getName().c_str(),execute_task_srv_name_.c_str());
+      ROS_INFO("[%s]: ven_execute_task_srv_client_name (%s)",ros::this_node::getName().c_str(),ven_execute_task_srv_client_name_.c_str());
+      ROS_INFO("[%s]: coord_execute_task_srv_name (%s)",ros::this_node::getName().c_str(),coord_execute_task_srv_name_.c_str());
       ROS_INFO("[%s]: -----------------------------------------------------.",ros::this_node::getName().c_str());
+
+
 
     }
     
@@ -142,17 +161,17 @@ namespace iliad_local_planner {
           teb_via_points_topic_name_pub_ = nodeHandle_.advertise<nav_msgs::Path>(teb_via_points_topic_name_, 5);          
       }
 
-      temp_pub_ = nodeHandle_.advertise<nav_msgs::Path>("/debug_local_path", 5);          
+      //temp_pub_ = nodeHandle_.advertise<nav_msgs::Path>("/debug_local_path", 5);          
                 
 
       // SERVICE CLIENTS ...............................................................................................
-      execute_task_srv_client_ = nodeHandle_.serviceClient<orunav_msgs::ExecuteTask>(execute_task_srv_name_);
+      ven_execute_task_srv_client_ = nodeHandle_.serviceClient<orunav_msgs::ExecuteTask>(ven_execute_task_srv_client_name_);
 
       // TOPIC  SUBSCRIBERS ............................................................................................
 
-      //! ROS subscriber to Tasks..
-      current_task_sub_ = nodeHandle_.subscribe(current_task_topic_name_, 1000, &local_planner::taskCallback, this);
-      //ROS_INFO("Task subscriber created");
+      robot_controller_reports_sub_ = nodeHandle_.subscribe(robot_controller_reports_topic_name_, 1000, &local_planner::robot_controller_reports_callback, this);
+
+      robot_robot_report_sub_ = nodeHandle_.subscribe(robot_robot_report_topic_name_, 1000, &local_planner::robot_robot_report_callback, this);      
 
       robot_odometry_sub_ = nodeHandle_.subscribe(robot_odometry_topic_name_, 1000, &local_planner::robotOdometryCallback, this);
       
@@ -164,8 +183,7 @@ namespace iliad_local_planner {
       //ROS_INFO("Local Path subscriber created");     
 
      // SERVICES ...................................................................................................
-
-
+     coord_execute_task_srv_ = nodeHandle_.advertiseService(coord_execute_task_srv_name_, &local_planner::coord_execute_task_callback, this);
       
     }
 
@@ -175,6 +193,17 @@ namespace iliad_local_planner {
 
         local_planner_ptr_.reset();    
         ROS_INFO("[%s]: Exiting",ros::this_node::getName().c_str());     
+    }
+
+
+
+    void local_planner::robot_controller_reports_callback(const orunav_msgs::ControllerReport::ConstPtr& report_msg){
+        steering_=report_msg->state.steering_angle;
+        controller_status_ = report_msg->status;        
+    }
+
+    void local_planner::robot_robot_report_callback(const orunav_msgs::RobotReport::ConstPtr& report_msg){        
+        robot_status_ = report_msg->status;        
     }
 
     void local_planner::robotOdometryCallback(const nav_msgs::Odometry::ConstPtr& odom_msg){
@@ -192,7 +221,6 @@ namespace iliad_local_planner {
         robot_frame_id_ =  odom_msg->child_frame_id;        
 
     }
-
 
     void local_planner::updateLocalPathCallback(const ros::TimerEvent&t){
       // check if this callback is taking too long
@@ -229,23 +257,74 @@ namespace iliad_local_planner {
                 if ( d >200.0){                  
                   ROS_ERROR("[%s]: //////////////////////////////////////////////////",ros::this_node::getName().c_str());
                   ROS_INFO("[%s]: Weird pose magnitude!",ros::this_node::getName().c_str());
-                  ROS_INFO("[%s]: pose [%u] (%3.3f, %3.3f, %3.3f).",ros::this_node::getName().c_str(),i, inV[i].pose.position.x, inV[i].pose.position.y, inV[i].pose.position.z);                  
+                  ROS_INFO("[%s]: pose [%u] (%3.1f, %3.1f, %3.1f).",ros::this_node::getName().c_str(),i, inV[i].pose.position.x, inV[i].pose.position.y, inV[i].pose.position.z);                  
                   ROS_ERROR("[%s]: //////////////////////////////////////////////////",ros::this_node::getName().c_str());
                 }
       }
+    }
 
+    
+    void local_planner::printPoseStamped(std::vector<geometry_msgs::PoseStamped> inV){      
+      ROS_INFO("[%s]: Lenght (%lu)",ros::this_node::getName().c_str(),inV.size());
+      for (unsigned int i = 0; i < inV.size(); ++i) {
+
+          ROS_INFO("[%s]: pose [%u] (%3.1f, %3.1f, %3.1f deg.).",ros::this_node::getName().c_str(),
+                                                              i, inV[i].pose.position.x, 
+                                                                 inV[i].pose.position.y, 
+                                                                 180.0*getYaw(inV[i].pose.orientation)/3.141592);                  
+      }
+    }
+
+    void local_planner::printPoseSteering(std::vector<orunav_msgs::PoseSteering> inV){      
+      ROS_INFO("[%s]: Lenght (%lu)",ros::this_node::getName().c_str(),inV.size());
+      for (unsigned int i = 0; i < inV.size(); ++i) {
+          ROS_INFO("[%s]: pose [%u] (%3.1f, %3.1f, %3.1f deg.).(%3.3f deg.)",ros::this_node::getName().c_str(),
+                                                                    i, inV[i].pose.position.x, 
+                                                                       inV[i].pose.position.y, 
+                                                                       180.0*getYaw(inV[i].pose.orientation)/3.141592,  
+                                                                       180.0*(inV[i].steering)/3.141592);                  
+      }
+    }
+
+
+    double local_planner::getYaw(geometry_msgs::Quaternion q0){
+       tf::Quaternion q(q0.x, q0.y, q0.z, q0.w);
+       tf::Matrix3x3 m(q);
+       double roll, pitch, yaw;
+       m.getRPY(roll, pitch, yaw);
+       return yaw;
+    }
+
+
+    bool local_planner::isNewLocalPlan(const nav_msgs::Path::ConstPtr& plan_msg){
+        bool ans = true;
+
+        nav_msgs::Path old_plan; new_plan;
+        if (last_local_plan_!= NULL){
+
+          // find starting point in path (both)
+
+          // crop path from starting point to end (both)
+
+          // resample to have same number of points
+
+
+        }
+
+        last_local_plan_ = plan_msg;
+        return ans;
     }
 
     void local_planner::localPlanCallback(const nav_msgs::Path::ConstPtr& plan_msg){
 
       unsigned int local_plan_len = plan_msg->poses.size();
-      ROS_WARN("[%s]: Local plan has: %u points", ros::this_node::getName().c_str(), local_plan_len);
-      
-      printSuspicius(plan_msg->poses);
+      ROS_WARN("[%s]: Received local plan:", ros::this_node::getName().c_str());      
+      printPoseStamped(plan_msg->poses);
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
 
+      if (isNewLocalPlan(plan_msg)){
 
       //ROS_WARN("[%s]: last point is at: %3.3f, %3.3f", ros::this_node::getName().c_str(), plan_msg->poses[local_plan_len-1].pose.position.x,plan_msg->poses[local_plan_len-1].pose.position.y);
-
       /*
       Recreate new Task blending this local path and the global task. This new task will:
         - Start at current robot position (we need subscriber).
@@ -270,8 +349,11 @@ namespace iliad_local_planner {
         }
 
       }
-
-      ROS_WARN("[%s]: Robot is at point [%u] of local plan", ros::this_node::getName().c_str(), start_local_path_i);
+      
+      ROS_INFO("[%s]: Robot at [%u] of local plan (%3.1f, %3.1f, %3.1f deg.).",ros::this_node::getName().c_str(),start_local_path_i,
+                                                                 robot_poseSt_.pose.position.x, 
+                                                                 robot_poseSt_.pose.position.y, 
+                                                                 180.0*getYaw(robot_poseSt_.pose.orientation)/3.141592);        
 
       // Find closest point to last local path pose in global task: end_insert_task_i
       // Find closest point to robot pose in global task: start_insert_task_i
@@ -296,62 +378,143 @@ namespace iliad_local_planner {
           start_insert_task_i = i;
         }
       }
+      
+      ROS_WARN("[%s]: We're inserting local plan between Task poses:", ros::this_node::getName().c_str());
+      ROS_INFO("[%s]: \t Start pose [%u] (%3.1f, %3.1f, %3.1f deg.).",ros::this_node::getName().c_str(),
+                                                              start_insert_task_i, global_path_.poses[start_insert_task_i].pose.position.x, 
+                                                                 global_path_.poses[start_insert_task_i].pose.position.y, 
+                                                                 180.0*getYaw(global_path_.poses[start_insert_task_i].pose.orientation)/3.141592);     
+      ROS_INFO("[%s]: \t End pose [%u] (%3.1f, %3.1f, %3.1f deg.).",ros::this_node::getName().c_str(),
+                                                              end_insert_task_i, global_path_.poses[end_insert_task_i].pose.position.x, 
+                                                                 global_path_.poses[end_insert_task_i].pose.position.y, 
+                                                                 180.0*getYaw(global_path_.poses[end_insert_task_i].pose.orientation)/3.141592);     
 
-      ROS_WARN("[%s]: We're inserting local plan between poses [%u] and [%u] of given Task", ros::this_node::getName().c_str(), start_insert_task_i, end_insert_task_i);
+
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
+      ROS_WARN("[%s]: Task", ros::this_node::getName().c_str());      
+      printPoseStamped(global_path_.poses);
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
 
       // Find how many task points we have to replace:  end_insert_task_i - start_insert_task_i = n_points
       unsigned int n_points = end_insert_task_i - start_insert_task_i + 1 ;
 
-      ROS_WARN("[%s]: Our local plan has to be subsampled to [%u] points", ros::this_node::getName().c_str(), n_points);
 
-      // Trim local path to start at start_local_path_i
-      nav_msgs::Path new_local_path;
-      new_local_path.header =plan_msg->header;
-      for (unsigned int i = start_local_path_i; i < local_plan_len; ++i) {
-        new_local_path.poses.push_back(plan_msg->poses[i]);
+      orunav_msgs::ExecuteTask::Request new_req;
+      // hope this makes a copy... of the current task...
+      new_req.task = current_task_;
+
+      if (false){
+      if ((end_insert_task_i>(start_insert_task_i)) || (!current_task_.update)){
+          ROS_WARN("[%s]: Our local plan has to be subsampled to [%u] points", ros::this_node::getName().c_str(), n_points);
+
+          // Trim local path to start at start_local_path_i
+          nav_msgs::Path new_local_path;
+          new_local_path.header =plan_msg->header;
+          for (unsigned int i = start_local_path_i; i < local_plan_len; ++i) {
+            new_local_path.poses.push_back(plan_msg->poses[i]);
+          }
+
+          printSuspicius(new_local_path.poses);
+
+          // subsample new local path to have n_points
+          nav_msgs::Path new_new_local_path = linear_subsample(new_local_path, n_points);
+          ROS_WARN("[%s]: Final Local plan", ros::this_node::getName().c_str());
+          printPoseStamped(new_new_local_path.poses);
+          
+
+
+          // cast path poses into oru style
+          std::vector<orunav_msgs::PoseSteering> local_path_oru = cast2PoseSteering(new_new_local_path.poses,1.2);
+
+
+          
+          // TODO create new task: using first n points in path
+          
+
+          // second change, we start here
+          new_req.task.target.start.pose = robot_poseSt_.pose;
+          new_req.task.target.start.steering = steering_;
+
+          //ROS_WARN("[%s]: Task copy has [%lu] points", ros::this_node::getName().c_str(), new_req.task.path.path.size());
+          //ROS_WARN("[%s]: Posesteering list has [%lu] points", ros::this_node::getName().c_str(), local_path_oru.size());
+          // third change: first few points         
+          for (unsigned int i = start_insert_task_i; i<=end_insert_task_i ; i++) {
+            //ROS_WARN("[%s]: i [%u]", ros::this_node::getName().c_str(), i);
+            new_req.task.path.path[i] = local_path_oru[i-start_insert_task_i];
+          }
+          
+          ROS_WARN("[%s]: We are sending the robot THIS trajectory", ros::this_node::getName().c_str());
+          printPoseSteering(new_req.task.path.path);
+          ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
+
+          //TODO  new_req.task.criticalPoint needs to be changed? 
+
+          // future calls to this method will perform updates on the task.
+          
+          
+          current_task_ = new_req.task;
+          current_task_.update = true;
+
+      } else {
+          ROS_WARN("[%s]: Robot is already at point [%u] of task and we should be inserting local at  point [%u]. Skipping ", ros::this_node::getName().c_str(), start_insert_task_i, end_insert_task_i);
+      }
       }
 
-      printSuspicius(new_local_path.poses);
+      // TODO Call Service ...
+      orunav_msgs::ExecuteTask msg;
+      msg.request = new_req;
+      if (!current_task_.update){
+        current_task_.update = true;
+      }
 
-      // subsample new local path to have n_points
-      nav_msgs::Path new_new_local_path = linear_subsample(new_local_path, n_points);
-      ROS_WARN("[%s]: Final Local plan has  [%lu] points\n\n\n", ros::this_node::getName().c_str(), new_new_local_path.poses.size());
+          if (ven_execute_task_srv_client_.call(msg)) {
+              ROS_INFO("[%s] - execute task successful", ros::this_node::getName().c_str());
+          }else{
+              ROS_ERROR("[%s] - Call to service execute_task returns ERROR", ros::this_node::getName().c_str());              
+          }
 
-      printSuspicius(new_new_local_path.poses);
-      temp_pub_.publish(new_new_local_path);  //viaPoints);
-
-      // Call Service ...
-
+      }
     }
 
-    void local_planner::taskCallback(const orunav_msgs::Task::ConstPtr& task_msg){
-      
+    bool local_planner::coord_execute_task_callback(orunav_msgs::ExecuteTask::Request &req, orunav_msgs::ExecuteTask::Response &res){
       //ROS_WARN("Task received.");
-      current_task_ = *task_msg;
-      
+      current_task_ = req.task;
+      task_timestamp_ = ros::Time::now();
+
       unsigned int task_len = current_task_.path.path.size();
-      ROS_WARN("[%s]: Task had: %u points", ros::this_node::getName().c_str(), task_len);
+      //ROS_WARN("[%s]: Task ", ros::this_node::getName().c_str());
+      //printPoseSteering(current_task_.path.path);
+      
 
       if (task_len>0){
           //ROS_WARN("Casting into path.");
           global_plan_ = this->task2poseStVect(current_task_);
+          //ROS_WARN("[%s]: Task (again)", ros::this_node::getName().c_str());
+          //printPoseStamped(global_plan_);
           global_path_ = this->poseStVect2Path(global_plan_);
-          ROS_WARN("[%s]: last task point is at: %3.3f, %3.3f", ros::this_node::getName().c_str(), global_plan_[task_len-1].pose.position.x,global_plan_[task_len-1].pose.position.y);              
+          //ROS_WARN("[%s]: last task point is at: %3.3f, %3.3f", ros::this_node::getName().c_str(), global_plan_[task_len-1].pose.position.x,global_plan_[task_len-1].pose.position.y);              
           //ROS_WARN("Passing to local planner.");
+
+          // if planner is teb... enforce via paths
+          if (local_planner_class_name_ == "teb_local_planner/TebLocalPlannerROS"){   
+              // teb will try to stick to these via points as much as config requires               
+              teb_via_points_topic_name_pub_.publish(global_path_);  //viaPoints);
+          }          
+
           // pass plan to local planner
           if(!local_planner_ptr_->setPlan(global_plan_)){
             //ABORT and SHUTDOWN COSTMAPS
             ROS_ERROR("[%s]: Failed to pass global plan to the controller, aborting.",ros::this_node::getName().c_str());
-
-            // if planner is teb... enforce via paths
-            if (local_planner_class_name_ == "teb_local_planner/TebLocalPlannerROS"){   
-                // teb will try to stick to these via points as much as config requires               
-                teb_via_points_topic_name_pub_.publish(global_path_);  //viaPoints);
-            }
+            res.result = 0;             
           }
+
       } else {
         ROS_WARN("[%s]: Ignoring len 0 task",ros::this_node::getName().c_str());
+        res.result = 0; 
       }
+
+      res.result = 1; 
+      return (res.result==1);
 
       //ROS_WARN("Finished.");
     }
@@ -384,7 +547,6 @@ namespace iliad_local_planner {
 
     }
 
-
     double local_planner::getDist(geometry_msgs::PoseStamped poseStA, geometry_msgs::PoseStamped poseStB){
 
         double dist = HUGE_VAL;
@@ -407,10 +569,11 @@ namespace iliad_local_planner {
             ans =  ans.erase(0,1);
           } 
 
-          if (ans == ""){
-            ROS_FATAL("[%s]: INVALID frame_id (%s)",ros::this_node::getName().c_str(),ans.c_str());
-            exit(1);
-          }
+          // if (ans == ""){
+          //   ROS_FATAL("[%s]: INVALID frame_id (%s)",ros::this_node::getName().c_str(),ans.c_str());
+          //   exit(1);
+          // }
+          
           return ans;              
     }
 
@@ -437,12 +600,11 @@ namespace iliad_local_planner {
               pose_to_frame_tf_ = tfBuffer2_.lookupTransform(frame_id,  poseIn.header.frame_id, ros::Time(0), ros::Duration(1.0) );
               tf2::doTransform(poseIn, poseOut, pose_to_frame_tf_); 
           }catch(tf::TransformException e){
-            ROS_ERROR("Failed to cast pose from (%s) to (%s), skipping.\nReason: (%s)", poseIn.header.frame_id.c_str(), frame_id.c_str() ,e.what());
+            ROS_ERROR("[%s]: Failed to cast pose from (%s) to (%s), skipping.\nReason: (%s)",ros::this_node::getName().c_str(), poseIn.header.frame_id.c_str(), frame_id.c_str() ,e.what());
           }
           return poseOut;
 
     }
-
 
     nav_msgs::Path local_planner::linear_subsample(nav_msgs::Path inputPath, unsigned int outLen){
         nav_msgs::Path outPath;
@@ -456,10 +618,12 @@ namespace iliad_local_planner {
         if (outLen>1){
             indexFactor = lastInIndex  / lastOutIndex;
             
-            
+            outPath.poses.push_back(inputPath.poses[0]); 
 
-            for (unsigned int i = 0; i < outLen; ++i) {
+            for (unsigned int i = 1; i < outLen; ++i) {
               geometry_msgs::PoseStamped res;
+              res.header.frame_id = inputPath.poses[0].header.frame_id;
+
               index = min(lastInIndex-1,i * indexFactor);
                            
               res.pose.position.x = (inputPath.poses[index + 1].pose.position.x + inputPath.poses[index].pose.position.x) / 2.0;
@@ -470,10 +634,10 @@ namespace iliad_local_planner {
                 if ( getDist(res,outPath.poses[outPath.poses.size()-1]) >2.0){                  
                   ROS_ERROR("[%s]: //////////////////////////////////////////////////",ros::this_node::getName().c_str());
                   ROS_INFO("[%s]: Weird cast!",ros::this_node::getName().c_str());
-                  ROS_INFO("[%s]: inputPath [%u] (%3.3f, %3.3f, %3.3f).",ros::this_node::getName().c_str(),index, inputPath.poses[index].pose.position.x, inputPath.poses[index].pose.position.y, inputPath.poses[index].pose.position.z);
-                  ROS_INFO("[%s]: inputPath [%u] (%3.3f, %3.3f, %3.3f).",ros::this_node::getName().c_str(),index+ 1, inputPath.poses[index+ 1].pose.position.x, inputPath.poses[index+ 1].pose.position.y, inputPath.poses[index+ 1].pose.position.z);              
-                  ROS_INFO("[%s]: Resulting into (%3.3f, %3.3f, %3.3f).",ros::this_node::getName().c_str(),res.pose.position.x,res.pose.position.y,res.pose.position.z);
-                  ROS_INFO("[%s]: Which goes after (%3.3f, %3.3f, %3.3f).",ros::this_node::getName().c_str(),outPath.poses[outPath.poses.size()-1].pose.position.x,outPath.poses[outPath.poses.size()-1].pose.position.y,outPath.poses[outPath.poses.size()-1].pose.position.z);
+                  ROS_INFO("[%s]: inputPath [%u] (%3.1f, %3.1f, %3.1f).",ros::this_node::getName().c_str(),index, inputPath.poses[index].pose.position.x, inputPath.poses[index].pose.position.y, inputPath.poses[index].pose.position.z);
+                  ROS_INFO("[%s]: inputPath [%u] (%3.1f, %3.1f, %3.1f).",ros::this_node::getName().c_str(),index+ 1, inputPath.poses[index+ 1].pose.position.x, inputPath.poses[index+ 1].pose.position.y, inputPath.poses[index+ 1].pose.position.z);              
+                  ROS_INFO("[%s]: Resulting into (%3.1f, %3.1f, %3.1f).",ros::this_node::getName().c_str(),res.pose.position.x,res.pose.position.y,res.pose.position.z);
+                  ROS_INFO("[%s]: Which goes after (%3.1f, %3.1f, %3.1f).",ros::this_node::getName().c_str(),outPath.poses[outPath.poses.size()-1].pose.position.x,outPath.poses[outPath.poses.size()-1].pose.position.y,outPath.poses[outPath.poses.size()-1].pose.position.z);
                   ROS_ERROR("[%s]: //////////////////////////////////////////////////",ros::this_node::getName().c_str());
                 }
               }
@@ -492,9 +656,7 @@ namespace iliad_local_planner {
         return outPath;
     }
 
-
     void local_planner::printAllROSparams(){
-
       std::vector< std::string > keys;
       nodeHandle_.getParamNames(keys);
       unsigned int keys_len = keys.size();
@@ -505,5 +667,88 @@ namespace iliad_local_planner {
 
     }
     
-    
+    std::vector<double> local_planner::curvature(std::vector<geometry_msgs::PoseStamped> path) {
+          // https://stackoverflow.com/questions/32629806/how-can-i-calculate-the-curvature-of-an-extracted-contour-by-opencv
+
+          std::vector<double> curvature( path.size() );
+
+          double curvature2D, divisor;
+
+          geometry_msgs::Point pos, posOld, posOlder;
+          geometry_msgs::Point f1stD, f2ndD;   
+
+          posOld = posOlder = path[0].pose.position; 
+          for (unsigned int i = 0; i < path.size(); i++ ){
+            pos = path[i].pose.position;
+
+            f1stD.x =   pos.x -       posOld.x;
+            f1stD.y =   pos.y -       posOld.y;
+            f2ndD.x = - pos.x + 2.0 * posOld.x - posOlder.x;
+            f2ndD.y = - pos.y + 2.0 * posOld.y - posOlder.y;
+
+            curvature2D =  std::numeric_limits<double>::infinity();
+            divisor = f2ndD.x + f2ndD.y;
+
+            if ( std::abs(divisor) > 10e-4 ){
+                curvature2D = std::abs( f2ndD.y*f1stD.x - f2ndD.x*f1stD.y ) / 
+                                   pow( divisor, 1.5 )  ;
+            }
+
+            curvature[i] = curvature2D;
+
+            posOlder = posOld;
+            posOld = pos;
+          }
+
+          return curvature;
+    } 
+
+    std::vector<double> local_planner::steeringAngles(std::vector<geometry_msgs::PoseStamped> path, double wheelbase){
+
+      std::vector<double> steerings = curvature(path);
+      double finite_curv = 0.0;
+
+      // get first finite one
+      for(int i = 0; i<steerings.size(); i++){        
+        if (! isinf(steerings[i]) ) {
+          finite_curv = steerings[i];
+          break;
+        }
+      }
+
+      for(int i = 0; i<steerings.size(); i++){        
+        if (! isinf(steerings[i]) ) {
+          finite_curv = steerings[i];
+        }
+        steerings[i] = atan(finite_curv * wheelbase);        
+      }
+      return steerings;
+    }
+
+    std::vector<orunav_msgs::PoseSteering> local_planner::cast2PoseSteering(std::vector<geometry_msgs::PoseStamped> path_ros, double wheelbase){
+      std::vector<orunav_msgs::PoseSteering> path_oru;
+      std::vector<double> steering_angles;
+      
+      steering_angles = steeringAngles(path_ros, wheelbase);
+      
+      // if (robot_frame_id_==""){
+      //     ROS_ERROR("[%s]: Empty robot frame",ros::this_node::getName().c_str());
+      // }
+
+      for(int i = 0; i<path_ros.size(); i++){        
+          orunav_msgs::PoseSteering p_oru;
+
+          // if (path_ros[i].header.frame_id==""){
+          //     ROS_ERROR("[%s]: Empty pose frame",ros::this_node::getName().c_str());
+          // }
+
+          geometry_msgs::PoseStamped global_pose=transformPose(global_frame_, path_ros[i]);
+
+          p_oru.pose = global_pose.pose;
+          p_oru.steering = steering_angles[i];
+          path_oru.push_back(p_oru);      
+      }
+      return path_oru;
+    }
+
 } // end of namespace iliad_local_planner
