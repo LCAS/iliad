@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+ <!-- 
+     Launches a world where forklift is facing a human that walks towards it.
+     Robot starts facing human walking from corner to corner of the room
+    
+-->
+ 
+<launch>
+  <!-- PARAMS ...................................................... -->
+  <arg name="gazeboGui" default="true"/> 
+  <arg name="rvizGui" default="true"/> 
+  <arg name="prefix" default="robot1"/>
+      <arg name="rviz_config_file" default="$(find iliad_base_simulation)/rviz/iliad_cititruck.rviz"/>
+
+
+  <include file="$(find iliad_base_simulation)/launch/iliad_sim.launch">
+        <arg name="world_name" value="$(find iliad_base_simulation)/worlds/ncfm_model_1_actor_long.world"/>
+                <arg name="rviz_config_file" value="$(arg rviz_config_file)"/>
+
+        <arg name="gazeboGui"  value="$(arg gazeboGui)"/> 
+        <arg name="rvizGui"    value="$(arg rvizGui)"/> 
+        <arg name="prefix"     value="$(arg prefix)"/>
+  </include>
+  
+</launch>
