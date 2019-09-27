@@ -28,6 +28,10 @@
 #include <orunav_msgs/PoseSteering.h>
 #include <orunav_msgs/ExecuteTask.h>
 
+// ORU
+
+
+
 //others
 #include <math.h>
 
@@ -105,6 +109,7 @@ class local_planner
       bool coord_execute_task_callback(orunav_msgs::ExecuteTask::Request &req, orunav_msgs::ExecuteTask::Response &res);
       std::vector<orunav_msgs::PoseSteering> cast2PoseSteering(std::vector<geometry_msgs::PoseStamped> path_ros, double wheelbase); 
 
+      bool isNewLocalPlan(const nav_msgs::Path::ConstPtr& plan_msg);
       //ros::Publisher temp_pub_;
 
       double getDist(geometry_msgs::PoseStamped poseStA, geometry_msgs::PoseStamped poseStB);
@@ -121,6 +126,17 @@ class local_planner
       double getYaw(geometry_msgs::Quaternion q0);
       void printPoseSteering(std::vector<orunav_msgs::PoseSteering> inV);
       void printPoseStamped(std::vector<geometry_msgs::PoseStamped> inV);
+
+      std::vector<orunav_msgs::PoseSteering> minIncrementalDistancePath(std::vector<orunav_msgs::PoseSteering>  in_path, double incr_path_dist);
+      std::vector<orunav_msgs::PoseSteering> minIntermediateDirPathPoints(std::vector<orunav_msgs::PoseSteering>  in_path);
+      double getDirectionIncr(geometry_msgs::Pose p);
+      double getDirection(geometry_msgs::Pose p1, geometry_msgs::Pose p2);
+      geometry_msgs::Pose subPose(geometry_msgs::Pose origin, geometry_msgs::Pose pose);
+      geometry_msgs::Pose addPose(geometry_msgs::Pose origin, geometry_msgs::Pose inc) ;
+      bool forwardDirection(geometry_msgs::Pose p1, geometry_msgs::Pose p2);
+      geometry_msgs::Quaternion getQ(double yaw);
+      double getDistPose(geometry_msgs::Pose poseA, geometry_msgs::Pose poseB);
+
 
       //! ROS nodehandle.
       ros::NodeHandle& nodeHandle_;

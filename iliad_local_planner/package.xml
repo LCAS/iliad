@@ -12,6 +12,9 @@
 
   <build_depend>roscpp</build_depend>
   <build_depend>orunav_msgs</build_depend>
+  <build_depend>orunav_generic</build_depend>
+  <build_depend>orunav_conversions</build_depend>
+  <build_depend>orunav_geometry</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>tf2</build_depend>
   <build_depend>tf2_geometry_msgs</build_depend>
@@ -29,6 +32,10 @@
   
   <!-- exec_depend   dynamic_reconfigure   /exec_depend -->
   <exec_depend>orunav_msgs</exec_depend>
+  <exec_depend>orunav_generic</exec_depend>
+  <exec_depend>orunav_conversions</exec_depend>
+  <exec_depend>orunav_geometry</exec_depend>
+
   <exec_depend>roscpp</exec_depend>
   <exec_depend>tf</exec_depend>
   <exec_depend>tf2</exec_depend>

@@ -273,6 +273,25 @@ namespace iliad_local_planner {
                                                                  inV[i].pose.position.y, 
                                                                  180.0*getYaw(inV[i].pose.orientation)/3.141592);                  
       }
+      //python friendly
+      std::cout << "x_m = [ " << inV[0].pose.position.x;
+      for (unsigned int i = 1; i < inV.size(); ++i) {
+        std::cout << " , " << inV[i].pose.position.x ;                  
+      }
+      std::cout << " ]" <<  std::endl;      
+      //.....................................................
+      std::cout << "y_m = [ " << inV[0].pose.position.y;
+      for (unsigned int i = 1; i < inV.size(); ++i) {
+        std::cout << " , " << inV[i].pose.position.y ;                  
+      }
+      std::cout << " ]" <<  std::endl;
+      //.....................................................
+      std::cout << "h_rad = [ " << getYaw(inV[0].pose.orientation);
+      for (unsigned int i = 1; i < inV.size(); ++i) {
+        std::cout << " , " << getYaw(inV[i].pose.orientation) ;                  
+      }
+      std::cout << " ]" <<  std::endl;
+
     }
 
     void local_planner::printPoseSteering(std::vector<orunav_msgs::PoseSteering> inV){      
@@ -284,6 +303,31 @@ namespace iliad_local_planner {
                                                                        180.0*getYaw(inV[i].pose.orientation)/3.141592,  
                                                                        180.0*(inV[i].steering)/3.141592);                  
       }
+
+      //python friendly
+      std::cout << "x_m = [ " << inV[0].pose.position.x;
+      for (unsigned int i = 1; i < inV.size(); ++i) {
+        std::cout << " , " << inV[i].pose.position.x ;                  
+      }
+      std::cout << " ]" <<  std::endl;      
+      //.....................................................
+      std::cout << "y_m = [ " << inV[0].pose.position.y;
+      for (unsigned int i = 1; i < inV.size(); ++i) {
+        std::cout << " , " << inV[i].pose.position.y ;                  
+      }
+      std::cout << " ]" <<  std::endl;
+      //.....................................................
+      std::cout << "h_rad = [ " << getYaw(inV[0].pose.orientation);
+      for (unsigned int i = 1; i < inV.size(); ++i) {
+        std::cout << " , " << getYaw(inV[i].pose.orientation) ;                  
+      }
+      std::cout << " ]" <<  std::endl;
+         //.....................................................
+      std::cout << "steer_rad = [ " << (inV[0].steering);
+      for (unsigned int i = 1; i < inV.size(); ++i) {
+        std::cout << " , " << (inV[i].steering) ;                  
+      }
+      std::cout << " ]" <<  std::endl;
     }
 
 
@@ -296,11 +340,14 @@ namespace iliad_local_planner {
     }
 
 
+
+
     bool local_planner::isNewLocalPlan(const nav_msgs::Path::ConstPtr& plan_msg){
         bool ans = true;
+        // this is yet to be done
 
-        nav_msgs::Path old_plan; new_plan;
-        if (last_local_plan_!= NULL){
+        //nav_msgs::Path old_plan, new_plan;
+        //if (last_local_plan_!= NULL){
 
           // find starting point in path (both)
 
@@ -309,52 +356,21 @@ namespace iliad_local_planner {
           // resample to have same number of points
 
 
-        }
+        //}
 
-        last_local_plan_ = plan_msg;
+        //last_local_plan_ = plan_msg;
         return ans;
     }
 
     void local_planner::localPlanCallback(const nav_msgs::Path::ConstPtr& plan_msg){
+      double min_incr_path_dist =  0.001;
+      double wheelbase = 1.2;
 
       unsigned int local_plan_len = plan_msg->poses.size();
       ROS_WARN("[%s]: Received local plan:", ros::this_node::getName().c_str());      
-      printPoseStamped(plan_msg->poses);
-      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
-
-      if (isNewLocalPlan(plan_msg)){
-
-      //ROS_WARN("[%s]: last point is at: %3.3f, %3.3f", ros::this_node::getName().c_str(), plan_msg->poses[local_plan_len-1].pose.position.x,plan_msg->poses[local_plan_len-1].pose.position.y);
-      /*
-      Recreate new Task blending this local path and the global task. This new task will:
-        - Start at current robot position (we need subscriber).
-        - End at original destination (given by original Task).
-        - Follow the local path: 
-            * we will find the closest task point to the end of local path.
-            * then find out how many task points we have to alter.
-            * and resample our local path to replace task points.
-      Finally send it to the veh through service ...      
-      */
-
-      // Find closest point to robot pose in local path: start_local_path_i
-      double min_dist = INFINITY;
-      double dist ;
-      unsigned int  start_local_path_i = local_plan_len;
-
-      for (unsigned int i = 0; i < local_plan_len; ++i) {
-        dist = getDist(plan_msg->poses[i], robot_poseSt_ );
-        if (dist< min_dist){
-          min_dist = dist;
-          start_local_path_i = i;
-        }
-
-      }
+      printPoseStamped(plan_msg->poses);  
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());
       
-      ROS_INFO("[%s]: Robot at [%u] of local plan (%3.1f, %3.1f, %3.1f deg.).",ros::this_node::getName().c_str(),start_local_path_i,
-                                                                 robot_poseSt_.pose.position.x, 
-                                                                 robot_poseSt_.pose.position.y, 
-                                                                 180.0*getYaw(robot_poseSt_.pose.orientation)/3.141592);        
-
       // Find closest point to last local path pose in global task: end_insert_task_i
       // Find closest point to robot pose in global task: start_insert_task_i
 
@@ -392,73 +408,62 @@ namespace iliad_local_planner {
 
       ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
       ROS_WARN("[%s]: Task", ros::this_node::getName().c_str());      
-      printPoseStamped(global_path_.poses);
+      printPoseSteering(current_task_.path.path);
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());  
+
+      // cast nav_msg::Path poses into oru path    
+      std::vector<orunav_msgs::PoseSteering> local_path_oru = cast2PoseSteering(plan_msg->poses,wheelbase);
+
       ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
+      ROS_WARN("[%s]: Local path as PoseSteering", ros::this_node::getName().c_str());      
+      printPoseSteering(local_path_oru);
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());  
 
-      // Find how many task points we have to replace:  end_insert_task_i - start_insert_task_i = n_points
-      unsigned int n_points = end_insert_task_i - start_insert_task_i + 1 ;
+
+      // New oru path. Past points are not altered
+      std::vector<orunav_msgs::PoseSteering>::const_iterator first = current_task_.path.path.begin();
+      std::vector<orunav_msgs::PoseSteering>::const_iterator last = current_task_.path.path.begin() + start_insert_task_i;
+      std::vector<orunav_msgs::PoseSteering> new_path_oru(first, last);
+      // Append local path      
+      new_path_oru.insert(new_path_oru.end(), local_path_oru.begin(), local_path_oru.end());
+      // Append the rest of the original path after local path
+      first =  current_task_.path.path.begin() + start_insert_task_i+1;
+      last = current_task_.path.path.end();
+      new_path_oru.insert (new_path_oru.end(),first ,last );
 
 
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
+      ROS_WARN("[%s]: TASK AFTER JOINING (1)", ros::this_node::getName().c_str());      
+      printPoseSteering(new_path_oru);
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());  
+
+      // Some cleaning now:    
+      // Enforce minimum distance between points.
+      std::vector<orunav_msgs::PoseSteering> path_w_min_dist = minIncrementalDistancePath(new_path_oru, min_incr_path_dist);
+      
+
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
+      ROS_WARN("[%s]: TASK AFTER ENFORCING POINT DIST (2)", ros::this_node::getName().c_str());      
+      printPoseSteering(path_w_min_dist);
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());  
+
+      // Enforce intermediate points in direction changes
+      std::vector<orunav_msgs::PoseSteering> path_w_dir_change = minIntermediateDirPathPoints(path_w_min_dist);
+
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
+      ROS_WARN("[%s]: Task FINAL", ros::this_node::getName().c_str());      
+      printPoseSteering(path_w_dir_change);
+      ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());  
+
+
+      // put path into a request
       orunav_msgs::ExecuteTask::Request new_req;
       // hope this makes a copy... of the current task...
       new_req.task = current_task_;
-
-      if (false){
-      if ((end_insert_task_i>(start_insert_task_i)) || (!current_task_.update)){
-          ROS_WARN("[%s]: Our local plan has to be subsampled to [%u] points", ros::this_node::getName().c_str(), n_points);
-
-          // Trim local path to start at start_local_path_i
-          nav_msgs::Path new_local_path;
-          new_local_path.header =plan_msg->header;
-          for (unsigned int i = start_local_path_i; i < local_plan_len; ++i) {
-            new_local_path.poses.push_back(plan_msg->poses[i]);
-          }
-
-          printSuspicius(new_local_path.poses);
-
-          // subsample new local path to have n_points
-          nav_msgs::Path new_new_local_path = linear_subsample(new_local_path, n_points);
-          ROS_WARN("[%s]: Final Local plan", ros::this_node::getName().c_str());
-          printPoseStamped(new_new_local_path.poses);
-          
-
-
-          // cast path poses into oru style
-          std::vector<orunav_msgs::PoseSteering> local_path_oru = cast2PoseSteering(new_new_local_path.poses,1.2);
-
-
-          
-          // TODO create new task: using first n points in path
-          
-
-          // second change, we start here
-          new_req.task.target.start.pose = robot_poseSt_.pose;
-          new_req.task.target.start.steering = steering_;
-
-          //ROS_WARN("[%s]: Task copy has [%lu] points", ros::this_node::getName().c_str(), new_req.task.path.path.size());
-          //ROS_WARN("[%s]: Posesteering list has [%lu] points", ros::this_node::getName().c_str(), local_path_oru.size());
-          // third change: first few points         
-          for (unsigned int i = start_insert_task_i; i<=end_insert_task_i ; i++) {
-            //ROS_WARN("[%s]: i [%u]", ros::this_node::getName().c_str(), i);
-            new_req.task.path.path[i] = local_path_oru[i-start_insert_task_i];
-          }
-          
-          ROS_WARN("[%s]: We are sending the robot THIS trajectory", ros::this_node::getName().c_str());
-          printPoseSteering(new_req.task.path.path);
-          ROS_WARN("[%s]: ................................", ros::this_node::getName().c_str());      
-
-          //TODO  new_req.task.criticalPoint needs to be changed? 
-
-          // future calls to this method will perform updates on the task.
-          
-          
-          current_task_ = new_req.task;
-          current_task_.update = true;
-
-      } else {
-          ROS_WARN("[%s]: Robot is already at point [%u] of task and we should be inserting local at  point [%u]. Skipping ", ros::this_node::getName().c_str(), start_insert_task_i, end_insert_task_i);
-      }
-      }
+    
+      // brutally overwrite all points in current task...
+      // hope this replaces the vector ...
+      new_req.task.path.path = path_w_dir_change;
 
       // TODO Call Service ...
       orunav_msgs::ExecuteTask msg;
@@ -473,8 +478,182 @@ namespace iliad_local_planner {
               ROS_ERROR("[%s] - Call to service execute_task returns ERROR", ros::this_node::getName().c_str());              
           }
 
-      }
+      
     }
+
+     // Enforce minimum distance between points.
+     std::vector<orunav_msgs::PoseSteering> local_planner::minIncrementalDistancePath(std::vector<orunav_msgs::PoseSteering>  in_path, double incr_path_dist){
+        std::vector<orunav_msgs::PoseSteering> path_out;
+        orunav_msgs::PoseSteering back;
+        double d1, d2;
+        if (in_path.size() == 0)
+          return path_out;
+
+        // first
+        path_out.push_back(in_path[0]);
+        back = in_path.back();
+
+        for (unsigned int i = 1; i < in_path.size()-1; i++){
+            d1 = getDistPose(path_out.back().pose, in_path[i].pose);
+            d2 = getDistPose(back.pose, in_path[i].pose);
+            if ((d1 > incr_path_dist) && (d2 > incr_path_dist)) {                
+                path_out.push_back(in_path[i]);
+            }
+        }
+
+        // last
+        path_out.push_back(back);
+
+        return path_out;
+
+      }
+      
+      
+
+      // Enforce intermediate points in direction changes
+      std::vector<orunav_msgs::PoseSteering> local_planner::minIntermediateDirPathPoints(std::vector<orunav_msgs::PoseSteering>  in_path){
+        std::vector<orunav_msgs::PoseSteering> path_out;
+        std::vector<unsigned int> inter_idx;
+
+        // Need to compute the direction of change.
+        inter_idx.clear();
+        std::vector<bool> dir(in_path.size()-1);
+        for (unsigned int i = 0; i < in_path.size()-1; i++) {
+            dir[i] = forwardDirection(in_path[i].pose, in_path[i+1].pose);
+        }
+   
+        // Check if we have any intermediate differences (e.g. false, false, true, false, false) - true is only occuring once.
+        // Need to pick up (false, true, true...) as well as (..., true, true, false) etc.
+        bool d = false;
+        unsigned int last_change = 0;
+        //  std::vector<unsigned int> inter_idx;
+        for (unsigned int i = 0; i < dir.size(); i++) {
+          if (i == 0)
+            d = dir[0];
+          else {
+            if (d == dir[i]) {
+              last_change++;
+            }
+            else {
+              // Change occured
+              if (last_change == 0) {
+                // Here is one problem
+                inter_idx.push_back(i);
+                //	   std::cout << "found no intermp at : " << i << std::endl;
+              }
+              last_change = 0;
+              d = dir[i];
+            }
+          }
+        }
+        // Sort out the last case (..., true, true, false).
+        if (dir.size() > 1) {
+          if (dir[dir.size()-1] != dir[dir.size()-2])
+            inter_idx.push_back(dir.size());
+        }
+
+        if (inter_idx.empty()) {
+          return in_path;
+        }
+        
+        // Need to add in 'interpolated' points.
+        unsigned int j = 0;
+        orunav_msgs::PoseSteering last;
+        orunav_msgs::PoseSteering curr;
+        
+        orunav_msgs::PoseSteering inc_pose;
+        
+
+        for (unsigned int i = 0; i < in_path.size(); i++) {
+          if (i == inter_idx[j]) {
+            // Add an interpolated one between i and the last path point.
+            
+            last = in_path[i-1];
+            curr = in_path[i];
+
+            inc_pose.pose = subPose(last.pose,curr.pose);
+            inc_pose.steering = last.steering - curr.steering;
+
+            orunav_msgs::PoseSteering interpos;
+            interpos.pose.position.x = last.pose.position.x + (0.5 * inc_pose.pose.position.x);
+            interpos.pose.position.y = last.pose.position.y + (0.5 * inc_pose.pose.position.y);
+            interpos.pose.position.z = 0.0;
+
+            interpos.steering = last.steering + (0.5 * inc_pose.steering);
+            path_out.push_back(interpos);
+            j++;
+          }          
+          path_out.push_back(in_path[i]);
+        }
+        return path_out;
+      }
+
+      
+
+
+
+    double local_planner::getDirectionIncr(geometry_msgs::Pose p){
+       if (p.position.x >= 0) // X is forward.
+	        return 1.;
+       return -1;
+     }
+
+     //! Returns the 'direction of motion' between two poses. 1 -> forward, -1 -> reverse.
+     double local_planner::getDirection(geometry_msgs::Pose p1, geometry_msgs::Pose p2){
+       geometry_msgs::Pose dir = subPose(p1, p2);
+       return getDirectionIncr(dir);
+     }
+
+          //! Return the relative pose between the origin and the 'pose'.
+     geometry_msgs::Pose local_planner::subPose(geometry_msgs::Pose origin, geometry_msgs::Pose pose) {
+          geometry_msgs::Pose ret;
+          double yaw_orig = getYaw(origin.orientation);
+
+          double cos_ = cos(yaw_orig);
+	        double sin_ = sin(yaw_orig);
+	        ret.position.x =  (pose.position.x - origin.position.x) * cos_ + (pose.position.y - origin.position.y) * sin_;
+      	  ret.position.y = -(pose.position.x - origin.position.x) * sin_ + (pose.position.y - origin.position.y) * cos_;
+          ret.position.z = 0.0;
+
+	        ret.orientation = getQ( getYaw(pose.orientation) - yaw_orig);
+          //ROS_WARN("[%s]: orientation: %3.1f = %3.1f - %3.1f", ros::this_node::getName().c_str(),getYaw(ret.orientation),getYaw(pose.orientation) , yaw_orig );      
+	        return ret;
+     }
+
+          //! Return the relative pose between the origin and the 'pose'.
+     geometry_msgs::Pose local_planner::addPose(geometry_msgs::Pose origin, geometry_msgs::Pose inc) {
+          geometry_msgs::Pose ret;
+          double yaw_orig = getYaw(origin.orientation);
+
+          double cos_ = cos(yaw_orig);
+	        double sin_ = sin(yaw_orig);
+	        ret.position.x = origin.position.x + (inc.position.x) * cos_ - (inc.position.y) * sin_;
+          ret.position.y = origin.position.y + (inc.position.x) * sin_ + (inc.position.y) * cos_;
+          ret.position.z = 0.0;
+
+	        ret.orientation = getQ( getYaw(inc.orientation) + yaw_orig);
+          //ROS_WARN("[%s]: orientation: %3.1f = %3.1f + %3.1f", ros::this_node::getName().c_str(),getYaw(ret.orientation),getYaw(inc.orientation) , yaw_orig );      
+	        return ret;
+     }
+
+    bool local_planner::forwardDirection(geometry_msgs::Pose p1, geometry_msgs::Pose p2){
+       return (getDirection(p1,p2) > 0);
+     }
+
+
+
+
+    geometry_msgs::Quaternion local_planner::getQ(double yaw){
+      tf::Quaternion q;
+      q.setRPY(0.0, 0.0, yaw);
+      geometry_msgs::Quaternion odom_quat;
+      tf::quaternionTFToMsg(q, odom_quat);
+      return odom_quat;
+    }
+
+
+
+
 
     bool local_planner::coord_execute_task_callback(orunav_msgs::ExecuteTask::Request &req, orunav_msgs::ExecuteTask::Response &res){
       //ROS_WARN("Task received.");
@@ -547,6 +726,7 @@ namespace iliad_local_planner {
 
     }
 
+
     double local_planner::getDist(geometry_msgs::PoseStamped poseStA, geometry_msgs::PoseStamped poseStB){
 
         double dist = HUGE_VAL;
@@ -555,12 +735,22 @@ namespace iliad_local_planner {
             poseStA=transformPose(poseStB.header.frame_id, poseStA);
         }
 
-        dist = sqrt( pow(poseStA.pose.position.x-poseStB.pose.position.x, 2) +
-                     pow(poseStA.pose.position.y-poseStB.pose.position.y, 2) +
-                     pow(poseStA.pose.position.z-poseStB.pose.position.z, 2) );
+        dist = getDistPose(poseStA.pose, poseStB.pose);
         
         return dist;
     }
+
+    double local_planner::getDistPose(geometry_msgs::Pose poseA, geometry_msgs::Pose poseB){
+
+        double dist = HUGE_VAL;
+    
+        dist = sqrt( pow(poseA.position.x-poseB.position.x, 2) +
+                     pow(poseA.position.y-poseB.position.y, 2) +
+                     pow(poseA.position.z-poseB.position.z, 2) );
+        
+        return dist;
+    }
+
 
     std::string purgueSlash(std::string inStr){
           std::string ans;              
@@ -677,7 +867,9 @@ namespace iliad_local_planner {
           geometry_msgs::Point pos, posOld, posOlder;
           geometry_msgs::Point f1stD, f2ndD;   
 
+          //init
           posOld = posOlder = path[0].pose.position; 
+
           for (unsigned int i = 0; i < path.size(); i++ ){
             pos = path[i].pose.position;
 
@@ -699,6 +891,12 @@ namespace iliad_local_planner {
             posOlder = posOld;
             posOld = pos;
           }
+          //python friendly
+          std::cout << "curvature = [ " << curvature[0];
+          for (unsigned int i = 0; i < curvature.size(); ++i) {
+              std::cout << " , " << curvature[i];                  
+          }
+          std::cout << " ]" <<  std::endl;  
 
           return curvature;
     } 
@@ -710,18 +908,22 @@ namespace iliad_local_planner {
 
       // get first finite one
       for(int i = 0; i<steerings.size(); i++){        
-        if (! isinf(steerings[i]) ) {
+        if (isfinite(steerings[i]) ) {
           finite_curv = steerings[i];
+          std::cout << " first finite curvature " << finite_curv <<  std::endl;  
           break;
         }
       }
+      steerings[0] = atan(finite_curv * wheelbase);        
+      std::cout << " first steering " << steerings[0] <<  std::endl;  
 
-      for(int i = 0; i<steerings.size(); i++){        
-        if (! isinf(steerings[i]) ) {
+      for(int i = 1; i<steerings.size(); i++){        
+        if (isfinite(steerings[i]) ) {
           finite_curv = steerings[i];
         }
         steerings[i] = atan(finite_curv * wheelbase);        
       }
+
       return steerings;
     }
 

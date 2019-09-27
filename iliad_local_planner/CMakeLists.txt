@@ -15,6 +15,10 @@ find_package(catkin REQUIRED COMPONENTS
   costmap_2d
   base_local_planner
   nav_msgs
+  orunav_conversions
+  orunav_msgs
+  orunav_generic
+  orunav_geometry
 )
 
 ###################################
@@ -22,9 +26,16 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 
 catkin_package(
-  INCLUDE_DIRS include
-  #LIBRARIES iliad_local_planner
-  CATKIN_DEPENDS #roscpp  tf tf2 geometry_msgs sensor_msgs  nav_msgs tf2_geometry_msgs
+  INCLUDE_DIRS 
+    include
+  #LIBRARIES 
+    #iliad_local_planner
+  CATKIN_DEPENDS 
+    orunav_conversions 
+    orunav_generic 
+    #roscpp  tf tf2 geometry_msgs sensor_msgs  nav_msgs tf2_geometry_msgs
+  LIBRARIES
+    ${PROJECT_NAME}
   #DEPENDS 
 )
 
