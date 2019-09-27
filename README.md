@@ -1,3 +1,7 @@
+THIS IS TIDY BRANCH:
+This branch will eventually turn into master when all legacy stuff gets archived.
+
+
 # Packages and description:
 Note: Those packages are still in early development ("hic sunt dracones")
 
