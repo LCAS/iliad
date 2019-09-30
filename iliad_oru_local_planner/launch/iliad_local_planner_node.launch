@@ -42,7 +42,7 @@
     <rosparam param="/$(arg prefix)/local_planner/DWAPlannerROS/controller_frequency" subst_value="True">2.0</rosparam>
 
     <group ns="$(arg prefix)">
-        <node pkg="iliad_oru_local_planner" type="iliad_local_planner_node" name="local_planner" output="screen">
+        <node pkg="iliad_oru_local_planner" type="iliad_oru_local_planner_node" name="local_planner" output="screen">
             <param name="robot_id" value="$(arg robot_id)"/>
             <param name="local_planner_plugin"  value="$(arg planner_plugin)"/>
         </node>

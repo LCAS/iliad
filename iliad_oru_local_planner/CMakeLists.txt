@@ -50,14 +50,14 @@ include_directories(
 )
 
 add_executable(
-   iliad_local_planner_node 
-   src/iliad_local_planner_node.cpp
+   iliad_oru_local_planner_node 
+   src/iliad_oru_local_planner_node.cpp
    src/iliad_oru_local_planner.cpp
    )
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(
-   iliad_local_planner_node
+   iliad_oru_local_planner_node
    ${Boost_LIBRARIES}
    ${catkin_LIBRARIES} 
  )
@@ -66,7 +66,7 @@ add_executable(
 ## Install ##
 #############
 
-install(TARGETS iliad_local_planner_node
+install(TARGETS iliad_oru_local_planner_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

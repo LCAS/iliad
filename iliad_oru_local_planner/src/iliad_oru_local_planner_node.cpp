@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "iliad_local_planner_node");
+  ros::init(argc, argv, "iliad_oru_local_planner_node");
   /*
   if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) 
   {
