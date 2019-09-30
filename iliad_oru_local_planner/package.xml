@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>iliad_local_planner</name>
+  <name>iliad_oru_local_planner</name>
   <version>0.0.1</version>
-  <description>The iliad_local_planner package</description>
-  <maintainer email="mfernandezcarmona@lincoln.ac.uk">Manuel Fernandez</maintainer>
-
+  <description>
+  Uses ROS local planners to perform local changes to orunav trajectories.
+  </description>
+  <maintainer email="manolofc@gmail.com">Manuel Fernandez-Carmona</maintainer>
   <license>BSD</license>
+
+  <author email="manolofc@gmail.com">Manuel Fernandez-Carmona</author>
 
   <buildtool_depend>catkin</buildtool_depend>
   <!--  build_depend dynamic_reconfigure  build_depend -->

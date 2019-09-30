@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(iliad_local_planner)
+project(iliad_oru_local_planner)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
@@ -29,7 +29,7 @@ catkin_package(
   INCLUDE_DIRS 
     include
   #LIBRARIES 
-    #iliad_local_planner
+    #iliad_oru_local_planner
   CATKIN_DEPENDS 
     orunav_conversions 
     orunav_generic 
@@ -52,7 +52,7 @@ include_directories(
 add_executable(
    iliad_local_planner_node 
    src/iliad_local_planner_node.cpp
-   src/iliad_local_planner.cpp
+   src/iliad_oru_local_planner.cpp
    )
 
 ## Specify libraries to link a library or executable target against

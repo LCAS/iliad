@@ -7,14 +7,12 @@
     https://bitbucket.org/osrf/gazebo/src/56a38a853d94a21529218f094786ac1ad3b398a6/examples/plugins/actor_collisions/?at=gazebo8_8.6.0
     
   </description>
-  <maintainer email="mfernandezcarmona@lincoln.ac.uk">Manuel Fernandez-Carmona</maintainer>
 
+  <maintainer email="manolofc@gmail.com">Manuel Fernandez-Carmona</maintainer>
   <license>BSD</license>
 
-  <!-- <url type="bugtracker"></url> -->
+  <author email="manolofc@gmail.com">Manuel Fernandez-Carmona</author>
 
-  <author email="mfernandezcarmona@lincoln.ac.uk">Manuel Fernandez-Carmona</author>
-  
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>
 

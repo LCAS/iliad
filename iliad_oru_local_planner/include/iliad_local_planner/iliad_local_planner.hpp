@@ -38,7 +38,7 @@
 using namespace std;
 using namespace ros;
 
-namespace iliad_local_planner {
+namespace iliad_oru_local_planner {
 
 /*!
  
@@ -185,4 +185,4 @@ class local_planner
 
 }; // End of Class local_planner
 
-} // end of  namespace iliad_local_planner
+} // end of  namespace iliad_oru_local_planner

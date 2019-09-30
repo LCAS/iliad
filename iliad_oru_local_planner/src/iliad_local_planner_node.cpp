@@ -1,4 +1,4 @@
-#include <iliad_local_planner/iliad_local_planner.hpp>
+#include <iliad_oru_local_planner/iliad_oru_local_planner.hpp>
 
 int main(int argc, char** argv)
 {
@@ -10,7 +10,7 @@ int main(int argc, char** argv)
   }
   */
   ros::NodeHandle nd("~");
-  iliad_local_planner::local_planner rg(nd);
+  iliad_oru_local_planner::local_planner rg(nd);
   
   
   ros::requestShutdown();

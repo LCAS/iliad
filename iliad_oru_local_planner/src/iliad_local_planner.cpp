@@ -1,7 +1,7 @@
-#include <iliad_local_planner/iliad_local_planner.hpp>
+#include <iliad_oru_local_planner/iliad_oru_local_planner.hpp>
 
 
-namespace iliad_local_planner {
+namespace iliad_oru_local_planner {
     
     
     local_planner::local_planner(ros::NodeHandle& n)
@@ -953,4 +953,4 @@ namespace iliad_local_planner {
       return path_oru;
     }
 
-} // end of namespace iliad_local_planner
+} // end of namespace iliad_oru_local_planner
