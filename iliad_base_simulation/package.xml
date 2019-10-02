@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>iliad_base_simulation</name>
+  <version>0.0.1</version>
+  <description>Gazebo world configurations and simulated forklifts used in other packages.</description>
+
+  <maintainer email="manolofc@gmail.com">Manuel Fernandez-Carmona</maintainer>
+  <license>BSD</license>
+
+  <author email="manolofc@gmail.com">Manuel Fernandez-Carmona</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>contact_monitor</run_depend>
+
+  <export>
+  </export>
+</package>
