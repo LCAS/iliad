@@ -42,6 +42,7 @@ class QTCStatePlotterNode():
 
         # ................................................................
         # Other config params and atributes
+        self.data_lock = Lock()
 
         # states from mpc node
         self.state = None
@@ -77,7 +78,10 @@ class QTCStatePlotterNode():
 
         rospy.loginfo("Node [" + rospy.get_name() + "] entering spin...")
 
-        rospy.spin()
+        r = rospy.Rate(2)
+        while not rospy.is_shutdown():
+            self.updateVisuals()
+            r.sleep()
 
     def find_param(self, param_name, rid, default_val):
         ans = default_val
@@ -168,75 +172,76 @@ class QTCStatePlotterNode():
 
     # we use robot reports to know robot position and speed
     def reports_callback(self, msg):
+        with self.data_lock:
+            nowTime = rospy.Time.now()
+            self.prev_state = self.state
+            self.state = msg.state
+            self.robot_x = msg.state.position_x
+            self.robot_y = msg.state.position_y
+            self.robot_h = msg.state.orientation_angle
+            self.robot_v = 0
+            self.robot_w = 0
 
-        nowTime = rospy.Time.now()
-        self.prev_state = self.state
-        self.state = msg.state
-        self.robot_x = msg.state.position_x
-        self.robot_y = msg.state.position_y
-        self.robot_h = msg.state.orientation_angle
-        self.robot_v = 0
-        self.robot_w = 0
-
-        if (self.prev_state and self.prev_time):
-            inc_t = (nowTime - self.prev_time).to_sec()
-            inc_x = self.state.position_x - self.prev_state.position_x
-            inc_y = self.state.position_y - self.prev_state.position_y
-            inc_r = np.sqrt((inc_x ** 2) + (inc_y ** 2))
-            self.robot_v = inc_r/inc_t
-            inc_h = self.state.orientation_angle - self.prev_state.orientation_angle
-            self.robot_w = inc_h/inc_t
-
-            rospy.logdebug_throttle(5, "Node [" + rospy.get_name() + "] " +
-                                    "Robot status: Pose ( " +
-                                    str(self.state.position_x) + ", " + str(self.state.position_y) + ", " +
-                                    str(self.state.orientation_angle*180.0/np.pi) + " deg), " +
-                                    "Speed ( " +
-                                    str(self.robot_v) + " m/sec, " +
-                                    str(self.robot_w * 180.0/np.pi) + " deg/sec) "
-                                    )
-        self.prev_time = nowTime
-        self.updateVisuals()
-
-    def spencer_human_tracking_callback(self, msg):
-        # after each callback, reset closests
-
-        self.closest_human_pose = None
-        self.closest_human_twist = None
-        min_dist = np.inf
-        min_i = -1
-
-        # TODO: Maybe it's better if we low pass filter these tracks to keep
-        #       just humans that have been detected for a minimum period of time
-        #rospy.loginfo("...........................................................")
-        for i, trk_person in enumerate(msg.tracks):
-            # Create the stamped object
-            human_pose = PoseWithCovarianceStamped()
-            # msg contains a header with the frame id for all poses
-            human_pose.header = msg.header
-            human_pose.pose = trk_person.pose
-
-            # from the list of tracked persons, find the closest ...
-            (dist, human_pose_base) = self.getDistToHuman(human_pose)
-            #rospy.loginfo("ID: "+str(i)+" Dist: "+str(dist) +" Pose:\n"+str(human_pose))
-            if dist < min_dist:
-                min_i = i
-                min_dist = dist
-                self.closest_human_pose = human_pose_base
-                self.closest_human_twist = self.getTwistInBaseFrame(trk_person.twist, msg.header)
-
-                (xh0, yh0, hh0, vh0, wh0) = self.getHumanState()
+            if (self.prev_state and self.prev_time):
+                inc_t = (nowTime - self.prev_time).to_sec()
+                inc_x = self.state.position_x - self.prev_state.position_x
+                inc_y = self.state.position_y - self.prev_state.position_y
+                inc_r = np.sqrt((inc_x ** 2) + (inc_y ** 2))
+                self.robot_v = inc_r/inc_t
+                inc_h = self.state.orientation_angle - self.prev_state.orientation_angle
+                self.robot_w = inc_h/inc_t
 
                 rospy.logdebug_throttle(5, "Node [" + rospy.get_name() + "] " +
-                                        "Closest human at: Pose ( " +
-                                        str(xh0) + ", " + str(yh0) + ", " +
-                                        str(hh0*180.0/np.pi) + " deg), " +
+                                        "Robot status: Pose ( " +
+                                        str(self.state.position_x) + ", " + str(self.state.position_y) + ", " +
+                                        str(self.state.orientation_angle*180.0/np.pi) + " deg), " +
                                         "Speed ( " +
-                                        str(vh0) + " m/sec, " +
-                                        str(wh0*180.0/np.pi) + " deg/sec) "
+                                        str(self.robot_v) + " m/sec, " +
+                                        str(self.robot_w * 180.0/np.pi) + " deg/sec) "
                                         )
-        #rospy.loginfo("...........................................................")
-        self.updateVisuals()
+            self.prev_time = nowTime
+            #self.updateVisuals()
+
+    def spencer_human_tracking_callback(self, msg):
+        with self.data_lock:
+            # after each callback, reset closests
+
+            self.closest_human_pose = None
+            self.closest_human_twist = None
+            min_dist = np.inf
+            min_i = -1
+
+            # TODO: Maybe it's better if we low pass filter these tracks to keep
+            #       just humans that have been detected for a minimum period of time
+            #rospy.loginfo("...........................................................")
+            for i, trk_person in enumerate(msg.tracks):
+                # Create the stamped object
+                human_pose = PoseWithCovarianceStamped()
+                # msg contains a header with the frame id for all poses
+                human_pose.header = msg.header
+                human_pose.pose = trk_person.pose
+
+                # from the list of tracked persons, find the closest ...
+                (dist, human_pose_base) = self.getDistToHuman(human_pose)
+                #rospy.loginfo("ID: "+str(i)+" Dist: "+str(dist) +" Pose:\n"+str(human_pose))
+                if dist < min_dist:
+                    min_i = i
+                    min_dist = dist
+                    self.closest_human_pose = human_pose_base
+                    self.closest_human_twist = self.getTwistInBaseFrame(trk_person.twist, msg.header)
+
+                    (xh0, yh0, hh0, vh0, wh0) = self.getHumanState()
+
+                    rospy.logdebug_throttle(5, "Node [" + rospy.get_name() + "] " +
+                                            "Closest human at: Pose ( " +
+                                            str(xh0) + ", " + str(yh0) + ", " +
+                                            str(hh0*180.0/np.pi) + " deg), " +
+                                            "Speed ( " +
+                                            str(vh0) + " m/sec, " +
+                                            str(wh0*180.0/np.pi) + " deg/sec) "
+                                            )
+            #rospy.loginfo("...........................................................")
+            #self.updateVisuals()
 
     def peopletracker_callback(self, msg):
         spencer_msg = self.bayes2spencer(msg)
@@ -397,91 +402,95 @@ class QTCStatePlotterNode():
         return (dist, hpose_out)
 
     def updateVisuals(self):
-        validData = isinstance(self.closest_human_pose, PoseWithCovarianceStamped)  and isinstance(self.closest_human_twist, TwistWithCovarianceStamped) 
-        
-        if validData:
+        with self.data_lock:
+            validData = isinstance(self.closest_human_pose, PoseWithCovarianceStamped)  and isinstance(self.closest_human_twist, TwistWithCovarianceStamped) 
             
-            (xh0, yh0, hh0, vh0, wh0) = self.getHumanState()
-            (xh1, yh1, hh1) = self.getNextHumanState(xh0, yh0, hh0, vh0, wh0)
-            xr0 = yr0 = hr0 = 0
-            (xr1, yr1, hr1) = self.getNextHumanState(xr0, yr0, hr0, self.robot_v, self.robot_w)
-
-            # All that data is in robot frame, but we need it in global frame...
-            (xh0, yh0, hh0) = self.fromRobot2GlobalFrame(xh0, yh0, hh0)
-            (xh1, yh1, hh1) = self.fromRobot2GlobalFrame(xh1, yh1, hh1)
-            # I could just use getOrigin with this one ...
-            (xr0, yr0, hr0) = self.fromRobot2GlobalFrame(xr0, yr0, hr0)
-            (xr1, yr1, hr1) = self.fromRobot2GlobalFrame(xr1, yr1, hr1)
-
-            # plot only if transforms where successfull
-            if ((xh0!=None) and (xh1!=None) and(xr0!=None) and(xr1!=None)):
-
-                data = MarkerArray()
-
-                # 0 line
-                line = Marker()
-                line.id = 0
-                line.type = Marker.LINE_STRIP
-                line.header.frame_id = self.global_frame_id
-
-                line.header.stamp = rospy.Time.now()
-                line.ns = "connecting_line"
-                line.action = Marker.ADD
-                line.pose.orientation.w = 1.0
-
-                # LINE_STRIP markers use only the x component of scale, for the line width
-                line.scale.x = 0.05
-
-                # blue color
-                line.color.b = 1.0
-                line.color.a = 1.0
-
-                humanP = Point(xh0, yh0, 1)
+            if validData:
                 
-                robotP = Point(xr0, yr0, 1)
-                line.points.append(humanP)
-                line.points.append(robotP)
+                (xh0, yh0, hh0, vh0, wh0) = self.getHumanState()
+                (xh1, yh1, hh1) = self.getNextHumanState(xh0, yh0, hh0, vh0, wh0)
+                xr0 = yr0 = hr0 = 0
+                (xr1, yr1, hr1) = self.getNextHumanState(xr0, yr0, hr0, self.robot_v, self.robot_w)
 
-                data.markers.append(line)
+                tx = xh0/2.0
+                ty = yh0/2.0
 
-                # 1 text
-                text = Marker()
-                text.id = 1
-                text.type = Marker.TEXT_VIEW_FACING
-                text.header.frame_id = self.global_frame_id
-                text.header.stamp = rospy.Time.now()
-                text.ns = "descriptor"
-                text.action = Marker.ADD
-                text.pose.orientation.w = 1.0
+                # All that data is in robot frame, but we need it in global frame...
+                (xh0, yh0, hh0) = self.fromRobot2GlobalFrame(xh0, yh0, hh0)
+                (xh1, yh1, hh1) = self.fromRobot2GlobalFrame(xh1, yh1, hh1)
+                # I could just use getOrigin with this one ...
+                (xr0, yr0, hr0) = self.fromRobot2GlobalFrame(xr0, yr0, hr0)
+                (xr1, yr1, hr1) = self.fromRobot2GlobalFrame(xr1, yr1, hr1)
 
-                text.pose.position.x = xh0/2.0
-                text.pose.position.y = yh0/2.0
-                text.pose.position.z = 1+0.2
-                # TEXT_VIEW_FACING markers use only the z component of scale, specifies the height of an uppercase "A".
-                text.scale.z = 0.45
+                # plot only if transforms where successfull
+                if ((xh0!=None) and (xh1!=None) and(xr0!=None) and(xr1!=None)):
 
-                # we show next state as text
-                (isValid, state) = self.getQSRState(xh0, yh0, xh1, yh1, xr0, yr0, xr1, yr1)
+                    data = MarkerArray()
 
-                if isValid:
-                    text.text = 'QTC State:' + state
-                    # yellow color
-                    text.color.r = text.color.g = 1.0
-                    text.color.a = 1.0
-                else:
-                    text.text = 'Unknown state'
-                     # red color
-                    text.color.r = 1.0
-                    text.color.a = 1.0
+                    # 0 line
+                    line = Marker()
+                    line.id = 0
+                    line.type = Marker.LINE_STRIP
+                    line.header.frame_id = self.global_frame_id
+
+                    line.header.stamp = rospy.Time.now()
+                    line.ns = "connecting_line"
+                    line.action = Marker.ADD
+                    line.pose.orientation.w = 1.0
+
+                    # LINE_STRIP markers use only the x component of scale, for the line width
+                    line.scale.x = 0.05
+
+                    # blue color
+                    line.color.b = 1.0
+                    line.color.a = 1.0
+
+                    humanP = Point(xh0, yh0, 1)
                     
-                data.markers.append(text)
+                    robotP = Point(xr0, yr0, 1)
+                    line.points.append(humanP)
+                    line.points.append(robotP)
 
-                # Finally publish .......................
-                self.visual_pub.publish(data)
+                    data.markers.append(line)
 
-        rospy.logdebug_throttle(1, "Node [" + rospy.get_name() + "] " +
-                                            "Updated visuals ... "
-                                            )
+                    # 1 text
+                    text = Marker()
+                    text.id = 1
+                    text.type = Marker.TEXT_VIEW_FACING
+                    text.header.frame_id = self.base_frame_id
+                    text.header.stamp = rospy.Time.now()
+                    text.ns = "descriptor"
+                    text.action = Marker.ADD
+                    text.pose.orientation.w = 1.0
+
+                    text.pose.position.x = tx
+                    text.pose.position.y = ty
+                    text.pose.position.z = 1+0.2
+                    # TEXT_VIEW_FACING markers use only the z component of scale, specifies the height of an uppercase "A".
+                    text.scale.z = 0.45
+
+                    # we show next state as text
+                    (isValid, state) = self.getQSRState(xh0, yh0, xh1, yh1, xr0, yr0, xr1, yr1)
+
+                    if isValid:
+                        text.text = 'QTC State: ' + state
+                        # yellow color
+                        text.color.r = text.color.g = 1.0
+                        text.color.a = 1.0
+                    else:
+                        text.text = 'Unknown state'
+                        # red color
+                        text.color.r = 1.0
+                        text.color.a = 1.0
+                        
+                    data.markers.append(text)
+
+                    # Finally publish .......................
+                    self.visual_pub.publish(data)
+
+            rospy.logdebug_throttle(1, "Node [" + rospy.get_name() + "] " +
+                                                "Updated visuals ... "
+                                                )
 
 
     def isBigger(self, rel_amount, amount1, amount0):
