@@ -56,12 +56,16 @@
 
       <!-- spencer to bayes -->
       <node pkg="iliad_human_local_navigation" type="spencer_to_bayes.py" name="spenc2bay" output="screen">
+        <param name="robot_id" value="$(arg robot_id)"/>
+
         <param name="ppl_topic"           type="string"  value="$(arg ppl_topic)"/>
         <param name="person_topic"           type="string"  value="$(arg person_topic)"/>
         <param name="target_frame"        type="string"  value="$(arg robot_base_frame_id)"/>
       </node>
 
       <node pkg="iliad_velocity_costmaps" type="iliad_velocity_costmap_server.py" name="velocity_costmap_server" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+
         <param name="qtc_topic"                           type = "string"   value="$(arg qtc_state_topic)"/>
         <param name="vis_marker_topic"                    type = "string" value= "$(arg vis_marker_topic)"/>
         <param name="vel_costmap_topic"                   type = "string" value= "$(arg vel_costmap_topic)"/>
