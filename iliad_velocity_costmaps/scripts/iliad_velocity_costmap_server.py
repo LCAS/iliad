@@ -374,7 +374,7 @@ class IliadVelocityCostmapServer(object):
     def callback(self, qtc, ppl):
         try:
            min_index = ppl.distances.index(ppl.min_distance)
-        except ValueError ex:
+        except ValueError as ex:
            if len(ppl.distances)>0:
               min_index = ppl.distances.index(min(ppl.distances))
            else:
