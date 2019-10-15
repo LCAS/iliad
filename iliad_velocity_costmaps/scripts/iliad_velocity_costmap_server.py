@@ -83,16 +83,17 @@ class IliadCostmapCreator(object):
         except KeyError:
             pass
 
-        rospy.logerr("Node [" + rospy.get_name() + "] " + "I got \n\t- qtc: [" + ''.join(qtc_data) + "]\n"+
-        "\t- human_h: [" + human_h + "]\n" +
-        "\t- human_v: [" + human_v + "]\n" +
-        "\t- robot_h: [" + robot_h + "]\n" +
-        "\t- robot_v: [" + robot_v + "]\n" +
-        "....................................\n" +
-        "\t- weight_p: [" + str(c_p) + "]\n" +
-        "\t- weight_a: [" + str(a_p) + "]\n" +
-        "\t- ang_inc: [" + str( round(angle*180.0/np.pi,2) ) + "]\n" +
-        "\n")
+        # rospy.logerr("Node [" + rospy.get_name() + "] " + "I got \n\t- qtc: [" + ''.join(qtc_data) + "]\n"+
+        # "\t- human_h: [" + human_h + "]\n" +
+        # "\t- human_v: [" + human_v + "]\n" +
+        # "\t- robot_h: [" + robot_h + "]\n" +
+        # "\t- robot_v: [" + robot_v + "]\n" +
+        # "....................................\n" +
+        # "\t- weight_p: [" + str(c_p) + "]\n" +
+        # "\t- weight_a: [" + str(a_p) + "]\n" +
+        # "\t- ang_inc: [" + str( round(angle*180.0/np.pi,2) ) + "]\n" +
+        # "\n")
+
         return (c_p, a_p, angle)
 
     def _create_costmap(self, angle=0.0, velocity=Vector3(), qtc_symbol='0', size_x=100, size_y=100 ):
@@ -381,13 +382,13 @@ class IliadVelocityCostmapServer(object):
 
         self.icc.update_map(min_ang, min_vel,qtc)
         
-        # test get cell values ...
-        for next_x in [-1,0,1]:
-            for next_y in [-1,0,1]:
-                (cx,cy,basur) = self.icc.pose2cell(next_x, next_y)
-                test_val = self.icc.valueAtPose(next_x, next_y)
-                self.icc
-                rospy.logerr("Node [" + rospy.get_name() + "] " + "Pose [" + str(next_x) + ", " + str(next_y)+ "] == Cell [" + str(cx) + ", " + str(cy)+ "]  [" + str(test_val) + "]\n")
+        # # test get cell values ...
+        # for next_x in [-1,0,1]:
+        #     for next_y in [-1,0,1]:
+        #         (cx,cy,basur) = self.icc.pose2cell(next_x, next_y)
+        #         test_val = self.icc.valueAtPose(next_x, next_y)
+        #         self.icc
+        #         rospy.logerr("Node [" + rospy.get_name() + "] " + "Pose [" + str(next_x) + ", " + str(next_y)+ "] == Cell [" + str(cx) + ", " + str(cy)+ "]  [" + str(test_val) + "]\n")
 
 
     def publish_closest_person_marker(self, pose, frame_id):
