@@ -5,7 +5,8 @@
 <launch>
 
     <arg name="robot_id" default="4"/>
-    
+    <arg name="sim" default="true"/>
+
     <!-- derived args -->
     <arg name="prefix" value="robot$(arg robot_id)"/>
 
@@ -29,7 +30,7 @@
     <group ns="$(arg prefix)/qsr">
 
       <!-- Publish groundtruth tracks and detections from Gazebo -->
-      <node name="groundtruth_tracks_from_gazebo" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true">
+      <node name="groundtruth_tracks_from_gazebo" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true"  if="$(arg sim)">
               <remap from="/groundtruth/detected_persons" to="$(arg dperson_topic)"/>
               <remap from="/groundtruth/tracked_persons" to="$(arg person_topic)"/>            
       </node>
