@@ -17,8 +17,8 @@
     <arg name="robotST_topic"       default = "/$(arg prefix)/robot_poseST"/>
 
     <arg name="ppl_topic"           default="/$(arg prefix)/qsr/people_tracker/positions"/>
-    <arg name="person_topic"        default="/$(arg prefix)/perception/tracked_persons"/>
-    <arg name="dperson_topic"        default="/$(arg prefix)/perception/detected_persons"/>
+    <arg name="person_topic"        default="/$(arg prefix)/human_perception/tracked_persons"/>
+    <arg name="dperson_topic"        default="/$(arg prefix)/human_perception/detected_persons"/>
     
     <arg name="qtc_state_topic"           default="/$(arg prefix)/qtc_state_topics"/>
         
