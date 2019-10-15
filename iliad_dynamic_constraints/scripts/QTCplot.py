@@ -14,6 +14,7 @@ import rospy
 import numpy as np
 from geometry_msgs.msg import Vector3Stamped, PoseStamped, PoseWithCovarianceStamped, TwistStamped, TwistWithCovarianceStamped, Point
 from std_msgs.msg import Header, UInt64
+from std_msgs.msg import String
 from spencer_tracking_msgs.msg import TrackedPersons, TrackedPerson
 from bayes_people_tracker.msg import PeopleTracker
 from tf.transformations import euler_from_quaternion, quaternion_from_euler, translation_matrix, quaternion_matrix
@@ -49,7 +50,7 @@ class QTCStatePlotterNode():
         self.prev_state = None
         
         # timestamp to get speeds...
-        self.prev_time = None
+        self.prev_time = rospy.Time.now()
 
         # qsrlib data...
         self.qsrlib = QSRlib()
@@ -105,6 +106,9 @@ class QTCStatePlotterNode():
         self.human_tracking_topic = rospy.get_param(
             '~human_tracking_topic', '/robot'+str(self.robot_id)+'/perception/tracked_persons')
 
+        self.qtc_state_topic = rospy.get_param(
+            '~qtc_state_topic', '/robot'+str(self.robot_id)+'/qtc_state_topic')
+
         # human detections using bayes peopletracker
         self.peopletracker_topic = rospy.get_param(
             '~peopletracker_topic', '/robot'+str(self.robot_id)+'/people_tracker/positions')
@@ -141,6 +145,7 @@ class QTCStatePlotterNode():
     def initROS(self):
         # publishers
         self.visual_pub = rospy.Publisher(self.visual_topic, MarkerArray, queue_size=1)
+        self.qtc_state_pub = rospy.Publisher(self.qtc_state_topic, String, queue_size=1, latch=True)
 
         # service clients
         # none here
@@ -187,9 +192,11 @@ class QTCStatePlotterNode():
                 inc_x = self.state.position_x - self.prev_state.position_x
                 inc_y = self.state.position_y - self.prev_state.position_y
                 inc_r = np.sqrt((inc_x ** 2) + (inc_y ** 2))
-                self.robot_v = inc_r/inc_t
+                if inc_t>0:
+                    self.robot_v = inc_r/inc_t
                 inc_h = self.state.orientation_angle - self.prev_state.orientation_angle
-                self.robot_w = inc_h/inc_t
+                if inc_t>0:
+                    self.robot_w = inc_h/inc_t
 
                 rospy.logdebug_throttle(5, "Node [" + rospy.get_name() + "] " +
                                         "Robot status: Pose ( " +
@@ -471,14 +478,18 @@ class QTCStatePlotterNode():
 
                     # we show next state as text
                     (isValid, state) = self.getQSRState(xh0, yh0, xh1, yh1, xr0, yr0, xr1, yr1)
+                    self.qtc_state = state
+                    self.is_valid = isValid
 
                     if isValid:
-                        text.text = 'QTC State: ' + state
-                        # yellow color
-                        text.color.r = text.color.g = 1.0
+                        text.text = self.getPrettyText(state)
+                        # red color
+                        text.color.r = 1 
+                        text.color.g = 0.0
                         text.color.a = 1.0
                     else:
-                        text.text = 'Unknown state'
+                        text.text = 'Undefined'
+                        state = "?,?,?,?"
                         # red color
                         text.color.r = 1.0
                         text.color.a = 1.0
@@ -487,11 +498,50 @@ class QTCStatePlotterNode():
 
                     # Finally publish .......................
                     self.visual_pub.publish(data)
+                    self.qtc_state_pub.publish(state)
 
             rospy.logdebug_throttle(1, "Node [" + rospy.get_name() + "] " +
                                                 "Updated visuals ... "
                                                 )
 
+    def getPrettyText(self, qtc_state):
+        qtc_data = qtc_state.split(',')
+        human_h = qtc_data[0]
+        human_v = qtc_data[2]
+        robot_h = qtc_data[1]
+        robot_v = qtc_data[3]
+
+        text_h = 'H:' + self.getPhrase(human_h, human_v)
+
+        text_r = 'R:' + self.getPhrase(robot_h, robot_v)
+
+        text = text_h + '\n' + text_r
+        return text
+
+    def getPhrase(self, h,v):
+        text = self.getPrettyTextDist(h) +  self.getPrettyTextAngle(v)
+        if h == v  == '0':
+            text = 'static'
+        return text
+
+    def getPrettyTextAngle(self, symbol):
+        if symbol == '-':
+                text = ' from left' 
+        elif symbol == '0':
+                text = ''
+        elif symbol == '+':
+                text = ' from right' 
+
+        return text
+        
+    def getPrettyTextDist(self, symbol):
+        if symbol == '-':
+                text = 'approaching' 
+        elif symbol == '0':
+                text = 'keeping dist.'
+        elif symbol == '+':
+                text = 'moving away' 
+        return text
 
     def isBigger(self, rel_amount, amount1, amount0):
         dif = np.abs(amount0-amount1)

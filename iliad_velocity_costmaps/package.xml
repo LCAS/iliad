@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package>
+  <name>iliad_velocity_costmaps</name>
+  <version>0.2.4</version>
+  <description>The iliad_velocity_costmap package
+
+    HEAVILY BASED ON cdondrup's hrsi_velocity_costmap from Strands project
+
+  </description>
+
+  <maintainer email="manolofc@gmail.com">Manuel Fdez.</maintainer>
+
+  <license>MIT</license>
+
+  <author email="cdondrup@lincoln.ac.uk">Christian Dondrup</author> 
+  <author email="manolofc@gmail.com">Manuel Fdez.</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>bayes_people_tracker</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>message_filters</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>hrsi_state_prediction</build_depend>
+
+  <run_depend>bayes_people_tracker</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>hrsi_representation</run_depend>
+  <run_depend>message_filters</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>hrsi_state_prediction</run_depend>
+
+  <export/>
+</package>
