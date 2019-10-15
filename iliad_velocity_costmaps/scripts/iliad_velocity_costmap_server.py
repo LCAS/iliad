@@ -372,8 +372,14 @@ class IliadVelocityCostmapServer(object):
         return config
 
     def callback(self, qtc, ppl):
-        min_index = ppl.distances.index(ppl.min_distance)
-        
+        try:
+           min_index = ppl.distances.index(ppl.min_distance)
+        except ValueError ex:
+           if len(ppl.distances)>0:
+              min_index = ppl.distances.index(min(ppl.distances))
+           else:
+              rospy.logerr("Node [" + rospy.get_name() + "] " + "people tracker distance vector empty! ")
+              return
         min_pose = ppl.poses[min_index]
         min_ang = ppl.angles[min_index]
         min_vel = ppl.velocities[min_index]
