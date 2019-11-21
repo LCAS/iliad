@@ -1,0 +1,36 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/manolofc/workspace/ms3/devel/include/**",
+        "/opt/ros/kinetic/include/**",
+        "/home/manolofc/workspace/ms3/src/iliad_experimental/constrain_maps/include/**",
+        "/home/manolofc/workspace/ms3/src/iliad/gazebo_plugin_actor_collision/include/**",
+        "/home/manolofc/workspace/ms3/src/iliad_experimental/gazebo_plugin_binary_contact/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/gazebo_oru/gazebo_plugins_oru/include/**",
+        "/home/manolofc/workspace/ms3/src/iliad_experimental/iliad_global_planner/include/**",
+        "/home/manolofc/workspace/ms3/src/iliad/iliad_oru_local_planner/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_constraint_extract/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_conversions/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_debug/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_generic/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_geometry/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_motion_planner/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_node_utils/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_pallet_detection_sdf/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_path_pool/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_path_smoother/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_rviz/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_trajectory_processor/include/**",
+        "/home/manolofc/workspace/ms3/src/navigation_oru-release/orunav_vehicle_execution/include/**",
+        "/home/manolofc/workspace/ms3/src/strands_hri/strands_gazing/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ]
+}
