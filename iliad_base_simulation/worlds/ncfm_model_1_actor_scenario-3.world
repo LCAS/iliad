@@ -3647,7 +3647,7 @@
             </contact>
           </sensor>
       </plugin>
-      <pose>12.5 4 1.02 0 0 -1.57</pose>
+      <pose>12.5 2 1.02 0 0 -1.57</pose>
       <skin>
         <filename>walk.dae</filename>
         <scale>1.0</scale>
@@ -3664,7 +3664,7 @@
         <trajectory id="0" type="walking">
           <waypoint>
             <time>0</time>
-            <pose>12.5 4 0 0 0 -1.57</pose> 
+            <pose>12.5 2 0 0 0 -1.57</pose> 
           </waypoint>        
           <waypoint>
             <time>15</time>   <!-- sed marker 2 -->
