@@ -126,7 +126,7 @@ class IliadCostmapCreator(object):
         cost_array = np.empty((size_x, size_y))
         cost_array.fill(0)
 
-        # second get polar indexes
+        # second, get polar indexes
         cp = self._cartesian_product( # Cartesian product of x and y indices
             [
                 np.arange(-int(np.floor(float(size_x)/2)), int(np.ceil(float(size_x)/2)), step=1),
@@ -138,33 +138,32 @@ class IliadCostmapCreator(object):
 
         cost_array = self.setcost(cost_array, center_angle, np.abs(ang_inc), connect_penalty, polar)
         cost_array = self.setcost(cost_array, center_angle+ang_inc, np.abs(ang_inc), ang_pennalty, polar)
-        #cost_array = self.setcost(cost_array, center_angle-ang_inc, np.abs(ang_inc), ang_pennalty, polar)
+
+        # remove all costs just around the robot
+        cost_array = self.setcost(cost_array, 0, 2.0*np.pi, 0, polar, 0, 1.8 / self.resolution )
 
         return cost_array
 
-    def setcost(self, carray, centre, arc, val,polar):
-
-        min_speed =-1000
-        max_speed =1000
+    def setcost(self, data_array, central_ang, arc, val, polar_indexs, min_range =0, max_range =1000):
 
         idx = np.logical_and( # Find polar inside specified range
-            np.logical_and( # Min and max speed = min and max distance from robot
-                polar[0] <= max_speed,
-                polar[0] >= min_speed
+            np.logical_and( # Min and max range = min and max distance from robot
+                polar_indexs[0] <= max_range,
+                polar_indexs[0] >= min_range
             ),
             np.logical_and( # Find angles according to desired shape
                 np.logical_or(
-                    polar[1] >= -(arc/2) + centre,
-                    polar[1] <= -(np.pi - ((np.abs(centre)+(arc/2))-np.pi)) # Sign flip in free area
+                    polar_indexs[1] >= -(arc/2) + central_ang,
+                    polar_indexs[1] <= -(np.pi - ((np.abs(central_ang)+(arc/2))-np.pi)) # Sign flip in free area
                 ),
                 np.logical_or(
-                    polar[1] <= (arc/2) + centre,
-                    polar[1] >= np.pi - ((np.abs(centre)+(arc/2))-np.pi) # Sign flip in free area
+                    polar_indexs[1] <= (arc/2) + central_ang,
+                    polar_indexs[1] >= np.pi - ((np.abs(central_ang)+(arc/2))-np.pi) # Sign flip in free area
                 )
             )
-        ).reshape(carray.shape[0], carray.shape[1])
-        carray[idx] = val
-        return carray
+        ).reshape(data_array.shape[0], data_array.shape[1])
+        data_array[idx] = val
+        return data_array
 
 
     def _cartesian_product(self, arrays, out=None):
