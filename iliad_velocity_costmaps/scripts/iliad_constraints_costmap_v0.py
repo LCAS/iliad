@@ -173,7 +173,7 @@ class ConstraintsCostmapV0(object):
                 # self.current_occ_grid.info.origin.position.x = (self.current_occ_grid.info.width/2.0)   * self.current_occ_grid.info.resolution 
                 # self.current_occ_grid.info.origin.position.y = (self.current_occ_grid.info.height/2.0)  * self.current_occ_grid.info.resolution
 
-                #self.awfulCaster()
+                self.awfulCaster()
 
                 self.map_pub.publish(self.current_occ_grid)
                 rospy.logdebug_throttle(2, "Node [" + rospy.get_name() + "] " +
@@ -203,6 +203,8 @@ class ConstraintsCostmapV0(object):
 
     def awfulCaster(self):
         # ................................
+        # shouldn't be necessary ...
+        # ................................
         oldOrigin = PoseStamped()
         oldOrigin = self.local_robot_pose
         oldOrigin.pose.position.x -= (self.current_occ_grid.info.width/2.0) * self.current_occ_grid.info.resolution 
@@ -210,19 +212,6 @@ class ConstraintsCostmapV0(object):
 
 
         newOrigin = self.cast_pose(oldOrigin, "map_laser2d")
-        self.current_occ_grid.info.origin = newOrigin.pose
-        self.current_occ_grid.header.frame_id = "map_laser2d"
-        self.current_occ_grid.header.stamp = rospy.Time.now()
-
-
-    def awfulCaster0(self):
-        # ................................
-        oldOrigin = PoseStamped()
-        #oldOrigin.pose = self.current_occ_grid.info.origin
-        oldOrigin.header.stamp = rospy.Time.now()
-        oldOrigin.header.frame_id = "map_laser2d"
-
-        newOrigin = self.cast_pose(oldOrigin, self.current_occ_grid.header.frame_id )
         self.current_occ_grid.info.origin = newOrigin.pose
         self.current_occ_grid.header.frame_id = "map_laser2d"
         self.current_occ_grid.header.stamp = rospy.Time.now()
@@ -296,6 +285,7 @@ class IliadConstraintsCostmapServer(object):
             '~costmap_topic_name', '/robot'+str(self.robot_id)+'/qsr/constraints_costmap')
 
         # Costmap frame id
+        # MFC: this needs to be robot/base_link and then internally we cast it to whatever ...
         self.costmap_frame_id = rospy.get_param(
             '~costmap_frame_id', '/robot'+str(self.robot_id)+'/base_link')
         # in tf2, frames do not have the initial slash
