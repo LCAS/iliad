@@ -25,6 +25,16 @@
     <arg name="vis_marker_topic"    default = "/$(arg prefix)/qsr/visualization_marker"/>
     <arg name="vel_costmap_topic"   default = "/$(arg prefix)/qsr/velocity_costmap"/>
     <arg name="origin_topic"        default = "/$(arg prefix)/qsr/origin"/>
+           
+    <arg name="costmap_topic_name"  default = "/$(arg prefix)/qsr/constraints_costmap"/>
+    <!-- <arg name="costmap_topic_name"  default = "/map_laser2d"/> -->
+    <arg name="reports_topic_name"  default = "/$(arg prefix)/control/controller/reports"/>
+    <arg name="task_topic_name"     default = "/$(arg prefix)/control/task"/>
+
+    <arg name="path_occ_grid_topic_name"  default = "/$(arg prefix)/qsr/constraints_costmap_path"/>
+    <arg name="curr_cost_topic_name"  default = "/$(arg prefix)/qsr/cost"/>
+
+
 
     <!-- the group -->
     <group ns="$(arg prefix)/qsr">
@@ -35,6 +45,7 @@
               <remap from="/groundtruth/tracked_persons" to="$(arg person_topic)"/>            
       </node>
 
+      <!--  Draws QTCs -->
       <node name="QSRview" pkg="iliad_dynamic_constraints" type="QTCplot.py" output="screen">
         <param name="robot_id" value="$(arg robot_id)"/>
         
@@ -54,15 +65,42 @@
    
       </node>
 
-      <!-- spencer to bayes -->
+      <!-- casts spencer detection to bayes data format -->
       <node pkg="iliad_human_local_navigation" type="spencer_to_bayes.py" name="spenc2bay" output="screen">
         <param name="robot_id" value="$(arg robot_id)"/>
 
         <param name="ppl_topic"           type="string"  value="$(arg ppl_topic)"/>
-        <param name="person_topic"           type="string"  value="$(arg person_topic)"/>
+        <param name="person_topic"        type="string"  value="$(arg person_topic)"/>
         <param name="target_frame"        type="string"  value="$(arg robot_base_frame_id)"/>
       </node>
 
+      <!-- constraints costmap V0: human exclusion area -->
+      <node pkg="iliad_velocity_costmaps" type="iliad_constraints_costmap_v0.py" name="constraints_costmap_server" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+
+        <param name="costmap_topic_name"                  type = "string" value= "$(arg costmap_topic_name)"/>
+        <param name="costmap_frame_id"                    type = "string" value= "$(arg robot_base_frame_id)"/>
+        <param name="reports_topic_name"                  type = "string" value= "$(arg reports_topic_name)"/>
+        <param name="reports_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
+        <param name="human_tracking_topic_name"           type = "string"   value="$(arg ppl_topic)"/>
+      </node>
+
+      <!-- Extracts current task cost -->
+      <node pkg="iliad_velocity_costmaps" type="iliad_task_cost_node.py" name="task_cost_node" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+
+        <param name="reports_topic_name"               type = "string" value= "$(arg reports_topic_name)"/>
+        <param name="costmap_topic_name"               type = "string" value= "$(arg costmap_topic_name)"/>      
+        <param name="task_topic_name"                  type = "string" value= "$(arg task_topic_name)"/>
+        <param name="task_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
+
+        <param name="path_occ_grid_topic_name"         type = "string" value= "$(arg path_occ_grid_topic_name)"/>      
+        <param name="curr_cost_topic_name"                  type = "string" value= "$(arg curr_cost_topic_name)"/>
+  
+      </node>
+
+
+      <!-- constraints costmap Alpha: qtc based constraints costmap
       <node pkg="iliad_velocity_costmaps" type="iliad_velocity_costmap_server.py" name="velocity_costmap_server" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
 
@@ -80,8 +118,15 @@
         <param name="max_rotat_vel"                      type = "string"   value="1.0"/>
         <param name="vel_constraints_topic"              type = "string"   value="/$(arg prefix)/velocity_constraints"/>
       </node>
-
+      -->
+      
     </group>
 
 
 </launch>
+
+
+
+
+
+

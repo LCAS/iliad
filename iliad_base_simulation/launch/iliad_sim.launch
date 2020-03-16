@@ -64,7 +64,7 @@
   </include>
 
 <!-- FAKE LOCALIZATION  -->
- <node pkg="tf" type="static_transform_publisher" name="origin_broadcaster"
+ <node pkg="tf" type="static_transform_publisher" name="world_2_map_tf_pub"
     args="0 0 0 0 0 0 /world $(arg map_frame) 100" />
 
 

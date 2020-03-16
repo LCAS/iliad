@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+    <!--
+    
+   -->
+<launch>
+
+    <arg name="robot_id" default="4"/>
+    
+
+    <!-- derived args -->
+    <arg name="prefix" value="robot$(arg robot_id)"/>
+
+    <!-- args from hri -->
+    <arg name="map_frame_id"        default="/map_laser2d"/>
+    <arg name="robot_base_frame_id" default="$(arg prefix)/base_link"/>
+    <arg name="ppl_topic"           default="/$(arg prefix)/qsr/people_tracker/positions"/>        
+    <arg name="costmap_topic_name"  default = "/$(arg prefix)/qsr/constraints_costmap"/>
+    <arg name="reports_topic_name"  default = "/$(arg prefix)/control/controller/reports"/>
+    <arg name="task_topic_name"     default = "/$(arg prefix)/control/task"/>
+
+    <arg name="path_occ_grid_topic_name"  default = "/$(arg prefix)/qsr/constraints_costmap_path"/>
+    <arg name="curr_cost_topic_name"  default = "/$(arg prefix)/qsr/cost"/>
+
+    <!-- I assume ms3.launch is running to provide all data -->
+    <group ns="$(arg prefix)/qsr">
+
+      <node pkg="iliad_velocity_costmaps" type="iliad_constraints_costmap_v0.py" name="constraints_costmap_server" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+
+        <param name="costmap_topic_name"                  type = "string" value= "$(arg costmap_topic_name)"/>
+        <param name="costmap_frame_id"                    type = "string" value= "$(arg robot_base_frame_id)"/>
+        <param name="reports_topic_name"                  type = "string" value= "$(arg reports_topic_name)"/>
+        <param name="reports_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
+        <param name="human_tracking_topic_name"           type = "string"   value="$(arg ppl_topic)"/>
+      </node>
+
+      <node pkg="iliad_velocity_costmaps" type="iliad_task_cost_node.py" name="task_cost_node" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+
+        <param name="reports_topic_name"               type = "string" value= "$(arg reports_topic_name)"/>
+        <param name="costmap_topic_name"               type = "string" value= "$(arg costmap_topic_name)"/>      
+        <param name="task_topic_name"                  type = "string" value= "$(arg task_topic_name)"/>
+        <param name="task_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
+
+        <param name="path_occ_grid_topic_name"         type = "string" value= "$(arg path_occ_grid_topic_name)"/>      
+        <param name="curr_cost_topic_name"                  type = "string" value= "$(arg curr_cost_topic_name)"/>
+  
+      </node>
+
+
+    </group>
+
+
+</launch>

@@ -3667,7 +3667,7 @@
             <pose>7.0 -3.75 0 0 0 0</pose>
           </waypoint>
           <waypoint>
-            <time>48</time>   <!-- sed marker 2 -->
+            <time>59</time>   <!-- sed marker 2 -->
             <pose>22.0 -3.75 0 0 0 0</pose>
           </waypoint>
         </trajectory>
