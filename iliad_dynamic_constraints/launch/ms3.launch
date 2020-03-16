@@ -27,7 +27,6 @@
     <arg name="origin_topic"        default = "/$(arg prefix)/qsr/origin"/>
            
     <arg name="costmap_topic_name"  default = "/$(arg prefix)/qsr/constraints_costmap"/>
-    <!-- <arg name="costmap_topic_name"  default = "/map_laser2d"/> -->
     <arg name="reports_topic_name"  default = "/$(arg prefix)/control/controller/reports"/>
     <arg name="task_topic_name"     default = "/$(arg prefix)/control/task"/>
 
@@ -79,10 +78,9 @@
         <param name="robot_id" value="$(arg robot_id)"/>
 
         <param name="costmap_topic_name"                  type = "string" value= "$(arg costmap_topic_name)"/>
-        <param name="costmap_frame_id"                    type = "string" value= "$(arg robot_base_frame_id)"/>
-        <param name="reports_topic_name"                  type = "string" value= "$(arg reports_topic_name)"/>
-        <param name="reports_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
-        <param name="human_tracking_topic_name"           type = "string"   value="$(arg ppl_topic)"/>
+        <param name="human_tracking_topic_name"           type = "string" value="$(arg ppl_topic)"/>
+        <param name="base_frame_id"                       type = "string" value="$(arg robot_base_frame_id)"/>
+
       </node>
 
       <!-- Extracts current task cost -->
@@ -95,7 +93,7 @@
         <param name="task_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
 
         <param name="path_occ_grid_topic_name"         type = "string" value= "$(arg path_occ_grid_topic_name)"/>      
-        <param name="curr_cost_topic_name"                  type = "string" value= "$(arg curr_cost_topic_name)"/>
+        <param name="curr_cost_topic_name"             type = "string" value= "$(arg curr_cost_topic_name)"/>
   
       </node>
 

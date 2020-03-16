@@ -26,14 +26,16 @@ from threading import Lock
 
 class ConstraintsCostmapV0(object):
     """
-    Costmap logic lies here
+    Costmap logic lies here. 
+    Costmap recives human poses relative to robot pose, 
+    and it publishes costmap relative to robot pose too.
+
     """
 
-    def __init__(self, costmap_frame_id, costmap_topic_pub, width=512, height=512,resolution=0.05):
+    def __init__(self, costmap_topic_pub, width=512, height=512,resolution=0.05):
 
         o = OccupancyGrid()
         o.header.stamp = rospy.Time.now()
-        o.header.frame_id = costmap_frame_id
         o.info.resolution = resolution
         o.info.height = height #y
         o.info.width = width #x
@@ -48,7 +50,6 @@ class ConstraintsCostmapV0(object):
         self.lock = Lock()
 
         self.local_human_pose = None
-        self.local_robot_pose = None
 
         self.map_pub = costmap_topic_pub
 
@@ -68,17 +69,9 @@ class ConstraintsCostmapV0(object):
     
     def update_human(self, humanPoseSt):
         if not (humanPoseSt == None):
-            self.local_human_pose = humanPoseSt
-        rospy.logdebug_throttle(2, "Node [" + rospy.get_name() + "] " +
-                                "Human pose received"
-                                )
-
-    def update_robot(self, robPoseSt):
-        if not (robPoseSt == None):
-            self.local_robot_pose = robPoseSt            
-        rospy.logdebug_throttle(2, "Node [" + rospy.get_name() + "] " +
-                                "robot pose received"
-                                )
+            self.local_human_pose = humanPoseSt            
+            self.current_occ_grid.header = humanPoseSt.header
+            #self.printPoseSt(robPoseSt, "human pose received")
 
     def pose2cell(self,x,y):
         resolution = self.current_occ_grid.info.resolution
@@ -145,7 +138,7 @@ class ConstraintsCostmapV0(object):
 
     def update_map(self,event):
         with self.lock: 
-            if ((not self.local_human_pose == None) and (not self.local_robot_pose == None)):
+            if (not self.local_human_pose == None):
                 height = self.current_occ_grid.info.height
                 width = self.current_occ_grid.info.width
                 ## get human distance to map origin
@@ -165,57 +158,34 @@ class ConstraintsCostmapV0(object):
                 c = ca * cd
                 # remap 0-100
                 c = np.interp(c, (c.min(), c.max()), (0, 100))
+
+                # dummy values for testing ....
+                # c = np.full( (width, height), 0)            
+                # c[0,0] = 100
+                # # c[width- 1, 0] = 100
+                # # c[width- 1, height- 1] = 100
+                # # c[0, height - 1] = 100
+                # c =  c.T
+
                 self.current_occ_grid.data =  c.flatten(order='C')
-
-                #self.setValue(self.local_human_pose.pose.position.x , self.local_human_pose.pose.position.y, 100)
-                #self.setValue(self.local_robot_pose.pose.position.x , self.local_robot_pose.pose.position.y, 100)
-
-                # self.current_occ_grid.info.origin.position.x = (self.current_occ_grid.info.width/2.0)   * self.current_occ_grid.info.resolution 
-                # self.current_occ_grid.info.origin.position.y = (self.current_occ_grid.info.height/2.0)  * self.current_occ_grid.info.resolution
-
-                self.awfulCaster()
 
                 self.map_pub.publish(self.current_occ_grid)
                 rospy.logdebug_throttle(2, "Node [" + rospy.get_name() + "] " +
                                 "Map published"
                                 )
 
-            # if (not self.local_robot_pose == None):
-            #     rospy.loginfo("Node [" + rospy.get_name() + "] " +
-            #                     "update_robot status: Pose ( " +
-            #                     str(self.local_robot_pose.pose.position.x) + ", " + str(self.local_robot_pose.pose.position.y) + ", " +
-            #                     str(self.get_rotation(self.local_robot_pose.pose.orientation) * 180.0 /np.pi) + " deg) "  +
-            #                     " in frame (" + self.local_robot_pose.header.frame_id+ ")"
-            #                     ) 
-            # else:
-            #     rospy.logerr("Node [" + rospy.get_name() + "] " +
-            #                     "update_robot status: Pose ( None )") 
-            # if (not self.local_human_pose == None):                                
-            #     rospy.loginfo("Node [" + rospy.get_name() + "] " +
-            #                     "update_human status: Pose ( " +
-            #                     str(self.local_human_pose.pose.position.x) + ", " + str(self.local_human_pose.pose.position.y) + ", " +
-            #                     str(self.get_rotation(self.local_human_pose.pose.orientation) * 180.0 /np.pi) + " deg) " +
-            #                     " in frame (" + self.local_human_pose.header.frame_id+ ")"
-            #                     )                                
-            # else:
-            #     rospy.logerr("Node [" + rospy.get_name() + "] " +
-            #                     "update_human status: Pose ( None )") 
+    def get_quaternion(self,yaw):
+        q_angle = quaternion_from_euler(0, 0, yaw, axes='sxyz') # is axes ok ??
+        q = Quaternion(*q_angle)
+        return q
 
-    def awfulCaster(self):
-        # ................................
-        # shouldn't be necessary ...
-        # ................................
-        oldOrigin = PoseStamped()
-        oldOrigin = self.local_robot_pose
-        oldOrigin.pose.position.x -= (self.current_occ_grid.info.width/2.0) * self.current_occ_grid.info.resolution 
-        oldOrigin.pose.position.y -= (self.current_occ_grid.info.height/2.0)  * self.current_occ_grid.info.resolution
-
-
-        newOrigin = self.cast_pose(oldOrigin, "map_laser2d")
-        self.current_occ_grid.info.origin = newOrigin.pose
-        self.current_occ_grid.header.frame_id = "map_laser2d"
-        self.current_occ_grid.header.stamp = rospy.Time.now()
-
+    def printPoseSt(self, poseSt,text):
+        rospy.loginfo("Node [" + rospy.get_name() + "] " +
+                text + ": Pose ( " +
+                '{0:.2f}'.format(poseSt.pose.position.x) + ", " + '{0:.2f}'.format(poseSt.pose.position.y) + ", " +
+                '{0:.2f}'.format(self.get_rotation(poseSt.pose.orientation) * 180.0 /np.pi) + " deg) " +
+                " in frame (" + poseSt.header.frame_id+ ")"
+                )      
 
     def cast_pose(self, pose_in, new_frame):
         pose_out = None
@@ -224,6 +194,10 @@ class ConstraintsCostmapV0(object):
         # in tf2, frames do not have the initial slash
         if (pose_in.header.frame_id[0] == '/'):
             pose_in.header.frame_id = pose_in.header.frame_id[1:]
+
+        # in tf2, frames do not have the initial slash
+        if (new_frame[0] == '/'):
+            new_frame = new_frame[1:]
 
         try:            
             transform = self.listenerBuffer.lookup_transform(new_frame, pose_in.header.frame_id, now, rospy.Duration(4.0))
@@ -244,15 +218,13 @@ class IliadConstraintsCostmapServer(object):
 
         # ................................................................
         # other params
-        self.robotPoseSt = PoseStamped()     
-        self.robotPoseSt.header.stamp = rospy.Time.now()
-        self.robotPoseSt.header.frame_id = self.reports_frame_id
+
 
         # ................................................................
         # start ros subs/pubs/servs....
         self.initROS()
 
-        self.icc = ConstraintsCostmapV0(self.costmap_frame_id, self.costmap_topic_pub)
+        self.icc = ConstraintsCostmapV0(self.costmap_topic_pub)
         
         rospy.loginfo("["+rospy.get_name()+"] " + "... all done.")
 
@@ -266,7 +238,6 @@ class IliadConstraintsCostmapServer(object):
 
         # subscribers and listeners
         rospy.Subscriber(self.human_tracking_topic_name, PeopleTracker, self.human_tracking_callback, queue_size=1)
-        rospy.Subscriber(self.reports_topic_name, ControllerReport, self.reports_callback, queue_size=1)
                 
         self.listenerBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.listenerBuffer)
@@ -284,25 +255,17 @@ class IliadConstraintsCostmapServer(object):
         self.costmap_topic_name = rospy.get_param(
             '~costmap_topic_name', '/robot'+str(self.robot_id)+'/qsr/constraints_costmap')
 
-        # Costmap frame id
-        # MFC: this needs to be robot/base_link and then internally we cast it to whatever ...
-        self.costmap_frame_id = rospy.get_param(
-            '~costmap_frame_id', '/robot'+str(self.robot_id)+'/base_link')
-        # in tf2, frames do not have the initial slash
-        if (self.costmap_frame_id[0] == '/'):
-            self.costmap_frame_id = self.costmap_frame_id[1:]
-
-        # reports frame id
-        self.reports_frame_id = rospy.get_param(
-            '~reports_frame_id', '/world')
-
-        # MPC reports with current robot state
-        self.reports_topic_name = rospy.get_param(
-            '~reports_topic_name', '/robot' + str(self.robot_id) + '/control/controller/reports')
-
         # human tracking trackedpersons (SPENCER) topic
         self.human_tracking_topic_name = rospy.get_param(
             '~human_tracking_topic_name', '/robot'+str(self.robot_id)+'/qsr/people_tracker/positions')
+
+        # base frame id
+        self.base_frame_id = rospy.get_param(
+            '~base_frame_id', '/robot'+str(self.robot_id)+'/base_link')            
+
+        # in tf2, frames do not have the initial slash
+        if (self.base_frame_id[0] == '/'):
+            self.base_frame_id = self.base_frame_id[1:]
 
     def human_tracking_callback(self, ppl):
         try:
@@ -324,22 +287,7 @@ class IliadConstraintsCostmapServer(object):
         
         try:
             # we could have potentially several maps here, each one tracking a different human
-            self.icc.update_human(self.get_local_pose(humanPoseSt, self.costmap_frame_id))
-        except AttributeError as ae:
-            # first msg may arrive even before creating the map....
-            pass
-
-    # we use robot reports to know robot position
-    def reports_callback(self, msg):
-        self.robotPoseSt.header.seq = self.robotPoseSt.header.seq + 1
-        self.robotPoseSt.header.stamp = rospy.Time.now()
-
-        self.robotPoseSt.pose.position.x = msg.state.position_x
-        self.robotPoseSt.pose.position.y = msg.state.position_y
-        self.robotPoseSt.pose.orientation = self.get_quaternion(msg.state.orientation_angle)
-
-        try:
-            self.icc.update_robot(self.get_local_pose(self.robotPoseSt, self.costmap_frame_id))
+            self.icc.update_human(self.get_local_pose(humanPoseSt, self.base_frame_id))
         except AttributeError as ae:
             # first msg may arrive even before creating the map....
             pass
@@ -351,6 +299,10 @@ class IliadConstraintsCostmapServer(object):
         # in tf2, frames do not have the initial slash
         if (pose_in.header.frame_id[0] == '/'):
             pose_in.header.frame_id = pose_in.header.frame_id[1:]
+        
+        # in tf2, frames do not have the initial slash
+        if (new_frame[0] == '/'):
+            new_frame = new_frame[1:]            
 
         try:            
             transform = self.listenerBuffer.lookup_transform(new_frame, pose_in.header.frame_id, now, rospy.Duration(4.0))
@@ -370,7 +322,7 @@ class IliadConstraintsCostmapServer(object):
         return yaw        
 
 if __name__ == "__main__":
-    rospy.init_node("constraints_costmap_server_v0")#, log_level=rospy.DEBUG)
+    rospy.init_node("constraints_costmap_server_v0" , log_level=rospy.DEBUG)
      # Go to class functions that do all the heavy lifting. Do error checking.
     try:
         v = IliadConstraintsCostmapServer(rospy.get_name())
