@@ -32,7 +32,7 @@ class ConstraintsCostmapV0(object):
 
     """
 
-    def __init__(self, costmap_topic_pub, width=512, height=512,resolution=0.05):
+    def __init__(self, costmap_topic_pub, width=4000, height=4000,resolution=0.05):
 
         o = OccupancyGrid()
         o.header.stamp = rospy.Time.now()
@@ -158,7 +158,7 @@ class ConstraintsCostmapV0(object):
                 c = ca * cd
                 # remap 0-100
                 c = np.interp(c, (c.min(), c.max()), (0, 100))
-
+                c[c>0.01] = 100
                 # dummy values for testing ....
                 # c = np.full( (width, height), 0)            
                 # c[0,0] = 100
@@ -167,7 +167,7 @@ class ConstraintsCostmapV0(object):
                 # # c[0, height - 1] = 100
                 # c =  c.T
 
-                self.current_occ_grid.data =  c.flatten(order='C')
+                self.current_occ_grid.data =  c.flatten(order='C').astype(np.uint8)
 
                 self.map_pub.publish(self.current_occ_grid)
                 rospy.logdebug_throttle(2, "Node [" + rospy.get_name() + "] " +

@@ -10,16 +10,33 @@
   <arg name="gazeboGui" default="true"/> 
   <arg name="rvizGui" default="true"/> 
   <arg name="prefix" default="robot1"/>
-      <arg name="rviz_config_file" default="$(find iliad_base_simulation)/rviz/iliad_cititruck.rviz"/>
+  <arg name="robot_pose_x" default="14.5"/>
+  <arg name="robot_pose_y" default="2.0"/>
+  <arg name="robot_pose_roll" default="0.0"/>
+  <arg name="robot_pose_pitch" default="0.0"/>
+  <arg name="robot_pose_yaw" default="-1.57"/>
+  <arg name="rviz_config_file" default="$(find iliad_base_simulation)/rviz/iliad_cititruck.rviz"/>
+  <arg name="map_frame" default="/map"/>
+  <arg name="map_topic" default="/map"/>
 
 
   <include file="$(find iliad_base_simulation)/launch/iliad_sim.launch">
-        <arg name="world_name" value="$(find iliad_base_simulation)/worlds/ncfm_model_1_actor_long.world"/>
-                <arg name="rviz_config_file" value="$(arg rviz_config_file)"/>
+        <arg name="yaml_map_file" value="$(find iliad_base_simulation)/maps/extra_room.yaml"/>  
+        <arg name="world_name" value="$(find iliad_base_simulation)/worlds/ncfm_model_1_actor_scenario-3.world"/>
+        <arg name="rviz_config_file" value="$(arg rviz_config_file)"/>
+
+        <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
+        <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
+        <arg name="robot_pose_roll" value="$(arg robot_pose_roll)"/>
+        <arg name="robot_pose_pitch" value="$(arg robot_pose_pitch)"/>
+        <arg name="robot_pose_yaw" value="$(arg robot_pose_yaw)"/>
 
         <arg name="gazeboGui"  value="$(arg gazeboGui)"/> 
         <arg name="rvizGui"    value="$(arg rvizGui)"/> 
         <arg name="prefix"     value="$(arg prefix)"/>
+
+        <arg name="map_frame_id" value="$(arg map_frame)"/>
+        <arg name="map_topic" value="$(arg map_topic)"/>
   </include>
-  
+
 </launch>

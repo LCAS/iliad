@@ -5,8 +5,7 @@
 
 <launch>
   <arg name="robot_id"  default="1"/>
-  <arg name="map_frame_id" default="map"/>
-
+  
   <!-- TF prefix of robot -->
   <arg name="prefix" default="robot$(arg robot_id)"/>
 
@@ -14,7 +13,7 @@
   <arg name="gazeboGui" default="true"/>
   <arg name="rvizGui" default="true"/>
   <arg name="gazeboPause"  default="false"/>
-  <arg name="map_frame" default="map"/>
+  <arg name="map_frame_id" default="map"/>
   <arg name="map_topic" default="map"/>
   <arg name="useTwist" default="true"/>
 
@@ -55,17 +54,12 @@
   <include file="$(find iliad_base_simulation)/launch/worlds/map_server.launch">
     <arg name="yaml_map_file" value="$(arg yaml_map_file)"/>
     <arg name="map_topic" value="$(arg map_topic)"/>
-    <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
-    <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
-    <arg name="robot_pose_roll" value="$(arg robot_pose_roll)"/>
-    <arg name="robot_pose_pitch" value="$(arg robot_pose_pitch)"/>
-    <arg name="robot_pose_yaw" value="$(arg robot_pose_yaw)"/>
     <arg name="frame_id" value="$(arg map_frame_id)"/>
   </include>
 
 <!-- FAKE LOCALIZATION  -->
- <node pkg="tf" type="static_transform_publisher" name="world_2_map_tf_pub"
-    args="0 0 0 0 0 0 /world $(arg map_frame) 100" />
+ <!-- <node pkg="tf" type="static_transform_publisher" name="world_2_map_tf_pub"
+    args="0 0 0 0 0 0 /world $(arg map_frame_id) 100" /> -->
 
 
 

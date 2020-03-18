@@ -3,12 +3,12 @@
 <launch>
   <arg name="yaml_map_file" default="$(find iliad_base_simulation)/maps/extra_room.yaml"/>
   <!-- Robot start position -->
-  <arg name="robot_pose_x" default="0"/>
-  <arg name="robot_pose_y" default="0"/>
-  <arg name="robot_pose_z" default="0"/>
-  <arg name="robot_pose_roll" default="0"/>
-  <arg name="robot_pose_pitch" default="0"/>
-  <arg name="robot_pose_yaw" default="0"/>
+  <arg name="offset_pose_x" default="0"/>
+  <arg name="offset_pose_y" default="0"/>
+  <arg name="offset_pose_z" default="0"/>
+  <arg name="offset_pose_roll" default="0"/>
+  <arg name="offset_pose_pitch" default="0"/>
+  <arg name="offset_pose_yaw" default="0"/>
   <arg name="frame_id" default="map"/>
   <arg name="map_topic" default="/map"/>
 
@@ -18,7 +18,12 @@
  -->
 
  <node pkg="tf" type="static_transform_publisher" name="origin_broadcaster"
-    args="$(arg robot_pose_x) $(arg robot_pose_y) $(arg robot_pose_z) $(arg robot_pose_roll) $(arg robot_pose_pitch) $(arg robot_pose_yaw)  /world $(arg frame_id) 100" />
+    args="$(arg offset_pose_x) $(arg offset_pose_y) $(arg offset_pose_z) $(arg offset_pose_yaw) $(arg offset_pose_pitch) $(arg offset_pose_roll)   /world $(arg frame_id) 100" /> 
+
+<!--     
+rosrun tf static_transform_publisher     7.53  -2.7   0.0    0.0   0.0   0.0  /world /map_laser2d 100
+  rosrun tf static_transform_publisher  14.5    2.0   0.0   -1.57  0.0   0.0  /world /map_laser2d 100    
+  -->
 
 <node name="map_server" pkg="map_server" type="map_server" args="$(arg yaml_map_file)">
     <param name="frame_id" value="$(arg frame_id)"/>

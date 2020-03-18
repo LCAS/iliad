@@ -3,7 +3,6 @@
      Launches a world where forklift is facing a human that walks towards it.
      Robot starts facing human walking from corner to corner of the room
     
-
 -->
  
 <launch>
@@ -17,7 +16,6 @@
   <arg name="robot_pose_pitch" default="0.0"/>
   <arg name="robot_pose_yaw" default="0.0"/>
   <arg name="rviz_config_file" default="$(find iliad_base_simulation)/rviz/iliad_cititruck.rviz"/>
-
 
 
   <include file="$(find iliad_base_simulation)/launch/iliad_sim.launch">

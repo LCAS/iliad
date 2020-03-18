@@ -13,6 +13,7 @@
     <!-- args from hri -->
     <arg name="map_frame_id"        default="/map_laser2d"/>
     <arg name="robot_base_frame_id" default="$(arg prefix)/base_link"/>
+
     <arg name="robot_topic"         default = "/$(arg prefix)/robot_pose"/>
     <arg name="robotST_topic"       default = "/$(arg prefix)/robot_poseST"/>
 
@@ -73,13 +74,22 @@
         <param name="target_frame"        type="string"  value="$(arg robot_base_frame_id)"/>
       </node>
 
-      <!-- constraints costmap V0: human exclusion area -->
-      <node pkg="iliad_velocity_costmaps" type="iliad_constraints_costmap_v0.py" name="constraints_costmap_server" output="screen" respawn="true">
-        <param name="robot_id" value="$(arg robot_id)"/>
+      <!-- Publishes robot pose -->
+      <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
+          <param name="map_frame" value="$(arg map_frame_id)"/>
+          <param name="base_frame" value="$(arg robot_base_frame_id)"/>
+          <param name="is_stamped" value="true"/>
+          <remap from="robot_pose" to="$(arg robotST_topic)"/>
+      </node>
 
+      <!-- constraints costmap V2: human exclusion area -->
+      <node pkg="iliad_velocity_costmaps" type="iliad_constraints_costmap_v2.py" name="constraints_costmap_server" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
         <param name="costmap_topic_name"                  type = "string" value= "$(arg costmap_topic_name)"/>
+        <param name="map_topic_name"                      type = "string" value= "$(arg map_frame_id)"/>
         <param name="human_tracking_topic_name"           type = "string" value="$(arg ppl_topic)"/>
-        <param name="base_frame_id"                       type = "string" value="$(arg robot_base_frame_id)"/>
+        <param name="robot_pose_topic_name"                type = "string" value="$(arg robotST_topic)"/>
+
 
       </node>
 
