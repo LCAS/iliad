@@ -210,30 +210,36 @@ class ConstraintsCostmapV2(object):
                 update.header.seq = self.seq
                 self.seq = self.seq + 1
 
-                # random update grid start position
-                (ih0,jh0,valid) = self.pose2cell(15.3,-3.03)
+                # random update grid center position
+                xc = 15.3
+                yc = -3.03
                 update.width  = 375
                 update.height = 306 
 
-                # get gridmap human pose
+                # get center cell
+                (ih0,jh0,valid) = self.pose2cell(xc,yc)
+
+                # get human pose cell
                 xh = self.local_human_pose.pose.position.x 
                 yh = self.local_human_pose.pose.position.y
+                #ah = self.get_rotation(self.local_human_pose.pose.orientation)
                 (ih,jh,valid) = self.pose2cell(xh,yh)
+
+                # get robot position
+                xr = self.local_robot_pose.pose.position.x 
+                yr = self.local_robot_pose.pose.position.y
+                #ar = self.get_rotation(self.local_robot_pose.pose.orientation)                
 
                 # update grid starts here                
                 update.x = ih0 - update.width/2
                 update.y = jh0 - update.height/2
-
-
+                
+                # clear "canvas"
                 update.data = np.zeros(update.width * update.height)
 
                 # this is human cell, relative to update grid
                 ih = ih - update.x 
                 jh = jh - update.y 
-
-                # mark margins
-                # update.data[0] = 100
-                # update.data[update.width*update.height-1] = 100
 
                 # this creates a square around human
                 for i in range(0,update.width):
@@ -242,7 +248,52 @@ class ConstraintsCostmapV2(object):
                         if (abs(ih-i)<int(update.width/20)) and (abs(jh-j)<int(update.height/20)):
                             update.data[k] = 100
 
+                # grids
+                x = np.linspace(xc -(update.width /2.0)* self.resolution , xc + (update.width /2.0)* self.resolution , update.width)        
+                y = np.linspace(yc -(update.height/2.0)* self.resolution , yc + (update.height/2.0)* self.resolution , update.height)        
+                xx, yy = np.meshgrid(x, y)
+
+                # distance to human in each cell
+                dh = np.sqrt(np.power(xx-xh,2)+np.power(yy-yh,2))
+
+                # distance to robotin each cell
+                dr = np.sqrt(np.power(xx-xr,2)+np.power(yy-yr,2))
+
+
+                # # angle between robot and any point
+                # aa = np.arctan2(yy-yr,xx-xr)
+                # # angle between human and any point
+                # ah= np.arctan2(yh-yr,xh-xr)
+                # using this, we had some rounding errors
+                # arg = (aa-ah)
+
+                # same as above, but avoiding two arctans
+                (a1, a2) = (yy-yr,xx-xr)
+                (b1, b2)  = (yh-yr,xh-xr)                
+                arg = np.arctan2(  a2*b1 - a1*b2, a1*b1+a2*b2 )
                 
+                # angle cost
+                ca = np.exp(-np.power(4*arg,2))
+                
+                # distance cost
+                cd = np.exp(-np.power(0.75*(dh),2))
+                
+                # angle cost
+                ca = np.interp(ca, (ca.min(), ca.max()), (0, 10))
+                cd = np.interp(cd, (cd.min(), cd.max()), (0, 1))
+                # combine costs
+                c = ca * cd
+                # remap 0-100
+                c = np.interp(c, (c.min(), c.max()), (0, 100))
+
+                # avoid overlapping costs over the robot
+                c[dr<2.3] = 0
+                
+                update.data =  c.flatten(order='C')
+
+                # mark margins
+                update.data[0] = 100
+                update.data[update.width*update.height-1] = 100
                             
                 self.last_update = update
                 self.update_map_pub.publish(update) 
