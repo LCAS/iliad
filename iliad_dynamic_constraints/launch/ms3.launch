@@ -12,6 +12,7 @@
 
     <!-- args from hri -->
     <arg name="map_frame_id"        default="/map_laser2d"/>
+    <arg name="map_topic_name"      default="/maps/map_laser2d"/>
     <arg name="robot_base_frame_id" default="$(arg prefix)/base_link"/>
 
     <arg name="robot_topic"         default = "/$(arg prefix)/robot_pose"/>
@@ -86,27 +87,35 @@
       <node pkg="iliad_velocity_costmaps" type="iliad_constraints_costmap_v2.py" name="constraints_costmap_server" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="costmap_topic_name"                  type = "string" value= "$(arg costmap_topic_name)"/>
-        <param name="map_topic_name"                      type = "string" value= "$(arg map_frame_id)"/>
+        <param name="map_topic_name"                      type = "string" value= "$(arg map_topic_name)"/>
         <param name="human_tracking_topic_name"           type = "string" value="$(arg ppl_topic)"/>
-        <param name="robot_pose_topic_name"                type = "string" value="$(arg robotST_topic)"/>
+        <param name="robot_pose_topic_name"               type = "string" value="$(arg robotST_topic)"/>
 
+        <param name="update_center_x"                     type = "double" value="15.3"/>
+        <param name="update_center_y"                     type = "double" value="-3.03"/>
+        <param name="update_width"                        type = "int" value="375"/>
+        <param name="update_height"                       type = "int" value="306"/>
+        <param name="update_publish_period"               type = "double" value="0.05"/>
+        <param name="robot_radius"                        type = "double" value="1.0"/>
 
       </node>
 
-      <!-- Extracts current task cost -->
-      <node pkg="iliad_velocity_costmaps" type="iliad_task_cost_node.py" name="task_cost_node" output="screen" respawn="true">
+      <!-- Extracts current task cost
+      <node pkg="iliad_velocity_costmaps" type="iliad_task_cost_node_v2.py" name="task_cost_node" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
 
-        <param name="reports_topic_name"               type = "string" value= "$(arg reports_topic_name)"/>
+        <param name="robot_pose_topic_name"               type = "string" value="$(arg robotST_topic)"/>
         <param name="costmap_topic_name"               type = "string" value= "$(arg costmap_topic_name)"/>      
         <param name="task_topic_name"                  type = "string" value= "$(arg task_topic_name)"/>
         <param name="task_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
 
         <param name="path_occ_grid_topic_name"         type = "string" value= "$(arg path_occ_grid_topic_name)"/>      
         <param name="curr_cost_topic_name"             type = "string" value= "$(arg curr_cost_topic_name)"/>
+        <param name="update_publish_period"               type = "double" value="0.05"/>
+
   
       </node>
-
+ -->
 
       <!-- constraints costmap Alpha: qtc based constraints costmap
       <node pkg="iliad_velocity_costmaps" type="iliad_velocity_costmap_server.py" name="velocity_costmap_server" output="screen" respawn="true">

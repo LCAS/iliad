@@ -152,7 +152,8 @@ class TaskCancellator():
             if (n_mod_points>0):
                 for i in range(index_mod_start,index_mod_end+1):
                     # curve with no offset at 0-end
-                    offset = (4.0 * (n_mod_points-i) * (i)/ (n_mod_points * n_mod_points ) )
+                    #offset = (4.0 * (n_mod_points-i) * (i)/ (n_mod_points * n_mod_points ) )
+                    offset = (4.0 * (index_mod_end-i) * (i-index_mod_start)/ ((n_mod_points-1) * (n_mod_points-1) ) )
                     req.task.path.path[i].pose.position.x = req.task.path.path[i].pose.position.x + 1.0 * offset
                     req.task.path.path[i].pose.position.y = req.task.path.path[i].pose.position.y + 1.0 * offset
                     #rospy.loginfo("Node [" + rospy.get_name() + "] p[" + str(i)+  " offset == " + str(offset) )

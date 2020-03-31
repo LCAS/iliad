@@ -136,10 +136,28 @@ class TaskCancellator():
         (roll, pitch, yaw) = euler_from_quaternion (orientation_list)
         return yaw
     
+
+    def printPath(self, task_path):
+        n_points = len(task_path)
+        x = np.array([task_path[i].pose.position.x for i in range(0,n_points)] )
+        y = np.array([task_path[i].pose.position.y for i in range(0,n_points)] )
+        xstr = np.array2string(x, prefix="x = [ ", suffix = " ]", precision=2, separator=',', suppress_small=True)
+        ystr = np.array2string(y, prefix="y = [ ", suffix = " ]", precision=2, separator=',', suppress_small=True)
+
+        rospy.loginfo("#..................................................................................")
+        rospy.loginfo(xstr)
+        rospy.loginfo(ystr)
+        rospy.loginfo("#..................................................................................")
+        for i in range(0,n_points):
+                    rospy.loginfo("P[" + str(i)+  "]  == " '{0:.2f}'.format(x[i]) +', {0:.2f}'.format(y[i]) )
+        rospy.loginfo("#..................................................................................\n\n\n\n")
+
+
     def abort_task(self):
         index_offset = 3
         try:
             req = UpdateTaskRequest()
+            req.task.update = True
             #req.task = self.active_task
             req.task = self.active_task
             n_points_orig = len(self.active_task.path.path)
@@ -149,29 +167,32 @@ class TaskCancellator():
 
             n_mod_points = index_mod_end - index_mod_start + 1
 
-            if (n_mod_points>0):
+            rospy.loginfo("#Pre")
+            self.printPath(req.task.path.path)
+            if (n_mod_points>1):
                 for i in range(index_mod_start,index_mod_end+1):
                     # curve with no offset at 0-end
-                    offset = (4.0 * (n_mod_points-i) * (i)/ (n_mod_points * n_mod_points ) )
-                    req.task.path.path[i].pose.position.x = req.task.path.path[i].pose.position.x + 1.0 * offset
-                    req.task.path.path[i].pose.position.y = req.task.path.path[i].pose.position.y + 1.0 * offset
-                    #rospy.loginfo("Node [" + rospy.get_name() + "] p[" + str(i)+  " offset == " + str(offset) )
+                    offset = (4.0 * (index_mod_end-i) * (i-index_mod_start)/ ((n_mod_points-1) * (n_mod_points-1) ) )
+                    #req.task.path.path[i].pose.position.x = req.task.path.path[i].pose.position.x + 2.0 * offset
+                    req.task.path.path[i].pose.position.y = req.task.path.path[i].pose.position.y + 2.0 * offset
+                    #rospy.loginfo("Node [" + rospy.get_name() + "] p[" + str(i)+  "] offset == " + str(offset) )
 
                 req.task.abort = False
                 req.task.update = True       
 
-                rospy.loginfo("Node [" + rospy.get_name() + "] Selected indexes are: [" + str(index_mod_start) + ":" 
-                                                                                        + str(index_mod_end)   + "] of " 
-                                                                                        + str(len(self.active_task.path.path)) )   
-                rospy.loginfo("Node [" + rospy.get_name() + "] " +
-                                        "Robot at: Pose ( " +
-                                        str(self.state.position_x) + ", " + str(self.state.position_y) + ", " +
-                                        str(self.state.orientation_angle*180.0/np.pi) + " deg) ")
-                rospy.loginfo("Node [" + rospy.get_name() + "] " +
-                                        "Goal at: Pose ( " +
-                                        str(req.task.path.target_goal.pose.position.x) + ", " + str(req.task.path.target_goal.pose.position.y) + ", " +
-                                        str(self.get_rotation(req.task.path.target_goal.pose.orientation)*180.0/np.pi) + " deg) ")
-
+                # rospy.loginfo("Node [" + rospy.get_name() + "] Selected indexes are: [" + str(index_mod_start) + ":" 
+                #                                                                         + str(index_mod_end)   + "] of " 
+                #                                                                         + str(len(self.active_task.path.path)) )   
+                # rospy.loginfo("Node [" + rospy.get_name() + "] " +
+                #                         "Robot at: Pose ( " +
+                #                         str(self.state.position_x) + ", " + str(self.state.position_y) + ", " +
+                #                         str(self.state.orientation_angle*180.0/np.pi) + " deg) ")
+                # rospy.loginfo("Node [" + rospy.get_name() + "] " +
+                #                         "Goal at: Pose ( " +
+                #                         str(req.task.path.target_goal.pose.position.x) + ", " + str(req.task.path.target_goal.pose.position.y) + ", " +
+                #                         str(self.get_rotation(req.task.path.target_goal.pose.orientation)*180.0/np.pi) + " deg) ")
+                rospy.loginfo("#post")
+                self.printPath(req.task.path.path)
                 try:
                     ans = self.update_task_srv_px.call(req)
                     rospy.loginfo("Node [" + rospy.get_name() + "] result was: "+str(ans))   
