@@ -22,17 +22,24 @@ from bayes_people_tracker.msg import PeopleTracker
 
 import numpy as np
 from threading import Lock
-from scipy.sparse import *
-
+#from scipy.sparse import *
+from matplotlib.path import Path
 
 class ConstraintsCostmapV2(object):
     """
         Here lies the costmap logic.
     """
 
-    def __init__(self, ref_costmap, update_center_x, update_center_y, update_width, update_height, robot_radius ):
+    def __init__(self, ref_costmap, update_center_x, update_center_y, update_width, update_height, d2, d1, w, blind_offset ):
 
-        self.robot_radius = robot_radius
+        # Robot shape: This is a rectangle, but we can use other stuff 
+        self.d2 = d2  # robot center to fork edge distance
+        self.d1 = d1  # robot center to front laser distance
+        self.w = w # truck width
+        self.blind_offset  = blind_offset # extra margin                
+        self.robotVerts = [(self.d1+self.blind_offset, self.w/2+self.blind_offset), (-self.d2-self.blind_offset, self.w/2+self.blind_offset), (-self.d2-self.blind_offset, -self.w/2-self.blind_offset), (self.d1+self.blind_offset, -self.w/2-self.blind_offset)]
+
+
         self.current_occ_grid = ref_costmap
         self.current_occ_grid.header.seq = -1
 
@@ -86,9 +93,17 @@ class ConstraintsCostmapV2(object):
         self.update.y = jh0 - self.update.height/2    
 
         # grids
-        x = np.linspace(update_center_x -(self.update.width /2.0)* self.resolution , update_center_x + (self.update.width /2.0)* self.resolution , self.update.width)        
-        y = np.linspace(update_center_y -(self.update.height/2.0)* self.resolution , update_center_y + (self.update.height/2.0)* self.resolution , self.update.height)        
-        self.xx, self.yy = np.meshgrid(x, y)            
+        self.min_update_x = update_center_x -(self.update.width /2.0)* self.resolution 
+        self.max_update_x = update_center_x + (self.update.width /2.0)* self.resolution
+        self.min_update_y = update_center_y -(self.update.height/2.0)* self.resolution 
+        self.max_update_y = update_center_y + (self.update.height/2.0)* self.resolution
+
+        x = np.linspace(self.min_update_x, self.max_update_x, self.update.width)        
+        y = np.linspace(self.min_update_y, self.max_update_y , self.update.height)        
+        self.xx, self.yy = np.meshgrid(x, y)   
+        xg, yg = self.xx.flatten(), self.yy.flatten()
+        self.grid_points = np.vstack((xg,yg)).T 
+         
 
     def get_map(self):
         with self.lock: 
@@ -114,6 +129,19 @@ class ConstraintsCostmapV2(object):
             if not (robotPoseSt == None):
                 self.local_robot_pose = robotPoseSt            
                 #self.printPoseSt(robotPoseSt, "robot pose received")
+
+    def getRobotPolyAt(self,x,y,a):
+        # translate and rotate to given reference        
+        newVerts = []
+        for xi,yi in self.robotVerts:
+            nx =  (xi * np.cos(a)) - (yi * np.sin(a)) + x
+            ny =  (xi * np.sin(a)) + (yi * np.cos(a)) + y
+            newVerts.append((nx,ny))
+
+        # make a polygon
+        robot_polygon = Path(newVerts) 
+        return robot_polygon 
+
 
     def pose2cell(self,x,y):
         ix, iy = self.getRel(x,y)
@@ -190,7 +218,7 @@ class ConstraintsCostmapV2(object):
                 # get robot position
                 xr = self.local_robot_pose.pose.position.x 
                 yr = self.local_robot_pose.pose.position.y
-                #ar = self.get_rotation(self.local_robot_pose.pose.orientation)                
+                ar = self.get_rotation(self.local_robot_pose.pose.orientation)                
                 
                 # clear "canvas"
                 self.update.data = np.zeros(self.update.width * self.update.height)
@@ -228,11 +256,11 @@ class ConstraintsCostmapV2(object):
                 ca = np.exp(-np.power(4*arg,2))
                 
                 # distance cost
-                cd = np.exp(-np.power(0.5*(dh),2))
+                cd = np.exp(-np.power(0.75*(dh),2))
                 
                 # remap costs
-                ca = np.interp(ca, (ca.min(), ca.max()), (0, 10))
-                cd = np.interp(cd, (cd.min(), cd.max()), (0, 5))
+                ca = np.interp(ca, (ca.min(), ca.max()), (0, 1))
+                cd = np.interp(cd, (cd.min(), cd.max()), (0, 1))
 
                 # combine costs
                 c = ca * cd
@@ -241,8 +269,12 @@ class ConstraintsCostmapV2(object):
                 c = np.interp(c, (c.min(), c.max()), (0, 100))
 
                 # avoid overlapping costs over the robot
-                c[dr<self.robot_radius] = 0
-                
+                robot_polygon = self.getRobotPolyAt(xr,yr,ar)
+                grid = robot_polygon.contains_points(self.grid_points)
+                # now you have a mask with points inside a polygon
+                mask = grid.reshape(self.update.height,self.update.width)         
+                c[mask] = 0
+
                 self.update.data =  c.flatten(order='C')
 
                 # mark margins
@@ -320,7 +352,7 @@ class IliadConstraintsCostmapServerV2(object):
         self.map = map
         if not self.gotMap:
             rospy.loginfo("["+rospy.get_name()+"] " + "Map received. Creating costmap.")
-            self.icc = ConstraintsCostmapV2(self.map, self.update_center_x, self.update_center_y, self.update_width, self.update_height, self.robot_radius )
+            self.icc = ConstraintsCostmapV2(self.map, self.update_center_x, self.update_center_y, self.update_width, self.update_height, self.d2, self.d1, self.w, self.blind_offset )
             rospy.loginfo("["+rospy.get_name()+"] " + "Costmap created. Publishing initial Map.")
             self.costmap_topic_pub.publish(self.icc.get_map())
         self.gotMap = True
@@ -355,8 +387,12 @@ class IliadConstraintsCostmapServerV2(object):
         self.update_width  = rospy.get_param('~update_width', 375)
         self.update_height = rospy.get_param('~update_height', 306)
         self.update_publish_period = rospy.get_param('~update_publish_period', 0.05)
-        self.robot_radius = rospy.get_param('~robot_radius', 1.8)
-        
+
+        self.d2 = rospy.get_param('~d2',0.3)  # robot center to fork edge distance
+        self.d1 = rospy.get_param('~d1',1.5)  # robot center to front laser distance
+        self.w = rospy.get_param('~w',0.8) # truck width
+        self.blind_offset = rospy.get_param('~blind_offset',0.20) # extra margin        
+
 
     def human_tracking_callback(self, ppl):
         try:

@@ -66,17 +66,13 @@ class TaskReplanner():
 
         self.goal_topic_name = rospy.get_param(
             '~goal_topic_name', '/robot' + str(self.robot_id) + '/goal')
-
-        self.brake_topic_name = rospy.get_param(
-            '~brake_topic_name', '/robot'+str(self.robot_id)+'/brake')       
-
+ 
         # task frame id
         self.goal_frame_id = rospy.get_param(
             '~goal_frame_id', 'map_laser2d')                 
 
     def initROS(self):
         # topic publishers
-        self.brake_topic_pub = rospy.Publisher(self.brake_topic_name, Int32, queue_size=1)
         self.goal_topic_pub = rospy.Publisher(self.goal_topic_name, PoseStamped, queue_size=1)
         
         # service clients
@@ -102,13 +98,6 @@ class TaskReplanner():
     def trigger_callback(self,msg):
         rospy.loginfo("Node [" + rospy.get_name() + "] Trying to replan it!")
         self.replan_task()    
-
-    def stop(self,isStopping):
-        msg = Int32()
-        msg.data = 2 # RECOVER
-        if isStopping:
-            msg.data = 0 # STOP
-        self.brake_topic_pub.publish(msg)
             
     # we use robot reports to know robot position and state
     def reports_callback(self, msg):
@@ -120,7 +109,6 @@ class TaskReplanner():
                 rospy.sleep(5.1)
                 rospy.loginfo("Node [" + rospy.get_name() + "] Asking for a new one ......................")      
                 self.goalPS.header.stamp = rospy.Time.now()   
-                self.goalPS.header.frame_id = "comemeElPapo"
                 self.goal_topic_pub.publish(self.goalPS)
                 self.goalPS=None
                 rospy.loginfo("Node [" + rospy.get_name() + "] Done")   

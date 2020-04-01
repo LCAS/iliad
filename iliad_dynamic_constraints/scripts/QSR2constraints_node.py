@@ -221,9 +221,13 @@ class DynamicConstraintsNode():
                 inc_x = self.state.position_x - self.prev_state.position_x
                 inc_y = self.state.position_y - self.prev_state.position_y
                 inc_r = np.sqrt((inc_x ** 2) + (inc_y ** 2))
-                self.robot_v = inc_r/inc_t
                 inc_h = self.state.orientation_angle - self.prev_state.orientation_angle
-                self.robot_w = inc_h/inc_t
+                if (inc_t>0):
+                    self.robot_v = inc_r/inc_t
+                    self.robot_w = inc_h/inc_t
+                else:
+                    self.robot_v = 0
+                    self.robot_w = 0
 
                 rospy.logdebug_throttle(5, "Node [" + rospy.get_name() + "] " +
                                         "Robot status: Pose ( " +

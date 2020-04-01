@@ -181,7 +181,7 @@ class TaskCostEvaluator(object):
                     cost = cost/dr2.sum()
                 self.curr_cost_topic_pub.publish(cost)
                 # mfc: using this metric, path cost can increase even if costmap does not change, just because the human happens to be at the end of the path                
-                rospy.loginfo_throttle(2,"["+rospy.get_name()+"] " + "Remaining path cost per meter is: " + str(cost))
+                rospy.logdebug_throttle(2,"["+rospy.get_name()+"] " + "Remaining path cost per meter is: " + str(cost))
             else:
                 rospy.loginfo_throttle(2,"Node [" + rospy.get_name() + "] Too soon for an update")
         
