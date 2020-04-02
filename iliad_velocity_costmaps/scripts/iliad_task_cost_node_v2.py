@@ -16,6 +16,8 @@ from nav_msgs.msg import OccupancyGrid
 from map_msgs.msg import OccupancyGridUpdate
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Pose, PoseStamped, Quaternion
+from visualization_msgs.msg import MarkerArray, Marker
+from matplotlib import cm, colors
 
 from bayes_people_tracker.msg import PeopleTracker
 from orunav_msgs.msg import PoseSteering, ControllerReport, Task
@@ -41,6 +43,17 @@ class TaskCostEvaluator(object):
         self.path_costmap = None
         self.path_costmap_update = None
         self.robotPoseSt = None
+        self.cost = 0
+
+        # For visualization
+        # No cost: white. Then blue, green, yellow, orange, red
+        self.discrete_color = colors.ListedColormap(['blue', 'green','yellow', 'orange'])
+        self.discrete_color.set_over('red')
+        self.discrete_color.set_under('white')
+
+        bounds = [0.1, 5.0, 10.0, 15.0, 19.9]        
+        self.norm = colors.BoundaryNorm(bounds, self.discrete_color.N)
+
         # ................................................................
         # start ros subs/pubs/servs....
         self.initROS()
@@ -53,6 +66,8 @@ class TaskCostEvaluator(object):
         self.path_occ_grid_updates_pub = rospy.Publisher(self.path_occ_grid_topic_name + "_updates", OccupancyGridUpdate, queue_size=1, latch=True)
 
         self.curr_cost_topic_pub = rospy.Publisher(self.curr_cost_topic_name, Float64, queue_size=1, latch=True)
+        self.visual_pub = rospy.Publisher(self.visual_pub_topic_name, MarkerArray, queue_size=1, latch=True)
+
         # service clients
         
         # ... none here
@@ -101,6 +116,14 @@ class TaskCostEvaluator(object):
 
         self.update_publish_period = rospy.get_param('~update_publish_period', 0.05)
 
+        # cost visualization  
+        self.visual_pub_topic_name = rospy.get_param(
+            '~visual_pub_topic_name', '/robot' + str(self.robot_id) + '/qsr/cost_visual')
+
+        # robot frame id
+        self.base_frame_id = rospy.get_param(
+            '~base_frame_id', '/robot' + str(self.robot_id) + '/base_link')
+
     # we subscribe to a pose publisher to get robot position
     def robot_pose_callback(self, msg):
         with self.lock:         
@@ -146,6 +169,7 @@ class TaskCostEvaluator(object):
                 pendingPath = self.active_task.path.path
                 # get part of the path still to be covered
                 i_path      = self.findClosestInPath(pendingPath,self.robotPoseSt)
+                pendingPath = self.active_task.path.path[i_path:]
                 # Resample
                 pendingPath = self.resamplePath(pendingPath, self.costmap.info.resolution)
                 for i,posSteer in enumerate(pendingPath):
@@ -155,11 +179,11 @@ class TaskCostEvaluator(object):
                     self.setCostmapUpdateValue(self.path_costmap, self.path_costmap_update, px, py, val)
                     #self.setCostmapUpdateValue(self.path_costmap, self.path_costmap_update, px, py, 100)
 
-                    # costs are only for points yet to be visited.
-                    if i>i_path:
-                        newPosePath.append((px, py))
-                        newRelCellPath.append((ci,cj))
-                        newCostPath.append(val)  
+                    # # costs are only for points yet to be visited.
+                    # if i>i_path:
+                    newPosePath.append((px, py))
+                    newRelCellPath.append((ci,cj))
+                    newCostPath.append(val)  
 
                 #publish the update         
                 self.path_occ_grid_updates_pub.publish(self.path_costmap_update)
@@ -176,12 +200,13 @@ class TaskCostEvaluator(object):
                 dr1 = np.concatenate(([0], dr), axis=0)
                 dr2 = dr0/2 + dr1/2
                 w = dr2.sum()
-                cost = C.dot(dr2)
+                self.cost = C.dot(dr2)
                 if w>0:
-                    cost = cost/dr2.sum()
-                self.curr_cost_topic_pub.publish(cost)
+                    self.cost = self.cost/dr2.sum()
+                self.curr_cost_topic_pub.publish(self.cost)
+                self.updateVisuals()
                 # mfc: using this metric, path cost can increase even if costmap does not change, just because the human happens to be at the end of the path                
-                rospy.logdebug_throttle(2,"["+rospy.get_name()+"] " + "Remaining path cost per meter is: " + str(cost))
+                rospy.logdebug_throttle(2,"["+rospy.get_name()+"] " + "Remaining path cost per meter is: " + str(self.cost))
             else:
                 rospy.loginfo_throttle(2,"Node [" + rospy.get_name() + "] Too soon for an update")
         
@@ -214,8 +239,6 @@ class TaskCostEvaluator(object):
             newPoseStPath.append(p)
         return  newPoseStPath 
     
-
-
     def findClosestInPath(self,poseSteerPath,robotposeSt):
         # Not the smartest search ...
         dist = 1e10
@@ -345,7 +368,42 @@ class TaskCostEvaluator(object):
         # nx =  dx * np.cos(oa) + dy * np.sin(oa) 
         # ny = -dx * np.sin(oa) + dy * np.cos(oa) 
         return (dx,dy)
-        
+
+    def updateVisuals(self):
+        data = MarkerArray()
+
+        # 1 text
+        text = Marker()
+        text.id = 1
+        text.type = Marker.TEXT_VIEW_FACING
+        text.header.frame_id = self.base_frame_id
+        text.header.stamp = rospy.Time.now()
+        text.ns = "path_cost"
+        text.action = Marker.ADD
+        text.pose.orientation.w = 1.0
+
+        text.pose.position.x = 0
+        text.pose.position.y = 0
+        text.pose.position.z = 1.2
+        # TEXT_VIEW_FACING markers use only the z component of scale, specifies the height of an uppercase "A".
+        text.scale.z = 0.45
+
+        text.text = 'Cost: {0:.2f}'.format(self.cost) 
+        (r,g,b,i) = self.getColor(self.cost)
+        text.color.r = r
+        text.color.g = g
+        text.color.b = b
+        text.color.a = 1.0
+        data.markers.append(text)
+
+        # Finally publish .......................
+        self.visual_pub.publish(data)
+    
+    def getColor(self, x):
+        (r,g,b,i) = self.discrete_color(self.norm(x))
+        return (r,g,b,i)
+
+
 if __name__ == "__main__":
     rospy.init_node("task_cost_evaluator")#, log_level=rospy.DEBUG)
      # Go to class functions that do all the heavy lifting. Do error checking.

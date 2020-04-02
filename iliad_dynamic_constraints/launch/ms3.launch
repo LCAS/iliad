@@ -98,7 +98,7 @@
         <param name="update_publish_period"               type = "double" value="0.05"/>
 
         <!-- robot center to fork edge distance -->
-        <param name="d2"                                  type = "double" value="0.5"/>  
+        <param name="d2"                                  type = "double" value="0.65"/>  
         <!-- robot center to front laser distance -->
         <param name="d1"                                  type = "double" value="1.5"/>
         <!-- truck width -->
