@@ -16,6 +16,7 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from message_filters import Subscriber
 from nav_msgs.msg import OccupancyGrid
 from map_msgs.msg import OccupancyGridUpdate
+from std_msgs.msg import String
 from geometry_msgs.msg import Pose, PointStamped, PoseStamped, Quaternion
 
 from bayes_people_tracker.msg import PeopleTracker
@@ -25,13 +26,14 @@ from threading import Lock
 #from scipy.sparse import *
 from matplotlib.path import Path
 
+situation = None
+
 class ConstraintsCostmapV2(object):
     """
         Here lies the costmap logic.
     """
 
-    def __init__(self, ref_costmap, update_center_x, update_center_y, update_width, update_height, d2, d1, w, blind_offset ):
-
+    def __init__(self, ref_costmap, update_center_x, update_center_y, update_width, update_height, d2, d1, w, blind_offset ):        
         # Robot shape: This is a rectangle, but we can use other stuff 
         self.d2 = d2  # robot center to fork edge distance
         self.d1 = d1  # robot center to front laser distance
@@ -201,6 +203,8 @@ class ConstraintsCostmapV2(object):
         return (i,j)
 
     def get_map_update(self):
+        global situation
+        rospy.loginfo("["+rospy.get_name()+"] " + "Situation: " + str(situation))
         # timestamping ...
         self.update.header.seq = self.update.header.seq + 1
         self.update.header.stamp = rospy.Time.now()
@@ -212,6 +216,7 @@ class ConstraintsCostmapV2(object):
                 # get human pose and cell
                 xh = self.local_human_pose.pose.position.x 
                 yh = self.local_human_pose.pose.position.y
+                ha = self.get_rotation(self.local_human_pose.pose.orientation)
                 #ah = self.get_rotation(self.local_human_pose.pose.orientation)
                 #(ih,jh,valid) = self.pose2cell(xh,yh)
 
@@ -236,7 +241,8 @@ class ConstraintsCostmapV2(object):
 
                 # distance to human in each cell
                 dh = np.sqrt(np.power(self.xx-xh,2)+np.power(self.yy-yh,2))
-
+                
+                
                 # distance to robotin each cell
                 dr = np.sqrt(np.power(self.xx-xr,2)+np.power(self.yy-yr,2))
 
@@ -263,10 +269,47 @@ class ConstraintsCostmapV2(object):
                 cd = np.interp(cd, (cd.min(), cd.max()), (0, 1))
 
                 # combine costs
-                c = ca * cd
+                c_no_sit = ca * cd
 
                 # remap 0-100
-                c = np.interp(c, (c.min(), c.max()), (0, 100))
+                c_no_sit = np.interp(c_no_sit, (c_no_sit.min(), c_no_sit.max()), (0, 100))
+
+                if situation == None:
+                    c = c_no_sit
+                else:
+                    # angle between human and any point
+                    ah = np.arctan2(self.yy - yh, self.xx - xh)
+
+                    c = ah
+                    for row in range(0,len(ah)):
+                        for cell in range(0,len(ah[row])):
+                            cell_to_human_angle = np.degrees(ah[row][cell])
+                            # rospy.loginfo("["+rospy.get_name()+"] " + "Cell angle: "+str(cell_to_human_angle))
+                            
+                            angle_diff = (cell_to_human_angle - np.degrees(ha) + 180 + 360) % 360 - 180
+                            # rospy.loginfo("["+rospy.get_name()+"] " + "Diff. between cell angle and human angle: "+str(angle_diff))
+                            lower_angle_lim = 0
+                            upper_angle_lim = 0
+                            
+                            if situation == "PBL" or situation == "ROTR":
+                                lower_angle_lim = 0
+                                upper_angle_lim = 90
+                            elif situation == "PBR" or situation == "ROTL":
+                                lower_angle_lim = -90
+                                upper_angle_lim = 0
+                            elif situation == "PC":
+                                lower_angle_lim = -45
+                                upper_angle_lim = 45
+                            
+                            if lower_angle_lim <= angle_diff <= upper_angle_lim:
+                                c[row][cell] = 100
+                            else:
+                                c[row][cell] = 0
+
+                    for row in range(0,len(c)):
+                        for cell in range(0,len(c[row])):
+                            if c[row][cell] != 100:
+                                c[row][cell] += c_no_sit[row][cell]
 
                 # avoid overlapping costs over the robot
                 robot_polygon = self.getRobotPolyAt(xr,yr,ar)
@@ -337,6 +380,8 @@ class IliadConstraintsCostmapServerV2(object):
 
         rospy.Subscriber(self.map_topic_name, OccupancyGrid, self.map_callback, queue_size=1)
 
+        rospy.Subscriber(self.situation_topic_name, String, self.sit_callback, queue_size=1)
+
         self.listenerBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.listenerBuffer)
         
@@ -348,6 +393,17 @@ class IliadConstraintsCostmapServerV2(object):
         rospy.Timer(rospy.Duration(self.update_publish_period), self.update_map, oneshot=False)
 
 
+    def sit_callback(self, sit_string):
+        global situation
+        
+        if str(sit_string.data) in ["PBL", "PBR", "ROTL", "ROTR", "PC"]:
+            rospy.loginfo("["+rospy.get_name()+"] " + "Situation: " + str(sit_string.data))
+            situation = str(sit_string.data)
+        else:
+            situation = None
+            rospy.loginfo("["+rospy.get_name()+"] " + "Situation: Unmodelled")
+        
+    
     def map_callback(self, map):
         self.map = map
         if not self.gotMap:
@@ -380,6 +436,10 @@ class IliadConstraintsCostmapServerV2(object):
         # current robot position from tf tree
         self.robot_pose_topic_name = rospy.get_param(
             '~robot_pose_topic_name', '/robot' + str(self.robot_id) + '/robot_poseST')
+
+        # current robot position from tf tree
+        self.situation_topic_name = rospy.get_param(
+            '~situation_topic_name', '/robot' + str(self.robot_id) + '/situation_predictions')
 
         # costmap update configuration.
         self.update_center_x = rospy.get_param('~update_center_x', 15.3)
