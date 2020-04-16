@@ -16,7 +16,7 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from message_filters import Subscriber
 from nav_msgs.msg import OccupancyGrid
 from map_msgs.msg import OccupancyGridUpdate
-from std_msgs.msg import String
+from std_msgs.msg import String, Float64MultiArray
 from geometry_msgs.msg import Pose, PointStamped, PoseStamped, Quaternion
 
 from bayes_people_tracker.msg import PeopleTracker
@@ -74,7 +74,7 @@ class ConstraintsCostmapV2(object):
         self.local_human_pose = None
         self.local_robot_pose = None
         self.situation = None
-
+        self.angle_bounds = np.array([0, 2.0*np.pi])
         # Updates will be our way of adding new data
         self.update = OccupancyGridUpdate()
         self.update.header = self.current_occ_grid.header
@@ -131,6 +131,10 @@ class ConstraintsCostmapV2(object):
             if not (robotPoseSt == None):
                 self.local_robot_pose = robotPoseSt            
                 #self.printPoseSt(robotPoseSt, "robot pose received")
+
+    def update_angle_bounds(self, angle_bounds):
+        with self.lock: 
+                self.angle_bounds = angle_bounds            
 
     def update_situation(self, situation):
         with self.lock: 
@@ -284,26 +288,46 @@ class ConstraintsCostmapV2(object):
                     c = c_no_sit
                 else:
                     
-                    if self.situation == "PBL" or self.situation == "ROTR":
+                    if self.situation == "PBL":
                         # allow left side of human ...
                         lower_angle_lim = 0
                         upper_angle_lim = np.pi
-                    elif self.situation == "PBR" or self.situation == "ROTL":
+                    elif self.situation == "ROTL":
+                        # allow rigth side of human ...
+                        lower_angle_lim = 0
+                        upper_angle_lim = 3.0*np.pi/2.0
+                    elif self.situation == "PBR":
                         # allow rigth side of human ...
                         lower_angle_lim = np.pi
+                        upper_angle_lim = 2.0*np.pi
+                    elif self.situation == "ROTR":
+                        # allow rigth side of human ...
+                        lower_angle_lim = np.pi/2.0
                         upper_angle_lim = 2.0*np.pi
                     elif self.situation == "PC":
                         # forbide cone in front of human ...
                         lower_angle_lim = np.pi/4.0
-                        upper_angle_lim = 13.0*np.pi/4.0
+                        upper_angle_lim = 7.0*np.pi/4.0
+                    elif self.situation == "DEBUG":
+                        lower_angle_lim = self.angle_bounds[0]
+                        upper_angle_lim = self.angle_bounds[1]
 
                     # human orientation is in -pi,pi range...
-                    angle_rel = np.mod(ahp  - np.mod(ah , 2*np.pi), 2*np.pi )
+                    # centered aroun human heading
+                    #angle_rel = np.mod(ahp - np.mod(ah , 2*np.pi)  , 2*np.pi )
+
+                    # angle centered around robot human line
+                    angle_rel = np.mod(-arg, 2*np.pi )
+
+                    # #use this cost to see what angle are we using
+                    # c =  np.interp(angle_rel, (angle_rel.min(), angle_rel.max()), (0, 100 ))
+                    
                     c =  c_no_sit
                     forbid_indexes = (angle_rel <= lower_angle_lim ) | (angle_rel >= upper_angle_lim)
-                    #c[ forbid_indexes ] = 100
-                    
-                    cd_strong = np.exp(-np.power(0.01*(dh),2))
+                    c[ forbid_indexes ] = 100
+
+                    # use a changing cost for forbidden area                    
+                    cd_strong = np.exp(-np.power(0.1*(dh),2))
                     cd_strong = np.interp(cd_strong, (cd_strong.min(), cd_strong.max()), (0, 100 ))
                     c[ forbid_indexes ] =  cd_strong[forbid_indexes] 
 
@@ -378,6 +402,8 @@ class IliadConstraintsCostmapServerV2(object):
 
         rospy.Subscriber(self.situation_topic_name, String, self.sit_callback, queue_size=1)
 
+        rospy.Subscriber(self.angle_bounds_topic_name, Float64MultiArray, self.angle_bounds_callback, queue_size=1)
+
         self.listenerBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.listenerBuffer)
         
@@ -389,14 +415,32 @@ class IliadConstraintsCostmapServerV2(object):
         rospy.Timer(rospy.Duration(self.update_publish_period), self.update_map, oneshot=False)
 
 
+    def angle_bounds_callback(self, msg):
+        coefs = msg.data
+        if len(coefs) == 2:
+            if (float(coefs[0]) < float(coefs[1])):
+                self.angle_bounds = np.array(coefs) * np.pi/180
+                try:
+                    self.icc.update_angle_bounds(self.angle_bounds)
+                except AttributeError as ae:
+                    # first msg may arrive even before creating the map....
+                    pass
+                                
+            else:
+                rospy.logerr("Node [" + rospy.get_name() + "] Lower angle bound bigger than higher one. (" + str(
+                    coefs[0])+") >= (" + str(coefs[1])+") ")
+        else:
+            rospy.logerr("Node [" + rospy.get_name() +
+                         "] More than 2 tangential vel bounds provided. (" + str(len(coefs))+") ")
+
     def sit_callback(self, sit_string):
       
-        if str(sit_string.data) in ["PBL", "PBR", "ROTL", "ROTR", "PC"]:
+        if str(sit_string.data) in ["PBL", "PBR", "ROTL", "ROTR", "PC", "DEBUG"]:
             #rospy.loginfo("["+rospy.get_name()+"] " + "Situation: " + str(sit_string.data))
             self.situation = str(sit_string.data)
         else:
             self.situation = None
-            rospy.warn("["+rospy.get_name()+"] " + "Situation: Unmodelled")
+            rospy.logwarn("["+rospy.get_name()+"] " + "Situation: Unmodelled")
 
         try:
             self.icc.update_situation(self.situation)
@@ -426,6 +470,10 @@ class IliadConstraintsCostmapServerV2(object):
         # Output Costmap topic
         self.costmap_topic_name = rospy.get_param(
             '~costmap_topic_name', '/robot'+str(self.robot_id)+'/qsr/constraints_costmap')
+
+        # angle bounds for debug
+        self.angle_bounds_topic_name = rospy.get_param(
+            '~angle_bounds_topic_name', '/robot'+str(self.robot_id)+'/angle_bounds')
 
         # Input map topic
         self.map_topic_name = rospy.get_param(
