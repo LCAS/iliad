@@ -26,7 +26,6 @@ from threading import Lock
 #from scipy.sparse import *
 from matplotlib.path import Path
 
-situation = None
 
 class ConstraintsCostmapV2(object):
     """
@@ -74,7 +73,8 @@ class ConstraintsCostmapV2(object):
 
         self.local_human_pose = None
         self.local_robot_pose = None
-        
+        self.situation = None
+
         # Updates will be our way of adding new data
         self.update = OccupancyGridUpdate()
         self.update.header = self.current_occ_grid.header
@@ -131,6 +131,10 @@ class ConstraintsCostmapV2(object):
             if not (robotPoseSt == None):
                 self.local_robot_pose = robotPoseSt            
                 #self.printPoseSt(robotPoseSt, "robot pose received")
+
+    def update_situation(self, situation):
+        with self.lock: 
+                self.situation = situation 
 
     def getRobotPolyAt(self,x,y,a):
         # translate and rotate to given reference        
@@ -203,8 +207,7 @@ class ConstraintsCostmapV2(object):
         return (i,j)
 
     def get_map_update(self):
-        global situation
-        rospy.loginfo("["+rospy.get_name()+"] " + "Situation: " + str(situation))
+        #rospy.loginfo("["+rospy.get_name()+"] " + "Situation: " + str(self.situation))
         # timestamping ...
         self.update.header.seq = self.update.header.seq + 1
         self.update.header.stamp = rospy.Time.now()
@@ -216,8 +219,9 @@ class ConstraintsCostmapV2(object):
                 # get human pose and cell
                 xh = self.local_human_pose.pose.position.x 
                 yh = self.local_human_pose.pose.position.y
-                ha = self.get_rotation(self.local_human_pose.pose.orientation)
-                #ah = self.get_rotation(self.local_human_pose.pose.orientation)
+                ah = self.get_rotation(self.local_human_pose.pose.orientation)
+                # there is a lot of error in estimations of human orientation. This may be noisy ...!
+
                 #(ih,jh,valid) = self.pose2cell(xh,yh)
 
                 # get robot position
@@ -246,14 +250,16 @@ class ConstraintsCostmapV2(object):
                 # distance to robotin each cell
                 dr = np.sqrt(np.power(self.xx-xr,2)+np.power(self.yy-yr,2))
 
+                # angle between human and any point
+                ahp = np.arctan2(self.yy - yh, self.xx - xh)
                 # # angle between robot and any point
-                # aa = np.arctan2(yy-yr,xx-xr)
-                # # angle between human and any point
-                # ah= np.arctan2(yh-yr,xh-xr)
-                # using this, we had some rounding errors
-                # arg = (aa-ah)
-
-                # same as above, but avoiding two arctans
+                # arp = np.arctan2(yy-yr,xx-xr)
+                # # angle between human and robot
+                # ahr = np.arctan2(yh-yr,xh-xr)
+                # # angle between human robot and any point
+                # arg = (arp - ahr)
+                # # using that aproach we had some rounding errors
+                # # this is the same as above, but avoiding computing two arctans
                 (a1, a2) = (self.yy-yr,self.xx-xr)
                 (b1, b2)  = (yh-yr,xh-xr)                
                 arg = np.arctan2(  a2*b1 - a1*b2, a1*b1+a2*b2 )
@@ -274,42 +280,32 @@ class ConstraintsCostmapV2(object):
                 # remap 0-100
                 c_no_sit = np.interp(c_no_sit, (c_no_sit.min(), c_no_sit.max()), (0, 100))
 
-                if situation == None:
+                if self.situation == None:
                     c = c_no_sit
                 else:
-                    # angle between human and any point
-                    ah = np.arctan2(self.yy - yh, self.xx - xh)
+                    
+                    if self.situation == "PBL" or self.situation == "ROTR":
+                        # allow left side of human ...
+                        lower_angle_lim = 0
+                        upper_angle_lim = np.pi
+                    elif self.situation == "PBR" or self.situation == "ROTL":
+                        # allow rigth side of human ...
+                        lower_angle_lim = np.pi
+                        upper_angle_lim = 2.0*np.pi
+                    elif self.situation == "PC":
+                        # forbide cone in front of human ...
+                        lower_angle_lim = np.pi/4.0
+                        upper_angle_lim = 13.0*np.pi/4.0
 
-                    c = ah
-                    for row in range(0,len(ah)):
-                        for cell in range(0,len(ah[row])):
-                            cell_to_human_angle = np.degrees(ah[row][cell])
-                            # rospy.loginfo("["+rospy.get_name()+"] " + "Cell angle: "+str(cell_to_human_angle))
-                            
-                            angle_diff = (cell_to_human_angle - np.degrees(ha) + 180 + 360) % 360 - 180
-                            # rospy.loginfo("["+rospy.get_name()+"] " + "Diff. between cell angle and human angle: "+str(angle_diff))
-                            lower_angle_lim = 0
-                            upper_angle_lim = 0
-                            
-                            if situation == "PBL" or situation == "ROTR":
-                                lower_angle_lim = 0
-                                upper_angle_lim = 90
-                            elif situation == "PBR" or situation == "ROTL":
-                                lower_angle_lim = -90
-                                upper_angle_lim = 0
-                            elif situation == "PC":
-                                lower_angle_lim = -45
-                                upper_angle_lim = 45
-                            
-                            if lower_angle_lim <= angle_diff <= upper_angle_lim:
-                                c[row][cell] = 100
-                            else:
-                                c[row][cell] = 0
-
-                    for row in range(0,len(c)):
-                        for cell in range(0,len(c[row])):
-                            if c[row][cell] != 100:
-                                c[row][cell] += c_no_sit[row][cell]
+                    # human orientation is in -pi,pi range...
+                    angle_rel = np.mod(ahp  - np.mod(ah , 2*np.pi), 2*np.pi )
+                    c =  c_no_sit
+                    forbid_indexes = (angle_rel <= lower_angle_lim ) | (angle_rel >= upper_angle_lim)
+                    #c[ forbid_indexes ] = 100
+                    
+                    cd_strong = np.exp(-np.power(0.01*(dh),2))
+                    cd_strong = np.interp(cd_strong, (cd_strong.min(), cd_strong.max()), (0, 100 ))
+                    c[ forbid_indexes ] =  cd_strong[forbid_indexes] 
 
                 # avoid overlapping costs over the robot
                 robot_polygon = self.getRobotPolyAt(xr,yr,ar)
@@ -326,7 +322,7 @@ class ConstraintsCostmapV2(object):
                                             
                 # ..........................................
                 dur = rospy.Time.now() - now
-                rospy.logdebug("Node [" + rospy.get_name() + "] " +
+                rospy.logdebug_throttle(5,"Node [" + rospy.get_name() + "] " +
                                 "Map update built in (" + str(dur.to_sec()) + ") secs"
                                 )
 
@@ -394,14 +390,19 @@ class IliadConstraintsCostmapServerV2(object):
 
 
     def sit_callback(self, sit_string):
-        global situation
-        
+      
         if str(sit_string.data) in ["PBL", "PBR", "ROTL", "ROTR", "PC"]:
-            rospy.loginfo("["+rospy.get_name()+"] " + "Situation: " + str(sit_string.data))
-            situation = str(sit_string.data)
+            #rospy.loginfo("["+rospy.get_name()+"] " + "Situation: " + str(sit_string.data))
+            self.situation = str(sit_string.data)
         else:
-            situation = None
-            rospy.loginfo("["+rospy.get_name()+"] " + "Situation: Unmodelled")
+            self.situation = None
+            rospy.warn("["+rospy.get_name()+"] " + "Situation: Unmodelled")
+
+        try:
+            self.icc.update_situation(self.situation)
+        except AttributeError as ae:
+            # first msg may arrive even before creating the map....
+            pass
         
     
     def map_callback(self, map):
@@ -412,6 +413,7 @@ class IliadConstraintsCostmapServerV2(object):
             rospy.loginfo("["+rospy.get_name()+"] " + "Costmap created. Publishing initial Map.")
             self.costmap_topic_pub.publish(self.icc.get_map())
         self.gotMap = True
+
     # .............................................................................................................
     def update_map(self, event):
         if self.gotMap:
