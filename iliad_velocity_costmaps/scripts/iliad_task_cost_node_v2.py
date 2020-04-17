@@ -162,7 +162,7 @@ class TaskCostEvaluator(object):
 
     def publish_updates(self,event):        
         with self.lock: 
-            if ((not self.active_task == None) and (not self.costmap_update == None) and (not self.path_costmap_update == None) and (not self.robotPoseSt == None)):
+            if ((not self.active_task == None) and (not self.costmap == None)  and (not self.costmap_update == None) and (not self.path_costmap_update == None) and (not self.robotPoseSt == None)):
                 newPosePath = []
                 newRelCellPath = []
                 newCostPath = []

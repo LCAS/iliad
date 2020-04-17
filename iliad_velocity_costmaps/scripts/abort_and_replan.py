@@ -12,12 +12,14 @@ to update task with alternative task.
 
 
 import rospy
+import json
 from orunav_msgs.srv import  UpdateTask, UpdateTaskRequest, UpdateTaskResponse
 from orunav_msgs.srv import  ComputeTask, ComputeTaskRequest, ComputeTaskResponse
 from orunav_msgs.msg import Operation
 from orunav_msgs.msg import Task
 from orunav_msgs.msg import ControllerReport
 from std_msgs.msg import Empty
+from visualization_msgs.msg import Marker
 import numpy as np
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from std_msgs.msg import Float64MultiArray
@@ -37,7 +39,15 @@ class TaskReplanner():
         # ................................................................
         # Other config params and atributes
         self.state = None
-        self.controller_status = None
+        self.controller_status = None        
+        self.status_dict = dict()
+        self.status_dict['VehicleState'] ='NONE'
+        self.status_dict['ControllerState'] ='NONE'
+        self.status_dict['ForkState'] ='NONE'
+        self.status_dict['ControlStatus'] ='NONE'
+        self.status_dict['StartOperation'] ='NONE'
+        self.status_dict['GoalOperation'] ='NONE'
+
         self.active_task = None
         self.goalPS = None
 
@@ -64,12 +74,13 @@ class TaskReplanner():
         self.reports_topic_name = rospy.get_param(
             '~reports_topic_name', '/robot' + str(self.robot_id) + '/control/controller/reports')
 
-        self.goal_topic_name = rospy.get_param(
-            '~goal_topic_name', '/robot' + str(self.robot_id) + '/goal')
+        self.goal_topic_name = rospy.get_param('~goal_topic_name', '/robot' + str(self.robot_id) + '/goal')
  
         # task frame id
-        self.goal_frame_id = rospy.get_param(
-            '~goal_frame_id', 'map_laser2d')                 
+        self.goal_frame_id = rospy.get_param('~goal_frame_id', 'map_laser2d')                 
+
+        # we get vehicle status from here
+        self.visualization_marker_topic_name = rospy.get_param('~visualization_marker_topic_name',  '/robot' + str(self.robot_id) + '/visualization_marker')
 
     def initROS(self):
         # topic publishers
@@ -89,6 +100,24 @@ class TaskReplanner():
         rospy.Subscriber(self.curr_task_topic_name, Task, self.curr_task_callback, queue_size=1)
         rospy.Subscriber(self.reports_topic_name, ControllerReport, self.reports_callback, queue_size=1)
         rospy.Subscriber(self.trigger_topic_name, Empty, self.trigger_callback, queue_size=1)
+        rospy.Subscriber(self.visualization_marker_topic_name, Marker, self.visualization_marker_callback, queue_size=1)
+
+
+    def visualization_marker_callback(self,msg):
+        #  /robot4/visualization_marker [visualization_msgs/Marker]
+        # ns: "state_str"
+        # text: "[VehicleState] : WAITING_FOR_TASK\n[ControllerState] : WAITING\n[ForkState] : FORK_POSITION_UNKNOWN\n\
+        #   [ControlStatus] : WAIT\n[StartOperation] : NO_OPERATION\n[GoalOperation] : NO_OPERATION"
+        # mesh_resource: ''
+        if ("state_str" in msg.ns):
+            status = msg.text.split('\n')
+            if (len(status) == 6):
+                text_dict = msg.text.replace('\n','\", ')
+                text_dict = text_dict.replace('[','\"')
+                text_dict = text_dict.replace(']','\"')
+                text_dict = text_dict.replace(': ',': \"')
+                text_dict = '{'+ text_dict + '\"}'
+                self.status_dict = json.loads(text_dict)
 
     def curr_task_callback(self,msg):
         self.active_task = msg
@@ -103,6 +132,10 @@ class TaskReplanner():
     def reports_callback(self, msg):
             self.state = msg.state
             self.controller_status = msg.status
+
+            rospy.loginfo_throttle(1,"Node [" + rospy.get_name() + "] \n- Vehicle State [" + self.status_dict['VehicleState'] + "]" +
+                                                            "\n- Controller State [" + self.status_dict['ControllerState'] + "]" +
+                                                            "\n- Control  Status [" + self.status_dict['ControlStatus'] + "]"    )
 
             if (self.controller_status == 1) and (self.goalPS!=None):
                 rospy.loginfo("Node [" + rospy.get_name() + "] Goal to be send in some seconds ...")   
@@ -143,14 +176,16 @@ class TaskReplanner():
             # where are we?
             curr_index = self.findClosestInPath(self.active_task.path.path)
             index_offset = 5
-            end_index = min(curr_index+index_offset,len(self.active_task.path.path)-1)
-            req.task.path.path = req.task.path.path[:end_index]
+            end_index = min(curr_index+index_offset,len(self.active_task.path.path))
+            req.task.path.path = req.task.path.path[:(end_index)]
             req.task.target.goal = req.task.path.path[-1]
 
             req.task.update = True
-            req.task.abort = True
+            # abort does not really work... we just update to a very close trajectory...
+            req.task.abort = False
            
             try:
+                rospy.loginfo("Node [" + rospy.get_name() + "] Truncating task ("+str(end_index-curr_index)+") points ahead")  
                 ans = self.update_task_srv_px.call(req)
                 if ans.result != 0:
                     rospy.logerr("Node [" + rospy.get_name() + "] Abort task result was FAILED: "+str(ans.result))   
