@@ -3,7 +3,7 @@
 
 
 roslaunch iliad_base_simulation iliad_sim_ncfm_no_human.launch gazeboGui:=true rviz_config_file:=`rospack find nav_simulation`/rviz/iliad_cititruck_dwa_nav.rviz
-roslaunch iliad_dynamic_constraints ms3.launch robot_id:=1
+roslaunch iliad_hrsi ms3.launch robot_id:=1
 rosrun tf static_transform_publisher 0 0 0 0 0 0 map map_laser2d 100
 roslaunch nav_simulation move_base_dwa.launch 
 

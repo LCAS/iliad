@@ -9,7 +9,7 @@
     <!-- Using other values requires some digging ... -->
     <arg name="robot_id" value="1"/>
 
-    <arg name="rviz_config_file" value="$(find iliad_dynamic_constraints)/cfg/test_constraints.rviz"/>
+    <arg name="rviz_config_file" value="$(find iliad_hrsi)/cfg/test_constraints.rviz"/>
 
     <arg name="scenario_id" default="1"/>
     <!-- scenario_id == 1 Robot crossess left of human         -->
@@ -38,7 +38,7 @@
     </include>
 
     <!-- NODE UNDER TEST
-    <include file="$(find iliad_dynamic_constraints)/launch/iliad_dynamic_constraints.launch">
+    <include file="$(find iliad_hrsi)/launch/iliad_hrsi.launch">
       <arg name="robot_id" value="$(arg robot_id)"/>
     </include>
 -->

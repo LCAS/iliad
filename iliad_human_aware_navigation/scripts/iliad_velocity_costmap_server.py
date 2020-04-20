@@ -12,13 +12,13 @@ import rospy
 import numpy as np
 from message_filters import Subscriber, ApproximateTimeSynchronizer, Cache
 from bayes_people_tracker.msg import PeopleTracker
-#from iliad_velocity_costmaps.iliad_costmap_creator import IliadCostmapCreator
+#from iliad_human_aware_navigation.iliad_costmap_creator import IliadCostmapCreator
 from std_msgs.msg import String
 
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import PoseStamped, Vector3Stamped
 from dynamic_reconfigure.server import Server as DynServer
-from iliad_velocity_costmaps.cfg import VelocityCostmapsConfig
+from iliad_human_aware_navigation.cfg import VelocityCostmapsConfig
 from visualization_msgs.msg import Marker
 from tf import TransformListener
 import tf2_geometry_msgs
@@ -351,7 +351,7 @@ class IliadVelocityCostmapServer(object):
         
         # this hardcoded should never be used ...
         self.qtc_rules_file = rospy.get_param(
-            '~qtc_rules_file', '/home/manolofc/workspace/ms3/src/iliad_velocity_costmaps/cfg/rules_qtc.yaml')
+            '~qtc_rules_file', '/home/manolofc/workspace/ms3/src/iliad_human_aware_navigation/cfg/rules_qtc.yaml')
         
         # tranform tf_timeout
         timeout = rospy.get_param('~tf_timeout', 2)

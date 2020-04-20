@@ -89,7 +89,7 @@
       </node>
 
 
-      <node name="QSRview" pkg="iliad_dynamic_constraints" type="QTCplot.py" output="screen">
+      <node name="QSRview" pkg="iliad_hrsi" type="QTCplot.py" output="screen">
         <param name="robot_id" value="$(arg robot_id)"/>
         
         <!--  peopletracker(bayes, from STRANDS) OR trackedpersons (SPENCER) -->

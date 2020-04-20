@@ -24,7 +24,7 @@
     <!-- I assume ms3.launch is running to provide all data -->
     <group ns="$(arg prefix)/qsr">
 
-      <node pkg="iliad_velocity_costmaps" type="iliad_constraints_costmap_v0.py" name="constraints_costmap_server" output="screen" respawn="true">
+      <node pkg="iliad_human_aware_navigation" type="iliad_constraints_costmap_v0.py" name="constraints_costmap_server" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
 
         <param name="costmap_topic_name"                  type = "string" value= "$(arg costmap_topic_name)"/>
@@ -34,7 +34,7 @@
         <param name="human_tracking_topic_name"           type = "string"   value="$(arg ppl_topic)"/>
       </node>
 
-      <node pkg="iliad_velocity_costmaps" type="iliad_task_cost_node.py" name="task_cost_node" output="screen" respawn="true">
+      <node pkg="iliad_human_aware_navigation" type="iliad_task_cost_node.py" name="task_cost_node" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
 
         <param name="reports_topic_name"               type = "string" value= "$(arg reports_topic_name)"/>

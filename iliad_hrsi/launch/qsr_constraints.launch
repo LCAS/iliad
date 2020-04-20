@@ -15,7 +15,7 @@
     <!-- node itself -->
     <group ns="$(arg prefix)">
 
-      <node name="QSR2VW" pkg="iliad_dynamic_constraints" type="QSR2constraints_node.py" output="screen" if="$(arg use_qsr)">
+      <node name="QSR2VW" pkg="iliad_hrsi" type="QSR2constraints_node.py" output="screen" if="$(arg use_qsr)">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="velocity_constraints_topic" value="/$(arg prefix)/velocity_constraints"/>
 

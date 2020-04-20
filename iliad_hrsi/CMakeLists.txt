@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(iliad_dynamic_constraints)
+project(iliad_hrsi)
 
 find_package(catkin REQUIRED COMPONENTS
 #  dynamic_reconfigure

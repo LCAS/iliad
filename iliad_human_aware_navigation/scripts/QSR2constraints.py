@@ -1,5 +1,7 @@
 """
 
+THIS IS NOT A ROS NODE BUT AN PROBLEM FORMULATION
+
 # Velocity constraints for human aware local avoidance
 
 ## Goal.

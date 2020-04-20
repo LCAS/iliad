@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>iliad_velocity_costmaps</name>
+  <name>iliad_human_aware_navigation</name>
   <version>0.2.4</version>
   <description>The iliad_velocity_costmap package
 

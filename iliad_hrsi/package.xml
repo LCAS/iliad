@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>iliad_dynamic_constraints</name>
+  <name>iliad_hrsi</name>
   <version>0.0.1</version>
   <description>
   Contains several works regarding local alterations of speeds or constraints. 
