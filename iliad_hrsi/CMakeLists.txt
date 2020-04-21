@@ -2,44 +2,53 @@ cmake_minimum_required(VERSION 2.8.3)
 project(iliad_hrsi)
 
 find_package(catkin REQUIRED COMPONENTS
-#  dynamic_reconfigure
-  roscpp
   rospy
+  bayes_people_tracker  
+  tf
+  tf2_ros
   orunav_msgs
-  driver_base
+  geometry_msgs
+  std_msgs
+  spencer_tracking_msgs
+  visualization_msgs
+  tf2_geometry_msgs
 )
 
-#generate_dynamic_reconfigure_options(
-#   cfg/constraintSettings.cfg
-#)
 
 catkin_package(
-#   INCLUDE_DIRS include
-   CATKIN_DEPENDS roscpp rospy orunav_msgs #dynamic_reconfigure 
+  CATKIN_DEPENDS 
+  rospy
+  bayes_people_tracker  
+  tf
+  tf2_ros
+  orunav_msgs
+  geometry_msgs
+  std_msgs
+  spencer_tracking_msgs
+  visualization_msgs
+  tf2_geometry_msgs
 )
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-#add_executable(em_node src/em_node.cpp)
-
-#add_dependencies(em_node ${PROJECT_NAME}_gencfg ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-#target_link_libraries(em_node
-#   ${catkin_LIBRARIES}
-# )
-
-#install(TARGETS em_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
-
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
-  scripts/dynamic_constraints_node.py
+  scripts/QTC_generator.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(PROGRAMS
+  scripts/QTCplot.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(PROGRAMS
+  scripts/spencer_to_bayes.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+  PATTERN ".svn" EXCLUDE
 )

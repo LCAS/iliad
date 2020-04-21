@@ -11,28 +11,27 @@
     <arg name="prefix" value="robot$(arg robot_id)"/>
 
     <!-- args from hri -->
-    <arg name="map_frame_id"              default="/map_laser2d"/>
-    <arg name="map_topic_name"            default="/maps/map_laser2d"/>
-    <arg name="robot_base_frame_id"       default="$(arg prefix)/base_link"/>
-    <arg name="robotST_topic"             default = "/$(arg prefix)/robot_poseST"/>
-    <arg name="qtc_points_topic_name"     default = "/$(arg prefix)/qsr/qtc_points"/>
+    <arg name="map_frame_id"          default="/map_laser2d"/>
+    <arg name="map_topic_name"        default="/maps/map_laser2d"/>
+    <arg name="robot_base_frame_id"   default="$(arg prefix)/base_link"/>
 
-    <arg name="ppl_topic"                 default="/$(arg prefix)/qsr/people_tracker/positions"/>
-    <arg name="person_topic"              default="/$(arg prefix)/human_perception/tracked_persons"/>
-    <arg name="dperson_topic"             default="/$(arg prefix)/human_perception/detected_persons"/>
+    <arg name="robotST_topic"         default = "/$(arg prefix)/robot_poseST"/>
+    <arg name="qtc_points_topic_name" default = "/$(arg prefix)/qsr/qtc_points"/>
+
+    <arg name="ppl_topic"             default="/$(arg prefix)/qsr/people_tracker/positions"/>
+    <arg name="person_topic"          default="/$(arg prefix)/human_perception/tracked_persons"/>
+    <arg name="dperson_topic"         default="/$(arg prefix)/human_perception/detected_persons"/>
     
-    <arg name="qtc_state_topic"           default="/$(arg prefix)/qsr/qtc_state"/>
+    <arg name="qtc_state_topic"       default="/$(arg prefix)/qsr/qtc_state"/>
         
-    <arg name="vis_marker_topic"          default = "/$(arg prefix)/qsr/visualization_marker"/>
-           
+    <arg name="vis_marker_topic"      default = "/$(arg prefix)/qsr/visualization_marker"/>
+    
     <arg name="costmap_topic_name"        default = "/$(arg prefix)/qsr/constraints_costmap"/>
     <arg name="reports_topic_name"        default = "/$(arg prefix)/control/controller/reports"/>
     <arg name="task_topic_name"           default = "/$(arg prefix)/control/task"/>
 
     <arg name="path_occ_grid_topic_name"  default = "/$(arg prefix)/qsr/constraints_costmap_path"/>
     <arg name="curr_cost_topic_name"      default = "/$(arg prefix)/qsr/cost"/>
-
-
 
     <!-- the group -->
     <group ns="$(arg prefix)/qsr">
@@ -74,7 +73,6 @@
 
         <param name="qtc_state_topic" value="$(arg qtc_state_topic)"/>
         <param name="qtc_points_topic_name" value="$(arg qtc_points_topic_name)"/>
-        <param name="robot_pose_topic_name" value="$(arg robotST_topic)"/>
 
         <param name="sampling_time" value="0.3"/>
         <param name="global_frame" value="$(arg map_frame_id)"/>        
@@ -88,7 +86,6 @@
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="qtc_state_topic" value="$(arg qtc_state_topic)"/>
         
-        <param name="robot_pose_topic_name" value="$(arg robotST_topic)"/>
         <param name="qtc_points_topic_name" value="$(arg qtc_points_topic_name)"/>
         
         <param name="visual_topic" value="$(arg vis_marker_topic)"/>

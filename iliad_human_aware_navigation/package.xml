@@ -1,10 +1,8 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>iliad_human_aware_navigation</name>
-  <version>0.2.4</version>
-  <description>The iliad_velocity_costmap package
-
-    HEAVILY BASED ON cdondrup's hrsi_velocity_costmap from Strands project
+  <version>0.2.5</version>
+  <description>The iliad_human_aware_navigation package
 
   </description>
 
@@ -12,27 +10,43 @@
 
   <license>MIT</license>
 
-  <author email="cdondrup@lincoln.ac.uk">Christian Dondrup</author> 
   <author email="manolofc@gmail.com">Manuel Fdez.</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>bayes_people_tracker</build_depend>
-  <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>message_filters</build_depend>
   <build_depend>rospy</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>message_filters</build_depend>
+  <build_depend>bayes_people_tracker</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  <build_depend>orunav_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>visualization_msgs</build_depend>
   <build_depend>nav_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend>hrsi_state_prediction</build_depend>
+  <build_depend>json</build_depend>
+  <build_depend>numpy</build_depend>
+  <build_depend>scipy</build_depend>
+  <build_depend>threading</build_depend>
+  <build_depend>matplotlib</build_depend>
 
-  <run_depend>bayes_people_tracker</run_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>hrsi_representation</run_depend>
-  <run_depend>message_filters</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>nav_msgs</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>hrsi_state_prediction</run_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>message_filters</exec_depend>
+  <exec_depend>bayes_people_tracker</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>orunav_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>json</exec_depend>
+  <exec_depend>numpy</exec_depend>
+  <exec_depend>scipy</exec_depend>
+  <exec_depend>threading</exec_depend>
+  <exec_depend>matplotlib</exec_depend>
 
   <export/>
 </package>

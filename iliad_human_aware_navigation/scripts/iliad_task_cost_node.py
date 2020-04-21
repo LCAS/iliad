@@ -13,11 +13,14 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from message_filters import Subscriber
 from nav_msgs.msg import OccupancyGrid
+from map_msgs.msg import OccupancyGridUpdate
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Pose, PoseStamped, Quaternion
+from visualization_msgs.msg import MarkerArray, Marker
+from matplotlib import cm, colors
 
 from bayes_people_tracker.msg import PeopleTracker
-from orunav_msgs.msg import ControllerReport, Task
+from orunav_msgs.msg import PoseSteering, ControllerReport, Task
 
 import numpy as np
 from threading import Lock
@@ -30,13 +33,27 @@ class TaskCostEvaluator(object):
         # ................................................................
         # read ros parameters
         self.loadROSParams()
-
+ 
         # ................................................................
         # other params
         self.lock = Lock()
         self.active_task = None
-        self.active_costmap = None
-        self.state = None
+        self.costmap = None
+        self.costmap_update = None
+        self.path_costmap = None
+        self.path_costmap_update = None
+        self.robotPoseSt = None
+        self.cost = 0
+
+        # For visualization
+        # No cost: white. Then blue, green, yellow, orange, red
+        self.discrete_color = colors.ListedColormap(['blue', 'green','yellow', 'orange'])
+        self.discrete_color.set_over('red')
+        self.discrete_color.set_under('white')
+
+        bounds = [0.1, 5.0, 10.0, 15.0, 19.9]        
+        self.norm = colors.BoundaryNorm(bounds, self.discrete_color.N)
+
         # ................................................................
         # start ros subs/pubs/servs....
         self.initROS()
@@ -45,8 +62,12 @@ class TaskCostEvaluator(object):
 
     def initROS(self):
         # publishers
-        self.path_occ_grid_pub = rospy.Publisher(self.path_occ_grid_topic_name, OccupancyGrid, queue_size=1)
-        self.curr_cost_topic_pub = rospy.Publisher(self.curr_cost_topic_name, Float64, queue_size=1)
+        self.path_occ_grid_pub = rospy.Publisher(self.path_occ_grid_topic_name, OccupancyGrid, queue_size=1, latch=True)
+        self.path_occ_grid_updates_pub = rospy.Publisher(self.path_occ_grid_topic_name + "_updates", OccupancyGridUpdate, queue_size=1, latch=True)
+
+        self.curr_cost_topic_pub = rospy.Publisher(self.curr_cost_topic_name, Float64, queue_size=1, latch=True)
+        self.visual_pub = rospy.Publisher(self.visual_pub_topic_name, MarkerArray, queue_size=1, latch=True)
+
         # service clients
         
         # ... none here
@@ -54,15 +75,16 @@ class TaskCostEvaluator(object):
         # subscribers and listeners
         self.listenerBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.listenerBuffer)
-
         rospy.Subscriber(self.task_topic_name, Task, self.task_callback, queue_size=1)                
         rospy.Subscriber(self.costmap_topic_name, OccupancyGrid, self.costmap_callback, queue_size=1)                
-        rospy.Subscriber(self.reports_topic_name, ControllerReport, self.reports_callback, queue_size=1)
+        rospy.Subscriber(self.costmap_topic_name+ "_updates", OccupancyGridUpdate, self.costmap_updates_callback, queue_size=1)                
+        rospy.Subscriber(self.robot_pose_topic_name, PoseStamped, self.robot_pose_callback, queue_size=1)
 
         # service servers
 
         # ... none here
-
+        # Timers
+        rospy.Timer(rospy.Duration(self.update_publish_period), self.publish_updates, oneshot=False)
     # .............................................................................................................
 
     def loadROSParams(self):
@@ -84,77 +106,88 @@ class TaskCostEvaluator(object):
         self.path_occ_grid_topic_name = rospy.get_param(
             '~path_occ_grid_topic_name', '/robot'+str(self.robot_id)+'/qsr/constraints_costmap_path')
 
-        # reports topic name
-        self.reports_topic_name = rospy.get_param(
-            '~reports_topic_name', '/robot' + str(self.robot_id) + '/control/controller/reports')
+        # current robot position from tf tree
+        self.robot_pose_topic_name = rospy.get_param(
+            '~robot_pose_topic_name', '/robot' + str(self.robot_id) + '/robot_poseST')
 
-        # current cost topic name
+        # current cost topic name 
         self.curr_cost_topic_name = rospy.get_param(
             '~curr_cost_topic_name', '/robot' + str(self.robot_id) + '/qsr/cost')
 
-    # we use robot reports to know robot position
-    def reports_callback(self, msg):
-            self.state = msg.state
+        self.update_publish_period = rospy.get_param('~update_publish_period', 0.05)
+
+        # cost visualization  
+        self.visual_pub_topic_name = rospy.get_param(
+            '~visual_pub_topic_name', '/robot' + str(self.robot_id) + '/qsr/cost_visual')
+
+        # robot frame id
+        self.base_frame_id = rospy.get_param(
+            '~base_frame_id', '/robot' + str(self.robot_id) + '/base_link')
+
+    # we subscribe to a pose publisher to get robot position
+    def robot_pose_callback(self, msg):
+        with self.lock:         
+            self.robotPoseSt = msg
 
     def task_callback(self,msg):
-        self.active_task = msg
-        rospy.loginfo("Node [" + rospy.get_name() + "] Detected a new active Task!")
-        self.updateCost()
-
-    def costmap_callback(self,msg):
-        self.active_costmap = msg
-        height = self.active_costmap.info.height
-        width = self.active_costmap.info.width        
-        
-        # as a 2d grid access is easier ...
-        self.active_costmap_local_grid = np.array(self.active_costmap.data).reshape(height,width).T
-
-        rospy.logdebug("Node [" + rospy.get_name() + "] Detected a new costmap!")
-        self.createPathCostGrid()
-        self.updateCost()
-
-    def createPathCostGrid(self):
-        o = OccupancyGrid()
-        o.header.stamp = rospy.Time.now()
-        o.header.frame_id = self.active_costmap.header.frame_id
-        o.info.resolution = self.active_costmap.info.resolution
-        o.info.height = self.active_costmap.info.height
-        o.info.width = self.active_costmap.info.width
-        o.info.origin = Pose()
-
-        # Translate to be centered under costmap_frame_id
-        o.info.origin.position.x -= (o.info.width/2.0) * o.info.resolution 
-        o.info.origin.position.y -= (o.info.height/2.0)  * o.info.resolution
-        # as a 2d grid access is easier ...
-        self.path_occ_grid_local_grid = np.full((o.info.width, o.info.height), 0)
-
-        # not really necesary till publishing...
-        o.data = self.path_occ_grid_local_grid.flatten(order='C')
-     
-        self.path_occ_grid = o
-        
-    def updateCost(self):
         with self.lock: 
-            if ((not self.active_task == None) and (not self.active_costmap == None) and (not self.state == None)):
+            self.active_task = msg
+            self.active_task_time = rospy.Time.now()  
+        rospy.logdebug("Node [" + rospy.get_name() + "] Detected a new active Task!")
+        
+    # we get a new constraints costmap. This should happen once.
+    def costmap_callback(self,msg):
+        with self.lock:         
+            self.costmap = msg
+            self.path_costmap = msg        
+            self.path_costmap.header.stamp = rospy.Time.now()
+            # costs are stored in updates, so this shouldn't be necesary...
+            # self.path_costmap.data = np.full((self.path_costmap.info.width, self.path_costmap.info.height), 0).flatten(order='C')
+        rospy.logdebug("Node ["+rospy.get_name()+"] " + "Received constraints costmap ")
+
+        self.path_occ_grid_pub.publish(self.path_costmap)
+
+    def costmap_updates_callback(self,msg):        
+        with self.lock: 
+            self.costmap_update = msg
+            self.path_costmap_update = OccupancyGridUpdate()
+            self.path_costmap_update.header.frame_id = msg.header.frame_id
+            self.path_costmap_update.header.seq = msg.header.seq
+            self.path_costmap_update.header.stamp = rospy.Time.now()
+            self.path_costmap_update.width = msg.width
+            self.path_costmap_update.height = msg.height
+            self.path_costmap_update.x = msg.x
+            self.path_costmap_update.y = msg.y
+            self.path_costmap_update.data = np.zeros(self.path_costmap_update.width * self.path_costmap_update.height)
+
+    def publish_updates(self,event):        
+        with self.lock: 
+            if ((not self.active_task == None) and (not self.costmap == None)  and (not self.costmap_update == None) and (not self.path_costmap_update == None) and (not self.robotPoseSt == None)):
                 newPosePath = []
-                newCellPath = []
+                newRelCellPath = []
                 newCostPath = []
                 pendingPath = self.active_task.path.path
                 # get part of the path still to be covered
-                i_path      = self.findClosestInPath(pendingPath,self.state)
-                pendingPath = pendingPath[i_path:]
-                # get costs of this pending path
-                for posSteer in pendingPath:
+                i_path      = self.findClosestInPath(pendingPath,self.robotPoseSt)
+                pendingPath = self.active_task.path.path[i_path:]
+                # Resample
+                pendingPath = self.resamplePath(pendingPath, self.costmap.info.resolution)
+                for i,posSteer in enumerate(pendingPath):
                     localPoseSt = self.poseSteer2costmapPose(posSteer)
-                    (px, py, ci, cj, val)  = self.getCostmapValue(self.active_costmap, self.active_costmap_local_grid, localPoseSt.pose.position.x , localPoseSt.pose.position.y)
-                    self.setCostmapValue(self.path_occ_grid, self.path_occ_grid_local_grid, px, py, val)
-                    #if not (ci,cj) in newCellPath:
+                    (px, py, ci, cj, val)  = self.getCostmapUpdateValue(self.costmap, self.costmap_update, localPoseSt.pose.position.x , localPoseSt.pose.position.y)
+
+                    self.setCostmapUpdateValue(self.path_costmap, self.path_costmap_update, px, py, val)
+                    #self.setCostmapUpdateValue(self.path_costmap, self.path_costmap_update, px, py, 100)
+
+                    # # costs are only for points yet to be visited.
+                    # if i>i_path:
                     newPosePath.append((px, py))
-                    newCellPath.append((ci,cj))
+                    newRelCellPath.append((ci,cj))
                     newCostPath.append(val)  
 
-                self.path_occ_grid.data =  self.path_occ_grid_local_grid.T.flatten(order='C')            
-                self.path_occ_grid_pub.publish(self.path_occ_grid)
+                #publish the update         
+                self.path_occ_grid_updates_pub.publish(self.path_costmap_update)
+                
                 # and this to test cost calculus
                 X, Y = zip(*newPosePath)
                 X = np.array(X)
@@ -167,87 +200,209 @@ class TaskCostEvaluator(object):
                 dr1 = np.concatenate(([0], dr), axis=0)
                 dr2 = dr0/2 + dr1/2
                 w = dr2.sum()
-                cost = C.dot(dr2)
+                self.cost = C.dot(dr2)
                 if w>0:
-                    cost = cost/dr2.sum()
-                self.curr_cost_topic_pub.publish(cost)
+                    self.cost = self.cost/dr2.sum()
+                self.curr_cost_topic_pub.publish(self.cost)
+                self.updateVisuals()
                 # mfc: using this metric, path cost can increase even if costmap does not change, just because the human happens to be at the end of the path                
-                #rospy.loginfo("["+rospy.get_name()+"] " + "Current map cost is: " + str(cost))
+                rospy.logdebug_throttle(2,"["+rospy.get_name()+"] " + "Remaining path cost per meter is: " + str(self.cost))
+            else:
+                rospy.loginfo_throttle(2,"Node [" + rospy.get_name() + "] Too soon for an update")
+        
+    def resamplePath(self, poseStPath, resolution):
+        X = [poseStPath[0].pose.position.x]
+        Y = [poseStPath[0].pose.position.y]
 
+        for i in range(1,len(poseStPath)):
+            X_p = X[-1]
+            Y_p = Y[-1]
+            X_i = poseStPath[i].pose.position.x
+            Y_i = poseStPath[i].pose.position.y
 
-    def findClosestInPath(self,poseStpath,robotState):
+            inc_x = X_i - X_p
+            inc_y = Y_i - Y_p
+            nx = np.ceil(abs(inc_x)/(resolution)).astype(int)
+            ny = np.ceil(abs(inc_y)/(resolution)).astype(int)
+            n = max(nx,ny)
+            for j in range(1,n):
+                X_n = X_p + inc_x * j / (n-1)
+                Y_n = Y_p + inc_y * j / (n-1)
+                X.append(X_n)                        
+                Y.append(Y_n)
+        
+        newPoseStPath = []
+        for x, y in zip(X, Y):
+            p = PoseSteering()
+            p.pose.position.x = x
+            p.pose.position.y = y
+            newPoseStPath.append(p)
+        return  newPoseStPath 
+    
+    def findClosestInPath(self,poseSteerPath,robotposeSt):
         # Not the smartest search ...
         dist = 1e10
         ind = -1
-        for i,posSteer in enumerate(poseStpath):
-            posit_i = posSteer.pose.position
-            dist_i = self.getDist(posit_i,robotState)
+
+        for i,posSteer in enumerate(poseSteerPath):
+            path_poseSt_i= self.poseSteer2PoseSt(posSteer)
+
+            dist_i = self.getDist(path_poseSt_i,robotposeSt)
             if (dist>dist_i):
                 ind = i
                 dist = dist_i
         return ind
+    
+    def getDist(self, poseStA, poseStB):
+    
+        if not (poseStA.header.frame_id == poseStB.header.frame_id):
+            poseStA=self.transformPose(poseStB.header.frame_id, poseStA)
+
+        dist = self.getDistPose(poseStA.pose, poseStB.pose)
         
-    def getDist(self, position_i, state_i ):
-        # I really don't like substracting points assuming same refernce frame ...
-        dx = state_i.position_x - position_i.x
-        dy = state_i.position_y - position_i.y
-        # dt = state_i.orientation_angle - 
-        dist = np.sqrt(dx*dx + dy*dy)   
-        return dist   
+        return dist
+    
+    def getDistPose(self, poseA, poseB):
 
-    def poseSteer2costmapPose(self, poseSteer):
-        poseSt_out = None
-        now = rospy.Time.now()
-
+        dist = np.sqrt( np.power(poseA.position.x-poseB.position.x, 2) +
+                        np.power(poseA.position.y-poseB.position.y, 2) +
+                        np.power(poseA.position.z-poseB.position.z, 2) )
+        
+        return dist
+    
+    def poseSteer2PoseSt(self, poseSteer):
         pose_in = PoseStamped()
         pose_in.pose = poseSteer.pose
         pose_in.header.frame_id = self.task_frame_id
-        pose_in.header.stamp = now
-        
+        pose_in.header.stamp = self.active_task_time
+        return pose_in
+
+    def poseSteer2costmapPose(self, poseSteer):
+        pose_in = self.poseSteer2PoseSt(poseSteer)
+        pose_out = self.transformPose(self.costmap.header.frame_id, pose_in)
+        return pose_out
+
+    def transformPose(self, out_frame_id, pose_in):
         # in tf2, frames do not have the initial slash
         if (pose_in.header.frame_id[0] == '/'):
             pose_in.header.frame_id = pose_in.header.frame_id[1:]
+        
+        # in tf2, frames do not have the initial slash
+        if (out_frame_id[0] == '/'):
+            out_frame_id = out_frame_id[1:]
 
         try:            
-            transform = self.listenerBuffer.lookup_transform(self.active_costmap.header.frame_id, pose_in.header.frame_id, now, rospy.Duration(4.0))
+            transform = self.listenerBuffer.lookup_transform(out_frame_id, pose_in.header.frame_id, rospy.Time.now(), rospy.Duration(4.0))
             pose_out = do_transform_pose(pose_in, transform)
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
-            rospy.logerr("[%s] transform from (%s) to (%s) failed: (%s).", rospy.get_name(), pose_in.header.frame_id, self.active_costmap.header.frame_id, e)        
+            rospy.logwarn("[%s] transform from (%s) to (%s) failed: (%s).", rospy.get_name(), pose_in.header.frame_id, out_frame_id, e)
+            pose_out = None        
         return pose_out
    
-    def getCostmapValue(self, costmap,local_grid, px, py):
-        isInside = False
+    def getCostmapUpdateValue(self, costmap,costmap_update, px, py):
+        inside = False
         val = 0
-        (ci, cj, isInside) = self.pose2cell(px , py, costmap)
-
-        if isInside:
-            val = local_grid[ci,cj] 
+        (ci, cj, inside) = self.pose2cell(px,py, costmap)
+        # rospy.loginfo("["+rospy.get_name()+"] " + "Pose [" + '{0:.2f}'.format(px) + ", " + '{0:.2f}'.format(py) + "]")
+        if inside: 
+            # rospy.loginfo("["+rospy.get_name()+"] " + "Is cell [" + str(ci) + ", " + str(cj) + "]")            
+            # cell pose, relative to update grid
+            ci = ci - costmap_update.x 
+            cj = cj - costmap_update.y 
+            inside = self.isInside(ci,cj, costmap_update.width, costmap_update.height)
+            if inside: 
+                # rospy.loginfo("["+rospy.get_name()+"] " + "Is REL cell [" + str(ci) + ", " + str(cj) + "]")            
+                k = self.linIndex(ci,cj, costmap_update.width)
+                val = costmap_update.data[k]
+        #         rospy.loginfo("["+rospy.get_name()+"] " + "Is lin Index [" + str(k) + "] == VAL [" + str(val) + "]")            
+        #     else:
+        #         rospy.logwarn("["+rospy.get_name()+"] " + "Is outside UPDATE")
+        # else:
+        #     rospy.logerr("["+rospy.get_name()+"] " + "Is outside costmap")
 
         return (px , py, ci, cj, val)
 
-    def setCostmapValue(self,costmap,local_grid, px, py, val):
-        isInside = False
-        (ci, cj, isInside) = self.pose2cell(px,py, costmap)
+    def setCostmapUpdateValue(self,costmap,costmap_update, px, py, val):
+        inside = False
+        (ci, cj, inside) = self.pose2cell(px,py, costmap)
+        if inside: 
+            # cell pose, relative to update grid
+            ci = ci - costmap_update.x 
+            cj = cj - costmap_update.y 
+            inside = self.isInside(ci,cj, costmap_update.width, costmap_update.height)
+            if inside: 
+                k = self.linIndex(ci,cj, costmap_update.width)
+                costmap_update.data[k] = val
 
-        if isInside: 
-            local_grid[ci,cj] = val
-        return isInside
+        return inside
+
+    def linIndex(self,i,j,width):
+        k = i + j * width
+        return k
 
     def pose2cell(self,x,y, costmap):
-        resolution = costmap.info.resolution
-        height = costmap.info.height
-        width = costmap.info.width
+        ix, iy = self.getRel(x,y,costmap)
+        i = int((ix / costmap.info.resolution))   
+        j = int((iy / costmap.info.resolution))  
 
-        i = j = 0
-        isValid = True
-        i = int((x / resolution)  + (width/2.0))   
-        j = int((y / resolution)  + (height/2.0))  
-
-        if (i > (width-1))  or (i<0) or (j > (height-1))  or (j<0):
-            isValid = False
+        isValid = self.isInside(i,j, costmap.info.width, costmap.info.height)
          
         return (i,j,isValid)
+
+    def isInside(self, i,j, w, h):
+        isValid = True
+        if (i > (w-1))  or (i<0) or (j > (h-1))  or (j<0):
+            isValid = False
+        return isValid
+
+    def getRel(self,x,y,costmap):
+        ox = costmap.info.origin.position.x 
+        oy = costmap.info.origin.position.y 
+
+        #MFC: layered costmap kind of assumes same position and orientation in all static maps... so DON'T use rotations!
+        # oa = self.get_rotation(costmap.info.origin.orientation)
+        # MFC: layered costmap kind of assumes same position and orientation in all static maps... so DON'T rotate!
+        dx = (x - ox)
+        dy = (y - oy)
+        # nx =  dx * np.cos(oa) + dy * np.sin(oa) 
+        # ny = -dx * np.sin(oa) + dy * np.cos(oa) 
+        return (dx,dy)
+
+    def updateVisuals(self):
+        data = MarkerArray()
+
+        # 1 text
+        text = Marker()
+        text.id = 1
+        text.type = Marker.TEXT_VIEW_FACING
+        text.header.frame_id = self.base_frame_id
+        text.header.stamp = rospy.Time.now()
+        text.ns = "path_cost"
+        text.action = Marker.ADD
+        text.pose.orientation.w = 1.0
+
+        text.pose.position.x = 0
+        text.pose.position.y = 0
+        text.pose.position.z = 1.2
+        # TEXT_VIEW_FACING markers use only the z component of scale, specifies the height of an uppercase "A".
+        text.scale.z = 0.45
+
+        text.text = 'Cost: {0:.2f}'.format(self.cost) 
+        (r,g,b,i) = self.getColor(self.cost)
+        text.color.r = r
+        text.color.g = g
+        text.color.b = b
+        text.color.a = 1.0
+        data.markers.append(text)
+
+        # Finally publish .......................
+        self.visual_pub.publish(data)
+    
+    def getColor(self, x):
+        (r,g,b,i) = self.discrete_color(self.norm(x))
+        return (r,g,b,i)
+
 
 if __name__ == "__main__":
     rospy.init_node("task_cost_evaluator")#, log_level=rospy.DEBUG)

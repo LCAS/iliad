@@ -14,7 +14,7 @@
 
     <!-- derived args -->
     <arg name="prefix" value="robot$(arg robot_id)"/>
-    <arg name="config_file" value="$(find iliad_hrsi)/rqtGui/slider_$(arg robot_id).yaml"/>
+    <arg name="config_file" value="$(find iliad_human_aware_navigation)/rqtGui/slider_$(arg robot_id).yaml"/>
 
     <!-- node itself -->
     <group ns="$(arg prefix)">

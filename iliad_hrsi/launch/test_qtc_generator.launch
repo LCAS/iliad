@@ -15,13 +15,13 @@
     <arg name="map_topic_name"        default="/maps/map_laser2d"/>
     <arg name="robot_base_frame_id"   default="$(arg prefix)/base_link"/>
 
-    <arg name="qtc_points_topic_name" default = "/$(arg prefix)/qsr/qtc_points"/>
 
     <arg name="ppl_topic"             default="/$(arg prefix)/qsr/people_tracker/positions"/>
     <arg name="person_topic"          default="/$(arg prefix)/human_perception/tracked_persons"/>
     <arg name="dperson_topic"         default="/$(arg prefix)/human_perception/detected_persons"/>
     
     <arg name="qtc_state_topic"       default="/$(arg prefix)/qsr/qtc_state"/>
+    <arg name="qtc_points_topic_name" default = "/$(arg prefix)/qsr/qtc_points"/>
         
     <arg name="vis_marker_topic"      default = "/$(arg prefix)/qsr/visualization_marker"/>
     
