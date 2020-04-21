@@ -31,7 +31,6 @@ class QTCStatePlotterNode():
         # Other config params and atributes      
         # sensible default values ...
         self.qtc_data = None
-        self.robotPoseSt = None
         self.qtc_state = None
         self.arrow_len = 1.2
 
@@ -52,8 +51,8 @@ class QTCStatePlotterNode():
         # Current QTC comes from here
         self.qtc_state_topic = rospy.get_param('~qtc_state_topic', '/robot'+str(self.robot_id)+'/qsr/qtc_state')
 
-        # current robot position from tf tree
-        self.robot_pose_topic_name = rospy.get_param('~robot_pose_topic_name', '/robot' + str(self.robot_id) + '/robot_poseST')
+        # current robot frame ide from tf tree
+        self.robot_base_frame_id = rospy.get_param('~robot_base_frame_id', '/robot' + str(self.robot_id) + '/base_link')
 
         # points used in qtc is also published
         self.qtc_points_topic_name = rospy.get_param('~qtc_points_topic_name', '/robot' + str(self.robot_id) + '/qsr/qtc_points')
@@ -91,16 +90,12 @@ class QTCStatePlotterNode():
 
         # subscribers and listeners
         rospy.Subscriber(self.qtc_state_topic, String, self.qtc_state_callback, queue_size=1)
-        rospy.Subscriber(self.robot_pose_topic_name, PoseStamped, self.robot_pose_callback, queue_size=1)
         rospy.Subscriber(self.qtc_points_topic_name, Float64MultiArray, self.qtc_points_callback, queue_size=1)        
 
 
         # service servers
         # none here
 
-    # .............................................................................................................
-    def robot_pose_callback(self, msg):
-        self.robotPoseSt = self.transformPoseSt( msg, self.global_frame_id)
 
     def qtc_points_callback(self, msg):
         self.qtc_data = msg.data
@@ -157,7 +152,7 @@ class QTCStatePlotterNode():
         return line
 
     def updateVisuals(self):
-            validData = self.qtc_data and self.robotPoseSt and self.qtc_state
+            validData = self.qtc_data and self.qtc_state
             
             if validData:
                     (xh0, yh0, hh0, xh1, yh1, hh1, xr0, yr0, hr0, xr1, yr1, hr1) = self.qtc_data
@@ -183,7 +178,7 @@ class QTCStatePlotterNode():
                     text = Marker()
                     text.id = 1
                     text.type = Marker.TEXT_VIEW_FACING
-                    text.header.frame_id = self.robotPoseSt.header.frame_id
+                    text.header.frame_id = self.robot_base_frame_id
                     text.header.stamp = rospy.Time.now()
                     text.ns = "descriptor"
                     text.action = Marker.ADD

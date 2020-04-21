@@ -11,22 +11,20 @@
     <arg name="prefix" value="robot$(arg robot_id)"/>
 
     <!-- args from hri -->
-    <arg name="map_frame_id"        default="/map_laser2d"/>
-    <arg name="map_topic_name"      default="/maps/map_laser2d"/>
-    <arg name="robot_base_frame_id" default="$(arg prefix)/base_link"/>
+    <arg name="map_frame_id"          default="/map_laser2d"/>
+    <arg name="map_topic_name"        default="/maps/map_laser2d"/>
+    <arg name="robot_base_frame_id"   default="$(arg prefix)/base_link"/>
 
-    <arg name="robotST_topic"       default = "/$(arg prefix)/robot_poseST"/>
-    <arg name="qtc_points_topic_name"     default = "/$(arg prefix)/qsr/qtc_points"/>
+    <arg name="qtc_points_topic_name" default = "/$(arg prefix)/qsr/qtc_points"/>
 
-    <arg name="ppl_topic"           default="/$(arg prefix)/qsr/people_tracker/positions"/>
-    <arg name="person_topic"        default="/$(arg prefix)/human_perception/tracked_persons"/>
-    <arg name="dperson_topic"        default="/$(arg prefix)/human_perception/detected_persons"/>
+    <arg name="ppl_topic"             default="/$(arg prefix)/qsr/people_tracker/positions"/>
+    <arg name="person_topic"          default="/$(arg prefix)/human_perception/tracked_persons"/>
+    <arg name="dperson_topic"         default="/$(arg prefix)/human_perception/detected_persons"/>
     
-    <arg name="qtc_state_topic"           default="/$(arg prefix)/qsr/qtc_state"/>
+    <arg name="qtc_state_topic"       default="/$(arg prefix)/qsr/qtc_state"/>
         
-    <arg name="vis_marker_topic"    default = "/$(arg prefix)/qsr/visualization_marker"/>
+    <arg name="vis_marker_topic"      default = "/$(arg prefix)/qsr/visualization_marker"/>
     
-
     <!-- the group -->
     <group ns="$(arg prefix)/qsr">
 
@@ -46,13 +44,6 @@
         <param name="target_frame"        type="string"  value="$(arg robot_base_frame_id)"/>
       </node>
 
-      <!-- Publishes robot pose -->
-      <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
-          <param name="map_frame" value="$(arg map_frame_id)"/>
-          <param name="base_frame" value="$(arg robot_base_frame_id)"/>
-          <param name="is_stamped" value="true"/>
-          <remap from="robot_pose" to="$(arg robotST_topic)"/>
-      </node>
 
       <!--  generate QTCs -->
       <node name="QTC_generator" pkg="iliad_hrsi" type="QTC_generator.py" output="screen">
@@ -67,7 +58,6 @@
 
         <param name="qtc_state_topic" value="$(arg qtc_state_topic)"/>
         <param name="qtc_points_topic_name" value="$(arg qtc_points_topic_name)"/>
-        <param name="robot_pose_topic_name" value="$(arg robotST_topic)"/>
 
         <param name="sampling_time" value="0.6"/>
         <param name="global_frame" value="$(arg map_frame_id)"/>        
@@ -81,7 +71,6 @@
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="qtc_state_topic" value="$(arg qtc_state_topic)"/>
         
-        <param name="robot_pose_topic_name" value="$(arg robotST_topic)"/>
         <param name="qtc_points_topic_name" value="$(arg qtc_points_topic_name)"/>
         
         <param name="visual_topic" value="$(arg vis_marker_topic)"/>
