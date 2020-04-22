@@ -178,7 +178,7 @@ class QTCStatePlotterNode():
                     text = Marker()
                     text.id = 1
                     text.type = Marker.TEXT_VIEW_FACING
-                    text.header.frame_id = self.robot_base_frame_id
+                    text.header.frame_id = self.global_frame_id
                     text.header.stamp = rospy.Time.now()
                     text.ns = "descriptor"
                     text.action = Marker.ADD

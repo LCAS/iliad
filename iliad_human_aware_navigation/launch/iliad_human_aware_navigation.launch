@@ -32,6 +32,8 @@
 
     <arg name="path_occ_grid_topic_name"  default = "/$(arg prefix)/qsr/constraints_costmap_path"/>
     <arg name="curr_cost_topic_name"      default = "/$(arg prefix)/qsr/cost"/>
+    <arg name="situation_topic_name"      default = "/$(arg prefix)/qsr/situation_predictions"/>
+
 
     <!-- the group -->
     <group ns="$(arg prefix)/qsr">
@@ -97,13 +99,27 @@
         <param name="pretty_text" value="true"/>        
       </node>
       
+      <!-- TODO: Here goes Laurence situation assessment module! 
+      <node pkg="************" type="***********" name="************" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="human_tracking_topic_name"    type = "string" value="$(arg ppl_topic)"/>
+        <param name="robot_pose_topic_name"        type = "string" value="$(arg robotST_topic)"/>
+        <param name="qtc_state_topic"              type = "string" value="$(arg qtc_state_topic)"/>
+        <param name="qtc_points_topic_name"        type = "string" value="$(arg qtc_points_topic_name)"/>
+        <param name="global_frame"                 type = "string" value="$(arg map_frame_id)"/>        
+        <! - - output - - >
+        <param name="situation_topic_name"         type = "string" value="$(arg situation_topic_name)"/>
+      </node>
+      -->
+
       <!-- constraints costmap V2: creates human exclusion area -->
-      <node pkg="iliad_human_aware_navigation" type="iliad_constraints_costmap.py" name="constraints_costmap_server" output="log" respawn="true">
+      <node pkg="iliad_human_aware_navigation" type="iliad_constraints_costmap.py" name="constraints_costmap_server" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="costmap_topic_name"                  type = "string" value= "$(arg costmap_topic_name)"/>
         <param name="map_topic_name"                      type = "string" value= "$(arg map_topic_name)"/>
         <param name="human_tracking_topic_name"           type = "string" value="$(arg ppl_topic)"/>
         <param name="robot_pose_topic_name"               type = "string" value="$(arg robotST_topic)"/>
+        <param name="situation_topic_name"                type = "string" value="$(arg situation_topic_name)"/>
 
         <param name="update_center_x"                     type = "double" value="15.3"/>
         <param name="update_center_y"                     type = "double" value="-3.03"/>
@@ -123,7 +139,7 @@
       </node>
 
       <!-- Extracts current task cost from constraints costmap -->
-      <node pkg="iliad_human_aware_navigation" type="iliad_task_cost_node.py" name="task_cost_node" output="log" respawn="true">
+      <node pkg="iliad_human_aware_navigation" type="iliad_task_cost_node.py" name="task_cost_node" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="robot_pose_topic_name"            type = "string" value="$(arg robotST_topic)"/>
         <param name="costmap_topic_name"               type = "string" value= "$(arg costmap_topic_name)"/>      
@@ -135,8 +151,23 @@
         <param name="update_publish_period"            type = "double" value="0.05"/> 
       </node>
  
+      <!-- This node decides about changing speed constraints or triggering a path replanning based on:
+         path cost
+         situation 
+         robot and human status ? Maybe
+      -->
+      <node pkg="iliad_human_aware_navigation" type="hrsi_plan_assessment.py" name="plan_assessment_node" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="human_tracking_topic_name"  type = "string" value="$(arg ppl_topic)"/>
+        <param name="robot_pose_topic_name"      type = "string" value="$(arg robotST_topic)"/>
+        <param name="situation_topic_name"       type = "string" value="$(arg situation_topic_name)"/>
+        <param name="curr_cost_topic_name"       type = "string" value= "$(arg curr_cost_topic_name)"/>
+        <param name="trigger_topic_name"         type = "string" value= "/$(arg prefix)/qsr/replan"/>      
+      </node>
+      
+
       <!-- Upon demand, it stops the robot and asks coordinator to replan -->
-      <node pkg="iliad_human_aware_navigation" type="abort_and_replan.py" name="replan_node" output="log" respawn="true">
+      <node pkg="iliad_human_aware_navigation" type="abort_and_replan.py" name="replan_node" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="task_topic_name"                  type = "string" value= "$(arg task_topic_name)"/>
         <param name="reports_topic_name"               type = "string" value = "$(arg reports_topic_name)"/>
@@ -145,10 +176,8 @@
         <param name="goal_topic_name"            type = "string" value="/$(arg prefix)/goal"/>
 
         <param name="update_task_srv_name"               type = "string" value= "/coordinator/update_task"/>      
-        <param name="trigger_topic_name"         type = "string" value= "/$(arg prefix)/replan"/>      
-
+        <param name="trigger_topic_name"         type = "string" value= "/$(arg prefix)/qsr/replan"/>      
       </node>
-
 
       
     </group>

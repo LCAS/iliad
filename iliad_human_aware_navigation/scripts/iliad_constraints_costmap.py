@@ -487,9 +487,9 @@ class IliadConstraintsCostmapServerV2(object):
         self.robot_pose_topic_name = rospy.get_param(
             '~robot_pose_topic_name', '/robot' + str(self.robot_id) + '/robot_poseST')
 
-        # current robot position from tf tree
+        # current human robot interaction from Laurences node
         self.situation_topic_name = rospy.get_param(
-            '~situation_topic_name', '/robot' + str(self.robot_id) + '/situation_predictions')
+            '~situation_topic_name', '/robot' + str(self.robot_id) + '/qsr/situation_predictions')
 
         # costmap update configuration.
         self.update_center_x = rospy.get_param('~update_center_x', 15.3)

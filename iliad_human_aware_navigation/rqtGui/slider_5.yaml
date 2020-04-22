@@ -1,5 +1,8 @@
 publish_interval: 100
 settings:
-  /robot5/velocity_constraints/data[0]: {is_repeat: false, max: 0.6, min: 0.0}
-  /robot5/velocity_constraints/data[1]: {is_repeat: false, max: 0.5, min: 0.0}
-texts: ['/robot5/velocity_constraints/data[0]','/robot5/velocity_constraints/data[1]']
+  /robot5/velocity_constraints/data[0]: {is_repeat: false, max: 0.8, min: 0.01}
+  /robot5/velocity_constraints/data[1]: {is_repeat: false, max: 0.8, min: 0.01}
+  /robot5/velocity_constraints/data[2]: {is_repeat: false, max: 0.8, min: 0.01}
+  /robot5/velocity_constraints/data[3]: {is_repeat: false, max: 0.8, min: 0.01}
+texts: ['/robot5/velocity_constraints/data[0]', '/robot5/velocity_constraints/data[1]',
+  '/robot5/velocity_constraints/data[2]', '/robot5/velocity_constraints/data[3]']

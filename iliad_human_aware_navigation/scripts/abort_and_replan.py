@@ -69,7 +69,7 @@ class TaskReplanner():
             '~task_topic_name', '/robot' + str(self.robot_id) + '/control/task')
 
         self.trigger_topic_name  = rospy.get_param(
-            '~trigger_topic_name', '/robot' + str(self.robot_id) + '/update_task')
+            '~trigger_topic_name', '/robot' + str(self.robot_id) + '/qsr/replan')
 
         self.reports_topic_name = rospy.get_param(
             '~reports_topic_name', '/robot' + str(self.robot_id) + '/control/controller/reports')
@@ -133,18 +133,18 @@ class TaskReplanner():
             self.state = msg.state
             self.controller_status = msg.status
 
-            rospy.loginfo_throttle(1,"Node [" + rospy.get_name() + "] \n- Vehicle State [" + self.status_dict['VehicleState'] + "]" +
+            rospy.logdebug_throttle(1,"Node [" + rospy.get_name() + "] \n- Vehicle State [" + self.status_dict['VehicleState'] + "]" +
                                                             "\n- Controller State [" + self.status_dict['ControllerState'] + "]" +
                                                             "\n- Control  Status [" + self.status_dict['ControlStatus'] + "]"    )
 
-            if (self.controller_status == 1) and (self.goalPS!=None):
-                rospy.loginfo("Node [" + rospy.get_name() + "] Goal to be send in some seconds ...")   
+            if (self.controller_status == ControllerReport.CONTROLLER_STATUS_WAIT) and (self.goalPS!=None):
+                rospy.logdebug("Node [" + rospy.get_name() + "] Goal to be send in some seconds ...")   
                 rospy.sleep(5.1)
-                rospy.loginfo("Node [" + rospy.get_name() + "] Asking for a new one ......................")      
+                rospy.logdebug("Node [" + rospy.get_name() + "] Asking for a new one ......................")      
                 self.goalPS.header.stamp = rospy.Time.now()   
                 self.goal_topic_pub.publish(self.goalPS)
                 self.goalPS=None
-                rospy.loginfo("Node [" + rospy.get_name() + "] Done")   
+                rospy.logdebug("Node [" + rospy.get_name() + "] Done")   
 
 
 
@@ -210,7 +210,7 @@ class TaskReplanner():
 
 # Main function.
 if __name__ == '__main__':
-    rospy.init_node('task_replan_node', log_level=rospy.DEBUG)
+    rospy.init_node('task_replan_node')#, log_level=rospy.DEBUG)
     # Go to class functions that do all the heavy lifting. Do error checking.
     try:
         goGo = TaskReplanner()

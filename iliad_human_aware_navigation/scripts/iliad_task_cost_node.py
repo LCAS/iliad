@@ -124,6 +124,11 @@ class TaskCostEvaluator(object):
         self.base_frame_id = rospy.get_param(
             '~base_frame_id', '/robot' + str(self.robot_id) + '/base_link')
 
+        # (true) calcule cost as average cost in remaining path / (false) just max cost in remaining path
+        self.useRemainingAvCost = rospy.get_param('~useRemainingAvCost', False)
+
+        
+
     # we subscribe to a pose publisher to get robot position
     def robot_pose_callback(self, msg):
         with self.lock:         
@@ -189,26 +194,32 @@ class TaskCostEvaluator(object):
                 self.path_occ_grid_updates_pub.publish(self.path_costmap_update)
                 
                 # and this to test cost calculus
-                X, Y = zip(*newPosePath)
-                X = np.array(X)
-                Y = np.array(Y)
-                C = np.array(newCostPath)
-                dx = np.diff(X)
-                dy = np.diff(Y)
-                dr = np.sqrt(dx*dx+dy*dy)
-                dr0 = np.concatenate((dr, [0]), axis=0)
-                dr1 = np.concatenate(([0], dr), axis=0)
-                dr2 = dr0/2 + dr1/2
-                w = dr2.sum()
-                self.cost = C.dot(dr2)
-                if w>0:
-                    self.cost = self.cost/dr2.sum()
+                if self.useRemainingAvCost:
+                    X, Y = zip(*newPosePath)
+                    X = np.array(X)
+                    Y = np.array(Y)
+                    C = np.array(newCostPath)
+                    dx = np.diff(X)
+                    dy = np.diff(Y)
+                    dr = np.sqrt(dx*dx+dy*dy)
+                    dr0 = np.concatenate((dr, [0]), axis=0)
+                    dr1 = np.concatenate(([0], dr), axis=0)
+                    dr2 = dr0/2 + dr1/2
+                    w = dr2.sum()
+                    self.cost = C.dot(dr2)
+                    if w>0:
+                        self.cost = self.cost/dr2.sum()
+                    # mfc: using this metric, path cost can increase even if costmap does not change, just because the human happens to be at the end of the path                
+                    rospy.logdebug_throttle(2,"["+rospy.get_name()+"] " + "Remaining path cost per meter is: " + str(self.cost))
+                else:
+                    self.cost = np.max(np.array(newCostPath))
+                    # mfc: simpler cost calculus
+                    rospy.logdebug_throttle(2,"["+rospy.get_name()+"] " + "Max cost in remaining path is: " + str(self.cost))
+
                 self.curr_cost_topic_pub.publish(self.cost)
                 self.updateVisuals()
-                # mfc: using this metric, path cost can increase even if costmap does not change, just because the human happens to be at the end of the path                
-                rospy.logdebug_throttle(2,"["+rospy.get_name()+"] " + "Remaining path cost per meter is: " + str(self.cost))
             else:
-                rospy.loginfo_throttle(2,"Node [" + rospy.get_name() + "] Too soon for an update")
+                rospy.logdebug_throttle(2,"Node [" + rospy.get_name() + "] Too soon for an update")
         
     def resamplePath(self, poseStPath, resolution):
         X = [poseStPath[0].pose.position.x]
