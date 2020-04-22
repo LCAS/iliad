@@ -70,9 +70,9 @@ class HRSIassessment():
         # this max left turning speed
         self.w_max = rospy.get_param(self.ven_name + '/max_rotational_vel', 0.1 )
         # this max backward speed
-        self.v_rev_max = rospy.get_param(self.ven_name + '/max_vel', self.v)
+        self.v_rev_max = rospy.get_param(self.ven_name + '/max_vel', self.v_max)
         # this max right turning speed
-        self.w_rev_max = rospy.get_param(self.ven_name + '/max_rotational_vel', self.w)
+        self.w_rev_max = rospy.get_param(self.ven_name + '/max_rotational_vel', self.w_max)
         
         # this is the minimum speed to prevent mpc to go bananas
         self.v_min = 0.01
