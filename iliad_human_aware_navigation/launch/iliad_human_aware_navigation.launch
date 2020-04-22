@@ -98,7 +98,7 @@
       </node>
       
       <!-- constraints costmap V2: creates human exclusion area -->
-      <node pkg="iliad_human_aware_navigation" type="iliad_constraints_costmap_v2.py" name="constraints_costmap_server" output="log" respawn="true">
+      <node pkg="iliad_human_aware_navigation" type="iliad_constraints_costmap.py" name="constraints_costmap_server" output="log" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="costmap_topic_name"                  type = "string" value= "$(arg costmap_topic_name)"/>
         <param name="map_topic_name"                      type = "string" value= "$(arg map_topic_name)"/>
@@ -123,7 +123,7 @@
       </node>
 
       <!-- Extracts current task cost from constraints costmap -->
-      <node pkg="iliad_human_aware_navigation" type="iliad_task_cost_node_v2.py" name="task_cost_node" output="log" respawn="true">
+      <node pkg="iliad_human_aware_navigation" type="iliad_task_cost_node.py" name="task_cost_node" output="log" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="robot_pose_topic_name"            type = "string" value="$(arg robotST_topic)"/>
         <param name="costmap_topic_name"               type = "string" value= "$(arg costmap_topic_name)"/>      
