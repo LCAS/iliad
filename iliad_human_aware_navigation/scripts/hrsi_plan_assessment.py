@@ -115,37 +115,42 @@ class HRSIassessment():
             
     def assesst(self):
         with self.lock:         
+            if (self.curr_cost)<45:
+                self.v = self.v_max
+                self.w = self.w_max
+                self.v_rev = self.v_rev_max
+                self.w_rev = self.w_rev_max                
             if (self.curr_cost)>45:
                     if self.situation == "PBL":
                         #  Both actors pass each-other on the left side from their perspective, moving in opposite directions.
                         self.v = np.max(0.5 * self.v_max, self.v_min)
                         self.w = self.w_min
-                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_rev_min)
+                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_min)
                         self.w_rev = self.w_rev_max
                     elif self.situation == "PBR":
                         # Both actors pass each-other on the right side from their perspective, moving in opposite directions.
                         self.v = np.max(0.5 * self.v_max, self.v_min)
                         self.w = self.w_max
-                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_rev_min)
-                        self.w_rev = self.w_rev_min
+                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_min)
+                        self.w_rev = self.w_min
                     elif self.situation == "ROTL":
                         # robot passes on the left of the human while both move in the same direction.
                         self.v = np.max(0.5 * self.v_max, self.v_min)
                         self.w = self.w_min
-                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_rev_min)
+                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_min)
                         self.w_rev = self.w_rev_max
                     elif self.situation == "ROTR":
                         # robot passes on the right of the human while
                         self.v = np.max(0.5 * self.v_max, self.v_min)
                         self.w = self.w_max
-                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_rev_min)
-                        self.w_rev = self.w_rev_min
+                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_min)
+                        self.w_rev = self.w_min
                     elif self.situation == "PC":
                         # The robot has to slow or stop movement to allow the human to move across the robot’s intended path
                         self.v = self.v_min
                         self.w = self.w_min
-                        self.v_rev = self.v_rev_min
-                        self.w_rev = self.w_rev_min
+                        self.v_rev = self.v_min
+                        self.w_rev = self.w_min
                     else:
                         # Unmodelled situation... 
                         self.v = self.v_max 
@@ -155,8 +160,8 @@ class HRSIassessment():
             if (self.curr_cost)>75:
                 self.v = self.v_min
                 self.w = self.w_min
-                self.v_rev = self.v_rev_min
-                self.w_rev = self.w_rev_min                
+                self.v_rev = self.v_min
+                self.w_rev = self.w_min                
                 rospy.logwarn("Node [" + rospy.get_name() + "] "+
                 "We should consider a replanning ..." )
                 #self.trigger_topic_pub.publish(Empty())
