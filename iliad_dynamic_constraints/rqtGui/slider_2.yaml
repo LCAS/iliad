@@ -1,5 +1,0 @@
-publish_interval: 100
-settings:
-  /robot2/velocity_constraints/data[0]: {is_repeat: false, max: 0.6, min: 0.0}
-  /robot2/velocity_constraints/data[1]: {is_repeat: false, max: 0.5, min: 0.0}
-texts: ['/robot2/velocity_constraints/data[0]','/robot2/velocity_constraints/data[1]']

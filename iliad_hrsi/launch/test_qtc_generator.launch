@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+    <!--
+    
+   -->
+<launch>
+
+    <arg name="robot_id" default="4"/>
+    <arg name="sim" default="true"/>
+
+    <!-- derived args -->
+    <arg name="prefix" value="robot$(arg robot_id)"/>
+
+    <!-- args from hri -->
+    <arg name="map_frame_id"          default="/map_laser2d"/>
+    <arg name="map_topic_name"        default="/maps/map_laser2d"/>
+    <arg name="robot_base_frame_id"   default="$(arg prefix)/base_link"/>
+
+
+    <arg name="ppl_topic"             default="/$(arg prefix)/qsr/people_tracker/positions"/>
+    <arg name="person_topic"          default="/$(arg prefix)/human_perception/tracked_persons"/>
+    <arg name="dperson_topic"         default="/$(arg prefix)/human_perception/detected_persons"/>
+    
+    <arg name="qtc_state_topic"       default="/$(arg prefix)/qsr/qtc_state"/>
+    <arg name="qtc_points_topic_name" default = "/$(arg prefix)/qsr/qtc_points"/>
+        
+    <arg name="vis_marker_topic"      default = "/$(arg prefix)/qsr/visualization_marker"/>
+    
+    <!-- the group -->
+    <group ns="$(arg prefix)/qsr">
+
+      <!-- Publish groundtruth tracks and detections from Gazebo -->
+      <node name="groundtruth_tracks_from_gazebo" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true"  if="$(arg sim)">
+              <remap from="/groundtruth/detected_persons" to="$(arg dperson_topic)"/>
+              <remap from="/groundtruth/tracked_persons" to="$(arg person_topic)"/>            
+      </node>
+
+
+      <!-- casts spencer detection to bayes data format -->
+      <node pkg="iliad_hrsi" type="spencer_to_bayes.py" name="spenc2bay" output="screen">
+        <param name="robot_id" value="$(arg robot_id)"/>
+
+        <param name="ppl_topic"           type="string"  value="$(arg ppl_topic)"/>
+        <param name="person_topic"        type="string"  value="$(arg person_topic)"/>
+        <param name="target_frame"        type="string"  value="$(arg robot_base_frame_id)"/>
+      </node>
+
+
+      <!--  generate QTCs -->
+      <node name="QTC_generator" pkg="iliad_hrsi" type="QTC_generator.py" output="screen">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        
+        <!--  peopletracker(bayes, from STRANDS) OR trackedpersons (SPENCER) -->
+        <param name="human_detection_method" value="trackedpersons"/>
+
+        <!-- acording to the detection method, human detections would be in the corresponding topic -->
+        <param name="peopletracker_topic" value="$(arg ppl_topic)"/>
+        <param name="human_tracking_topic" value="$(arg person_topic)"/>
+
+        <param name="qtc_state_topic" value="$(arg qtc_state_topic)"/>
+        <param name="qtc_points_topic_name" value="$(arg qtc_points_topic_name)"/>
+
+        <param name="sampling_time" value="0.6"/>
+        <param name="global_frame" value="$(arg map_frame_id)"/>        
+        <param name="tf_timeout" value="1"/>
+   
+      </node>
+
+
+      <!--  Draws QTCs -->
+      <node name="QTCplot" pkg="iliad_hrsi" type="QTCplot.py" output="screen">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="qtc_state_topic" value="$(arg qtc_state_topic)"/>
+        
+        <param name="qtc_points_topic_name" value="$(arg qtc_points_topic_name)"/>
+        
+        <param name="visual_topic" value="$(arg vis_marker_topic)"/>
+
+        <param name="global_frame" value="$(arg map_frame_id)"/>        
+        <param name="tf_timeout" value="1.0"/>
+        <param name="visuals_publish_rate" value="1.0"/>
+        <!-- overlay descriptive text (true) OR qtcc state -->
+        <param name="pretty_text" value="true"/>        
+      </node>
+
+    </group>
+
+
+</launch>
+
+
+
+
+
+

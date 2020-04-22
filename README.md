@@ -1,26 +1,23 @@
-THIS IS TIDY BRANCH:
-This branch will eventually turn into master when all legacy stuff gets archived.
-
 # Packages and description:
-Note: Those packages are still in early development ("hic sunt dracones")
+Note: Those packages are still under heavy development ("hic sunt dracones")
 
 ## gazebo_plugin_actor_collision
 Actor collision plugin. Enables reporting collisions with actors, so that `gazebo-contactMonitor` can report those (see correspoding repo at https://github.com/LCAS/gazebo-contactMonitor)
 
-## iliad_citi_controller
-Extremely simple citi forklift controller. Contains a basic ROS/CAN bridge and a simple command converter. Command converter transforms from rot/trans vel commands (like a differential robot) to steering angle/speed and motor wheel speed.
-
 ## iliad_base_simulation
 Gazebo world configurations and simulated citi forklifts used in other packages.
 
+## iliad_citi_controller
+Extremely simple citi forklift controller. Contains a basic ROS/CAN bridge and a simple command converter. Command converter transforms from rot/trans vel commands (like a differential robot) to steering angle/speed and motor wheel speed.
+
+## iliad_hrsi
+Contains several works regarding human robot spatial interaction in iliad. 
+
+## iliad_human_aware_navigation
+Nodes that take hrsi outputs and (potentially) change the way ILIAD robot navigates. 
+
 ## iliad_oru_local_planer
 Uses ROS local planners to perform local changes to orunav trajectories.
-
-## iliad_dynamic_constraints
-Contains several works regarding local alterations of speeds or constraints. 
-`dynamic_constraints_node.py` captures trajectories from the execution node to the controller node and changes spatial and speed constraints.
-`QSR2constraints_node.py` analyzes and plots in rviz current qtc state and publishes speed restrictions based on those.
-
 
 ## Other relevant packages:
 

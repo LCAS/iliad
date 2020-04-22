@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+    <!--
+    
+    New experiment:
+       groundtruth people tracking from gazebo
+              provides TrackedPersons [from ILIAD sim]
+
+       trackedpersons (spencer) to peopletracker (strands)
+              requires
+                TrackedPersons, [from previous]
+
+       launch some strands goodies (basically strands hri)
+          online_qtc_creator
+              https://github.com/strands-project/strands_hri/blob/kinetic-devel/hrsi_representation/scripts/online_qtc_creator.py
+              requires
+                PeopleTracker, [from previous]
+                Pose, robot [from ILIAD]
+                
+                PoseStamped, robot [from ILIAD]
+
+                PoseStamped, goal [from ILIAD]
+
+          state_predictor
+              https://github.com/strands-project/strands_hri/blob/kinetic-devel/hrsi_state_prediction/scripts/state_predictor.py
+              requires
+                QTCArray, [from previous]
+                PeopleTracker, [from previous]
+
+          velocity_costmap_server
+              https://github.com/strands-project/strands_hri/blob/kinetic-devel/hrsi_velocity_costmaps/scripts/velocity_costmap_server.py
+              requires
+                QTCPredictionArray, [from previous]
+                PeopleTracker [from previous]
+
+   -->
+<launch>
+
+    <arg name="robot_id" default="4"/>
+    
+    <!-- derived args -->
+    <arg name="prefix" value="robot$(arg robot_id)"/>
+
+    <!-- args from hri -->
+    <arg name="map_frame_id"        default="/map_laser2d"/>
+    <arg name="robot_base_frame_id" default="$(arg prefix)/base_link"/>
+    <arg name="robot_topic"         default = "/$(arg prefix)/robot_pose"/>
+    <arg name="robotST_topic"       default = "/$(arg prefix)/robot_poseST"/>
+
+    <arg name="goal_topic"          default="/$(arg prefix)/goal"/>
+    <arg name="ppl_topic"           default="/$(arg prefix)/qsr/people_tracker/positions"/>
+    <arg name="person_topic"        default="/$(arg prefix)/perception/tracked_persons"/>
+    <arg name="dperson_topic"        default="/$(arg prefix)/perception/detected_persons"/>
+    
+    <arg name="processing_rate"     default="60"/>
+    <arg name="max_buffer_size"     default="10"/>
+    <arg name="decay_time"          default="20."/>
+    <arg name="quantisation_factor" default="0.01"/>
+    <arg name="distance_threshold"  default="6.0"/>
+    <arg name="smoothing_rate"      default="0.3"/>
+    <arg name="qtc_type"            default="1"/> <!-- "qtcbs", "qtccs", "qtcbcs", "qtcbcs_argprobd",  -->
+    <arg name="no_collapse"         default="true"/>
+    <arg name="prune_buffer"        default="false"/>
+    <arg name="validate"            default="true"/>
+    <arg name="qtc_arr_topic"       default="/$(arg prefix)/qsr/online_qtc_creator/qtc_array"/>
+
+    <arg name="with_qsr_prob_rep"   default="true"/>
+    <arg name="with_qsr_lib"        default="true"/>
+
+    <arg name="predictor_visualisation_file" default="$(find hrsi_state_prediction)/conf/visualisation.yaml"/>
+    <arg name="model_dir" default="$(find hrsi_state_prediction)/models"/>
+    <arg name="qtc_topic"           default="/$(arg prefix)/qsr/qtc_state_predictor/prediction_array"/>
+
+    <arg name="vis_marker_topic"    default = "/$(arg prefix)/qsr/visualization_marker"/>
+    <arg name="vel_costmap_topic"   default = "/$(arg prefix)/qsr/velocity_costmap"/>
+    <arg name="origin_topic"        default = "/$(arg prefix)/qsr/origin"/>
+
+    <!-- faking move_base -->
+    <arg name="move_base_topic"     default = "/$(arg prefix)/dummy"/>
+    <param name="$(arg move_base_topic)/base_local_planner" value="/something/dummy_planner"/>
+    <param name="$(arg move_base_topic)/something/max_vel_x" value="1.0"/>
+
+    <!-- the group -->
+    <group ns="$(arg prefix)/qsr">
+
+      <!-- Publish groundtruth tracks and detections from Gazebo -->
+      <node name="groundtruth_tracks_from_gazebo" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true">
+              <remap from="/groundtruth/detected_persons" to="$(arg dperson_topic)"/>
+              <remap from="/groundtruth/tracked_persons" to="$(arg person_topic)"/>            
+      </node>
+
+
+      <node name="QSRview" pkg="iliad_hrsi" type="QTCplot.py" output="screen">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        
+        <!--  peopletracker(bayes, from STRANDS) OR trackedpersons (SPENCER) -->
+        <param name="human_detection_method" value="trackedpersons"/>
+
+        <!-- acording to the detection method, human detections would be in the corresponding topic -->
+        <param name="peopletracker_topic" value="$(arg ppl_topic)"/>
+        <param name="human_tracking_topic" value="$(arg person_topic)"/>
+
+        <param name="reports_topic" value="/$(arg prefix)/control/controller/reports"/>
+        <param name="base_frame" value="$(arg robot_base_frame_id)"/>
+        <param name="global_frame" value="$(arg map_frame_id)"/>        
+        <param name="tf_timeout" value="1"/>
+        <param name="sampling_time" value="0.6"/>
+        <param name="qtc_state_topic" value="/$(arg prefix)/qtc_state_topics"/>
+   
+      </node>
+
+      <!-- spencer to bayes -->
+      <node pkg="iliad_human_local_navigation" type="spencer_to_bayes.py" name="spenc2bay" output="screen">
+        <param name="ppl_topic"           type="string"  value="$(arg ppl_topic)"/>
+        <param name="person_topic"           type="string"  value="$(arg person_topic)"/>
+        <param name="target_frame"        type="string"  value="$(arg robot_base_frame_id)"/>
+      </node>
+
+      <!-- Publishes robot pose -->
+      <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
+          <param name="map_frame" value="$(arg map_frame_id)"/>
+          <param name="base_frame" value="$(arg robot_base_frame_id)"/>
+          <param name="is_stamped" value="true"/>
+          <remap from="robot_pose" to="$(arg robotST_topic)"/>
+      </node>
+      <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_pose_publisher" output="screen">
+          <param name="map_frame" value="$(arg map_frame_id)"/>
+          <param name="base_frame" value="$(arg robot_base_frame_id)"/>
+          <param name="is_stamped" value="false"/>
+          <remap from="robot_pose" to="$(arg robot_topic)"/>
+      </node>
+
+      <node name="qsr_lib" pkg="qsr_lib" type="qsrlib_ros_server.py" output="screen" respawn="true" if="$(arg with_qsr_lib)"/>
+      
+      <!-- relays input topic -->
+    <node name="goal_pose_republisher" pkg="hrsi_representation" type="goal_pose_republisher.py" output="screen" respawn="true">
+      <param name="in_topic"                     type="string"   value="$(arg goal_topic)"/>
+      <param name="out_topic"                     type="string"   value="$(arg goal_topic)_latched"/>
+    </node>
+            
+      <node pkg="hrsi_representation" type="online_qtc_creator.py" name="online_qtc_creator" output="screen" respawn="true">
+        <param name="ppl_topic"           type="string"  value="$(arg ppl_topic)"/>
+        <param name="processing_rate"     type="int"     value="$(arg processing_rate)"/>
+        <param name="max_buffer_size"     type="int"     value="$(arg max_buffer_size)"/>
+        <param name="decay_time"          type="double"  value="$(arg decay_time)"/>
+        <param name="quantisation_factor" type="double"  value="$(arg quantisation_factor)"/>
+        <param name="distance_threshold"  type="double"  value="$(arg distance_threshold)"/>
+        <param name="smoothing_rate"      type="double"  value="$(arg smoothing_rate)"/>
+        <param name="qtc_type"            type="int"     value="$(arg qtc_type)"/>
+        <param name="no_collapse"         type="bool"    value="$(arg no_collapse)"/>
+        <param name="prune_buffer"        type="bool"    value="$(arg prune_buffer)"/>
+        <param name="validate"            type="bool"    value="$(arg validate)"/>
+        <param name="goal_topic"          type="string"  value="$(arg goal_topic)"/>
+        <param name="qtc_arr_topic"       type="string"  value="$(arg qtc_arr_topic)"/>
+        <param name="robot_topic"         type="string"  value="$(arg robot_topic)"/>
+        <param name="robotST_topic"       type="string"  value="$(arg robotST_topic)"/>
+        <param name="target_frame"        type="string"  value="$(arg map_frame_id)"/>
+      </node>
+      
+      <node pkg="qsr_prob_rep" type="qsr_prob_rep_ros_server.py" name="prob_rep_ros_server" output="screen" respawn="true" if="$(arg with_qsr_prob_rep)"/>
+      
+      <include file="$(find hrsi_state_prediction)/launch/state_predictor.launch">
+        <arg name="visualisation_file" value="$(arg predictor_visualisation_file)"/>    
+        <arg name="model_dir"          value="$(arg model_dir)"/>
+        <arg name="ppl_topic"          value="$(arg ppl_topic)"/>
+        <arg name="qtc_topic"          value="$(arg qtc_arr_topic)"/>
+      </include>
+      
+       <node pkg="hrsi_velocity_costmaps" type="velocity_costmap_server.py" name="velocity_costmap_server" output="screen" respawn="true">
+        <param name="qtc_topic"                           type = "string"   value="$(arg qtc_topic)"/>
+        <param name="vis_marker_topic"                    type = "string" value= "$(arg vis_marker_topic)"/>
+        <param name="vel_costmap_topic"                   type = "string" value= "$(arg vel_costmap_topic)"/>
+        <param name="origin_topic"                        type = "string" value= "$(arg origin_topic)"/>
+        <param name="base_link_tf"                        type = "string" value= "$(arg robot_base_frame_id)"/>
+        <param name="ppl_topic"                           type = "string"   value="$(arg ppl_topic)"/>
+        <param name="move_base_topic"                     type = "string"   value="$(arg move_base_topic)"/>   
+      </node> 
+    </group>
+
+
+</launch>

@@ -337,7 +337,7 @@
     </model>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>-20.00 -20.00 20.00 -0 0.8938 1.50778</pose>
+        <pose frame=''>12.7 -9.0 30.0 0 1.3578 1.57978</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -3647,7 +3647,7 @@
             </contact>
           </sensor>
       </plugin>
-      <pose>-20.0 -4.3 1.02 0 0 1.57</pose>
+      <pose>16.5 2 1.02 0 0 -1.57</pose>
       <skin>
         <filename>walk.dae</filename>
         <scale>1.0</scale>
@@ -3658,22 +3658,20 @@
         <interpolate_x>true</interpolate_x>
       </animation>
       <script>
-        <delay_start>8</delay_start>  <!-- sed marker 1 -->
+        <delay_start>36</delay_start>  <!-- sed marker 1 -->
         <loop>false</loop>
         <auto_start>true</auto_start>
         <trajectory id="0" type="walking">
           <waypoint>
             <time>0</time>
-            <pose>-20.0 -4.3 0 0 0 1.57</pose>
-          </waypoint>
+            <pose>16.5 2 0 0 0 -1.57</pose> 
+          </waypoint>        
           <waypoint>
-            <time>12</time>   <!-- sed marker 2 -->
-            <pose>-20.0 3.3 0 0 0 1.57</pose>
+            <time>15</time>   <!-- sed marker 2 -->
+            <pose>16.5 -9.1 0 0 0 -1.57</pose>
           </waypoint>
         </trajectory>
       </script>
     </actor>
-
-
   </world>
 </sdf>
