@@ -259,7 +259,7 @@ class ConstraintsCostmapV2(object):
                 # # angle between robot and any point
                 # arp = np.arctan2(yy-yr,xx-xr)
                 # # angle between human and robot
-                # ahr = np.arctan2(yh-yr,xh-xr)
+                ahr = np.arctan2(yh-yr,xh-xr)
                 # # angle between human robot and any point
                 # arg = (arp - ahr)
                 # # using that aproach we had some rounding errors
@@ -287,47 +287,23 @@ class ConstraintsCostmapV2(object):
                 if self.situation == None:
                     c = c_no_sit
                 else:
-                    
-                    if self.situation == "PBL":
+                    if self.situation in ["PBL", "ROL", "PCL"]:
                         # allow left side of human ...
                         lower_angle_lim = 0
                         upper_angle_lim = np.pi
-                    elif self.situation == "ROTL":
-                        # allow rigth side of human ...
-                        lower_angle_lim = 0
-                        upper_angle_lim = 3.0*np.pi/2.0
-                    elif self.situation == "PBR":
-                        # allow rigth side of human ...
+                    elif self.situation in ["PBR", "ROR", "PCR"]:
+                        # allow right side of human ...
                         lower_angle_lim = np.pi
                         upper_angle_lim = 2.0*np.pi
-                    elif self.situation == "ROTR":
-                        # allow rigth side of human ...
-                        lower_angle_lim = np.pi/2.0
-                        upper_angle_lim = 2.0*np.pi
-                    elif self.situation == "PC":
-                        # forbide cone in front of human ...
-                        lower_angle_lim = np.pi/4.0
-                        upper_angle_lim = 7.0*np.pi/4.0
-                    elif self.situation == "DEBUG":
-                        lower_angle_lim = self.angle_bounds[0]
-                        upper_angle_lim = self.angle_bounds[1]
 
                     # human orientation is in -pi,pi range...
-                    # centered aroun human heading
-                    #angle_rel = np.mod(ahp - np.mod(ah , 2*np.pi)  , 2*np.pi )
-
-                    # angle centered around robot human line
-                    angle_rel = np.mod(-arg, 2*np.pi )
-
-                    # #use this cost to see what angle are we using
-                    # c =  np.interp(angle_rel, (angle_rel.min(), angle_rel.max()), (0, 100 ))
-                    
+                    angle_rel = np.mod(ahp  - np.mod(ahr , 2*np.pi), 2*np.pi )
                     c =  c_no_sit
                     forbid_indexes = (angle_rel <= lower_angle_lim ) | (angle_rel >= upper_angle_lim)
-                    c[ forbid_indexes ] = 100
-
-                    # use a changing cost for forbidden area                    
-                    cd_strong = np.exp(-np.power(0.1*(dh),2))
+                    #c[ forbid_indexes ] = 100
+                    
+                    # cd_strong = np.exp(-np.power(0.01*(dh),2))
+                    cd_strong = np.exp(-np.power(0.3*(dh),2))
                     cd_strong = np.interp(cd_strong, (cd_strong.min(), cd_strong.max()), (0, 100 ))
                     c[ forbid_indexes ] =  cd_strong[forbid_indexes] 
 
@@ -435,7 +411,7 @@ class IliadConstraintsCostmapServerV2(object):
 
     def sit_callback(self, sit_string):
       
-        if str(sit_string.data) in ["PBL", "PBR", "ROTL", "ROTR", "PC", "DEBUG"]:
+        if str(sit_string.data) in ["PBL", "PBR", "ROL", "ROR", "PCL", "PCR", "DEBUG"]:
             #rospy.loginfo("["+rospy.get_name()+"] " + "Situation: " + str(sit_string.data))
             self.situation = str(sit_string.data)
         else:
