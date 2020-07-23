@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>iliad_init_pose_manager</name>
+  <version>0.0.1</version>
+  <description>
+  This package helps to automatize pose initialization.
+  It subscribes to a corrected odometry, storing the current position.
+  If stopped, it will save the position in .ros folder.
+  This position will be published to the initpose topic in next restart.
+  </description>
+
+  <maintainer email="manolofc@gmail.com">Manuel Fernandez-Carmona</maintainer>
+  <license>BSD</license>
+
+  <author email="manolofc@gmail.com">Manuel Fernandez-Carmona</author>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <!--  build_depend dynamic_reconfigure  build_depend -->
+
+  <build_depend>rospy</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>  
+  <build_depend>rospy_message_converter</build_depend>  
+
+  <exec_depend>rospy_message_converter</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+
+  <!-- <exec_depend>math</exec_depend>
+  <exec_depend>threading</exec_depend> -->
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>
