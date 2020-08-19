@@ -8,7 +8,6 @@
   <!-- PLUGINS -->
 
   <gazebo>
-
     <plugin name="$(arg actor_name)_object_controller" filename="libgazebo_ros_planar_move.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>20.0</updateRate>
@@ -19,7 +18,6 @@
       <odometryRate>20.0</odometryRate>
       <robotBaseFrame>$(arg tf_prefix)/base_footprint</robotBaseFrame>
     </plugin>
-
   </gazebo>
 
 
@@ -30,55 +28,29 @@
 
   <link name="$(arg tf_prefix)/base_link">
     <inertial>
-      <pose>0 0 0.95 0 0 0</pose>
-      <mass value="25.0"/>
-      <inertia ixx=".866" ixy="-.061" ixz="-.121"
-               iyy=".874" iyz="-.059" izz=" .274"/>
+      <mass value="80"/>
+      <inertia ixx="22.85" ixy="0.0" ixz="0.0" iyy="22.85" iyz="0.0" izz="2.5"/>
     </inertial>
-
-    <collision name="$(arg actor_name)_box">
-      <origin xyz="0 0 0.01" rpy="0 0 0"/>
+    <visual name="$(arg actor_name)_magic_carpet">
+      <origin xyz="0 0 0.0" rpy="0.0 0 0"/>
       <geometry>
-        <box size="0.5 0.35 0.02"/>
-      </geometry>
-    </collision>
-
-    <collision name="$(arg actor_name)_person">
-      <origin xyz="0 0 0.03" rpy="0.0 0 0"/>
-      <geometry>
-        <box size="0.5 0.35 0.02"/>
-      </geometry>
-    </collision>
-
-    <visual name="$(arg actor_name)_visual">
-      <origin xyz="0 0 0.01" rpy="0.0 0 1.54"/>
-      <geometry>
-        <box size="0.5 0.35 0.02"/>
+        <box size="0.5 0.5 0.02"/>
       </geometry>
     </visual>
 
-
-<!--   ORIG!
-    <collision name="$(arg actor_name)_box">
-      <origin xyz="0 0 0.01" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.5 0.35 0.02"/>
-      </geometry>
-    </collision>
-
     <collision name="$(arg actor_name)_person">
-      <origin xyz="0 0 0.01" rpy="0.04 0 0"/>
+      <origin xyz="0 0 0.03" rpy="0.0 0 1.54"/>
       <geometry>
         <mesh filename="model://person_standing/meshes/standing.dae"/>
       </geometry>
     </collision>
 
     <visual name="$(arg actor_name)_visual">
-      <origin xyz="0 0 0.01" rpy="0.04 0 1.54"/>
+      <origin xyz="0 0 0.03" rpy="0.0 0 1.54"/>
       <geometry>
         <mesh filename="model://person_standing/meshes/standing.dae"/>
       </geometry>
-    </visual> -->
+    </visual>
   </link>
 
   <gazebo reference="$(arg tf_prefix)/base_link">
@@ -103,13 +75,14 @@
     <parent link="$(arg tf_prefix)/base_link"/>
     <child link="$(arg tf_prefix)/hokuyo"/>
     <axis xyz="0 1 0" />
-    <origin xyz="0.2 0 0.73" rpy="0 0 0"/>
+    <origin xyz="0.175 0 0.73" rpy="0 0 0"/>
   </joint>
 
 
-<!-- navigation laser  -->
-<gazebo reference="$(arg tf_prefix)/hokuyo">
-    <sensor type="gpu_ray" name="$(arg actor_name)_hokuyo_sensor">
+  <!-- CREATE SENSORS -->
+
+  <gazebo reference="$(arg tf_prefix)/hokuyo">
+    <sensor name="$(arg actor_name)_hokuyo_sensor" type="gpu_ray">
       <pose>0 0 0 0 0 0</pose>
       <visualize>false</visualize>
       <update_rate>40</update_rate>
@@ -117,24 +90,19 @@
       <ray>
         <scan>
           <horizontal>
-            <samples>36</samples>
+            <samples>180</samples>
             <resolution>1</resolution>
             <min_angle>-1.570796</min_angle>
             <max_angle>1.570796</max_angle>
           </horizontal>
         </scan>
         <range>
-          <min>0.10</min>
+          <min>0.1</min>
           <max>50.0</max>
           <resolution>0.01</resolution>
         </range>
-        <!-- <noise>
-          <type>gaussian</type>
-          <mean>0.0</mean>
-          <stddev>0.01</stddev>
-        </noise> -->
       </ray>
-      <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_gpu_laser.so">
+      <plugin name="$(arg actor_name)_hokuyo_node" filename="libgazebo_ros_gpu_laser.so">
         <topicName>scan</topicName>
         <frameName>hokuyo</frameName>
       </plugin>

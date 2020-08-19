@@ -5,7 +5,6 @@
   <xacro:arg name="actor_name" default=""/>
   <xacro:arg name="tf_prefix" default=""/>
 
-
   <!-- PLUGINS -->
 
   <gazebo>
