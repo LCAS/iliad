@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="actor">
+  
+  <xacro:arg name="actor_name" default=""/>
+  <xacro:arg name="tf_prefix" default=""/>
+
+  <!-- PLUGINS -->
+
+  <gazebo>
+
+    <plugin name="$(arg actor_name)_object_controller" filename="libgazebo_ros_planar_move.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>20.0</updateRate>
+      <robotNamespace>$(arg actor_name)</robotNamespace>
+       <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>$(arg tf_prefix)/odom</odometryFrame>
+      <odometryRate>20.0</odometryRate>
+      <robotBaseFrame>$(arg tf_prefix)/base_footprint</robotBaseFrame>
+    </plugin>
+
+  </gazebo>
+
+
+  <!-- CREATE LINKS -->
+
+  <link name="$(arg tf_prefix)/base_footprint"/>
+
+
+  <link name="$(arg tf_prefix)/base_link">
+    <inertial>
+      <pose>0 0 0.95 0 0 0</pose>
+      <mass value="25.0"/>
+      <inertia ixx=".866" ixy="-.061" ixz="-.121"
+               iyy=".874" iyz="-.059" izz=" .274"/>
+    </inertial>
+
+    <collision name="$(arg actor_name)_box">
+      <origin xyz="0 0 0.01" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.5 0.35 0.02"/>
+      </geometry>
+    </collision>
+
+    <collision name="$(arg actor_name)_person">
+      <origin xyz="0 0 0.03" rpy="0.0 0 0"/>
+      <geometry>
+        <box size="0.5 0.35 0.02"/>
+      </geometry>
+    </collision>
+
+    <visual name="$(arg actor_name)_visual">
+      <origin xyz="0 0 0.01" rpy="0.0 0 1.54"/>
+      <geometry>
+        <box size="0.5 0.35 0.02"/>
+      </geometry>
+    </visual>
+
+
+<!--   ORIG!
+    <collision name="$(arg actor_name)_box">
+      <origin xyz="0 0 0.01" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.5 0.35 0.02"/>
+      </geometry>
+    </collision>
+
+    <collision name="$(arg actor_name)_person">
+      <origin xyz="0 0 0.01" rpy="0.04 0 0"/>
+      <geometry>
+        <mesh filename="model://person_standing/meshes/standing.dae"/>
+      </geometry>
+    </collision>
+
+    <visual name="$(arg actor_name)_visual">
+      <origin xyz="0 0 0.01" rpy="0.04 0 1.54"/>
+      <geometry>
+        <mesh filename="model://person_standing/meshes/standing.dae"/>
+      </geometry>
+    </visual> -->
+  </link>
+
+  <gazebo reference="$(arg tf_prefix)/base_link">
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+
+  <link name="$(arg tf_prefix)/hokuyo"/>
+
+
+  <!-- CREATE JOINTS -->
+
+  <!-- For odometry -->
+  <joint name="$(arg tf_prefix)/base_footprint_to_base_link" type="fixed">
+    <parent link="$(arg tf_prefix)/base_footprint"/>
+    <child  link="$(arg tf_prefix)/base_link"/>
+    <origin xyz="0 0 0.09" rpy="0 0 0"/>
+  </joint>
+
+
+  <joint name="$(arg tf_prefix)/base_link_to_hokuyo" type="fixed">
+    <parent link="$(arg tf_prefix)/base_link"/>
+    <child link="$(arg tf_prefix)/hokuyo"/>
+    <axis xyz="0 1 0" />
+    <origin xyz="0.2 0 0.73" rpy="0 0 0"/>
+  </joint>
+
+
+<!-- navigation laser  -->
+<gazebo reference="$(arg tf_prefix)/hokuyo">
+    <sensor type="gpu_ray" name="$(arg actor_name)_hokuyo_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>40</update_rate>
+      <always_on>1</always_on>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>36</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.570796</min_angle>
+            <max_angle>1.570796</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>50.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <!-- <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise> -->
+      </ray>
+      <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_gpu_laser.so">
+        <topicName>scan</topicName>
+        <frameName>hokuyo</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+
+</robot>

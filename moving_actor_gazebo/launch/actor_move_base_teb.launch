@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<launch>   
+  <arg name="actor_name" default="actor00"/>
+  <arg name="map_topic" default="/map"/>
+  <arg name="tf_prefix" value="$(arg actor_name)" />
+
+      <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
+          <remap from="/map" to="$(arg map_topic)"/>
+          <remap from="/scan" to="scan"/>
+
+          <!--Parameters-->
+          <rosparam file="$(find moving_actor_gazebo)/config/move_base/teb/teb_planner_ros.yaml" command="load"/>
+          <rosparam file="$(find moving_actor_gazebo)/config/move_base/teb/teb_move_base_params.yaml" command="load"/>
+
+          <rosparam file="$(find moving_actor_gazebo)/config/move_base/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+          <rosparam file="$(find moving_actor_gazebo)/config/move_base/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+
+          <rosparam file="$(find moving_actor_gazebo)/config/move_base/local_costmap_params.yaml" command="load"/>
+          <rosparam file="$(find moving_actor_gazebo)/config/move_base/global_costmap_params.yaml" command="load"/>
+	  <!-- <rosparam file="$(find moving_actor_gazebo)/config/move_base/nav_fn_ros.yaml" command="load" /> -->
+	       <rosparam file="$(find moving_actor_gazebo)/config/move_base/globalPlanner.yaml" command="load" />
+
+	  <!-- resetting parameters values like frame names and topic names to the correct ones-->
+          <rosparam param="global_costmap/robot_base_frame" subst_value="true">"$(arg tf_prefix)/base_link"</rosparam>
+          <rosparam param="global_costmap/obstacle_layer/laser_scan_sensor/sensor_frame" subst_value="true">"$(arg tf_prefix)/hokuyo"</rosparam>
+          <rosparam param="global_costmap/obstacle_layer/laser_scan_sensor/topic" subst_value="true">"/scan"</rosparam>
+
+          <rosparam param="local_costmap/robot_base_frame" subst_value="true">"$(arg tf_prefix)/base_link"</rosparam>
+          <rosparam param="local_costmap/obstacle_layer/laser_scan_sensor/sensor_frame" subst_value="true">"$(arg tf_prefix)/hokuyo"</rosparam>
+          <rosparam param="local_costmap/obstacle_layer/laser_scan_sensor/topic" subst_value="true">"/scan"</rosparam>
+
+          <rosparam param="TebLocalPlannerROS/odom_topic" subst_value="true">"/$(arg actor_name)/odom"</rosparam>
+   
+      </node>
+
+</launch> 
+

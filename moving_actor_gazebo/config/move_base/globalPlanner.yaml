@@ -1,0 +1,7 @@
+#see http://wiki.ros.org/global_planner for param description
+base_global_planner: global_planner/GlobalPlanner
+
+GlobalPlanner:
+  allow_unknown: false
+  default_tolerance: 0.0
+  orientation_mode: 1

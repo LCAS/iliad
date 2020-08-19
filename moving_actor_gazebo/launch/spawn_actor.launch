@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+
+<!-- 
+MFC: based on Adam's spawn actor from RASberry
+-->
+
+<launch>  
+  <arg name="use_gpu_gazebo_lidar" default="false"/>
+  <arg name="actor_name" default="actor"/>
+  <arg name="map_topic" default="/map"/>
+  <arg name="start_pose_x" default="0"/>
+  <arg name="start_pose_y" default="0"/>
+  <arg name="start_pose_z" default="0"/>
+  <arg name="start_pose_R" default="0"/>
+  <arg name="start_pose_P" default="0"/>
+  <arg name="start_pose_Y" default="0"/>
+
+  <arg name="actor_xacro_file" default="$(find moving_actor_gazebo)/urdf/actor_cpu.xacro"/>
+  <arg name="actor_xacro_file" value="$(find moving_actor_gazebo)/urdf/actor_gpu.xacro" if="$(eval arg('use_gpu_gazebo_lidar') == 'true')"/>
+
+  <group ns="$(arg actor_name)">
+
+    <param name="robot_description" command="$(find xacro)/xacro '$(arg actor_xacro_file)' '--inorder' actor_name:='$(arg actor_name)' tf_prefix:='$(arg actor_name)' use_gpu:='$(arg use_gpu_gazebo_lidar)'"/>
+
+    <node pkg="gazebo_ros" type="spawn_model" name="$(arg actor_name)_spawner" output="screen" args="-x $(arg start_pose_x) -y $(arg start_pose_y) -z $(arg start_pose_z) -R $(arg start_pose_R)  -P 		      $(arg start_pose_P)  -Y $(arg start_pose_Y) -urdf -param /$(arg actor_name)/robot_description -model $(arg actor_name)"/>
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+      <param name="publish_frequency" type="double" value="30.0" />
+    </node>
+
+      <!-- <node name="fake_localization" pkg="fake_localization" type="fake_localization">        
+        <remap from="base_pose_ground_truth" to="odom" />
+	      <param name="odom_frame_id" type="string" value="$(arg actor_name)/odom"/>
+        <param name="base_frame_id" type="string" value="$(arg actor_name)/base_footprint"/>
+	      <param name="global_frame_id" type="string" value="$(arg map_topic)"/>
+      </node> -->
+    <node pkg="tf" type="static_transform_publisher" name="world_2_actor_odom_tfb"
+            args="0.0 0.0 0.0  0.0 0.0 0.0   world $(arg actor_name)/odom 20"/>
+      
+    <include file="$(find moving_actor_gazebo)/launch/actor_move_base_teb.launch">
+      <arg name="actor_name" value="$(arg actor_name)"/>
+      <arg name="map_topic" value="$(arg map_topic)"/>
+    </include>
+
+   </group>
+</launch> 
