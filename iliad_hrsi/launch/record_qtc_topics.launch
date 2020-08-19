@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!-- launcher to programatically record topics involved in qtc online classification -->
+
+<launch>
+
+    <arg name="robot_id" default="5"/>
+    <arg name="bag_descriptor" default="qsr_study"/>
+    
+    <!-- derived args -->
+    <arg name="prefix" value="robot$(arg robot_id)"/>
+    
+    <arg name="report_topic_name"     default="/$(arg prefix)/control/controller/reports"/>
+    <arg name="encoders_topic_name"   default="/$(arg prefix)/control/encoders"/>
+    <arg name="odom_topic_name"   default="/$(arg prefix)/control/odom"/>
+    <arg name="report_topic_name"   default="/$(arg prefix)/control/report"/>
+    <arg name="state_topic_name"   default="/$(arg prefix)/control/state"/>
+    <arg name="marker_people_topic_name"   default="/$(arg prefix)/people_tracker_filtered/marker_array"/>
+    <arg name="pose_people_topic_name"   default="/$(arg prefix)/people_tracker_filtered/pose_array"/>
+    <arg name="positions_people_topic_name"   default="/$(arg prefix)/people_tracker_filtered/positions"/>
+    <arg name="laser_floor_sensor_topic_name"   default="/$(arg prefix)/sensors/laser2d_floor"/>
+    <arg name="laser_floor_filtered_sensor_topic_name"   default="/$(arg prefix)/sensors/laser2d_floor_filtered"/>
+    <arg name="velodyne_sensor_topic_name"   default="/$(arg prefix)/sensors/velodyne_packets"/>
+    <arg name="qtc_state_topic_name"   default="/$(arg prefix)/qsr/qtc_state_topics "/>
+    <arg name="classification_topic_name"   default="/$(arg prefix)/qsr/situation_predictions"/>
+    
+
+    <arg name="topics_list"   default="/maps/map_active_area  /maps/map_laser2d /tf  /tf_static $(arg report_topic_name) $(arg encoders_topic_name) $(arg odom_topic_name) $(arg report_topic_name) $(arg state_topic_name) $(arg marker_people_topic_name) $(arg pose_people_topic_name) $(arg positions_people_topic_name) $(arg laser_floor_sensor_topic_name) $(arg laser_floor_filtered_sensor_topic_name) $(arg velodyne_sensor_topic_name) $(arg qtc_state_topic_name) $(arg classification_topic_name)"/>
+
+    <!-- Record relevant topics -->
+    <node required="true" pkg="rosbag" type="record" name="recorder"
+        args="record -o $(arg bag_descriptor) $(arg topics_list)" output="screen"/>
+
+</launch>
+ 
