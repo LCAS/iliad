@@ -8,12 +8,15 @@ MFC: based on Adam's spawn actor from RASberry
   <arg name="use_gpu_gazebo_lidar" default="false"/>
   <arg name="actor_name" default="actor"/>
   <arg name="map_topic" default="/map"/>
+  <arg name="global_frame_id" default="world"/>
   <arg name="start_pose_x" default="0"/>
   <arg name="start_pose_y" default="0"/>
   <arg name="start_pose_z" default="0"/>
   <arg name="start_pose_R" default="0"/>
   <arg name="start_pose_P" default="0"/>
   <arg name="start_pose_Y" default="0"/>
+
+  <arg name="actor_trajectory_file" default="$(find moving_actor_gazebo)/config/trajectories/trajectory.json"/>
 
   <arg name="actor_xacro_file" default="$(find moving_actor_gazebo)/urdf/actor_cpu.xacro"/>
   <arg name="actor_xacro_file" value="$(find moving_actor_gazebo)/urdf/actor_gpu.xacro" if="$(eval arg('use_gpu_gazebo_lidar') == 'true')"/>
@@ -28,19 +31,24 @@ MFC: based on Adam's spawn actor from RASberry
       <param name="publish_frequency" type="double" value="30.0" />
     </node>
 
-      <!-- <node name="fake_localization" pkg="fake_localization" type="fake_localization">        
-        <remap from="base_pose_ground_truth" to="odom" />
-	      <param name="odom_frame_id" type="string" value="$(arg actor_name)/odom"/>
-        <param name="base_frame_id" type="string" value="$(arg actor_name)/base_footprint"/>
-	      <param name="global_frame_id" type="string" value="$(arg map_topic)"/>
-      </node> -->
+
     <node pkg="tf" type="static_transform_publisher" name="world_2_actor_odom_tfb"
-            args="0.0 0.0 0.0  0.0 0.0 0.0   world $(arg actor_name)/odom 20"/>
+            args="0.0 0.0 0.0  0.0 0.0 0.0 $(arg global_frame_id) $(arg actor_name)/odom 20"/>
       
     <include file="$(find moving_actor_gazebo)/launch/actor_move_base_teb.launch">
       <arg name="actor_name" value="$(arg actor_name)"/>
       <arg name="map_topic" value="$(arg map_topic)"/>
     </include>
 
+    <node pkg="moving_actor_gazebo" type="goal_feeder.py" name="goal_manager">
+      <param name="goals_filename" type="string" value="$(arg actor_trajectory_file)"/>
+      <param name="frame_id" type="string" value="$(arg global_frame_id)"/>
+      <param name="robot_base_frame_id" type="string" value="$(arg actor_name)/base_link"/>
+      <param name="move_base_actionserver_name" type="string" value="/$(arg actor_name)/move_base"/>
+      <param name="wait_time" type="double" value="0.00005"/>
+      <param name="interpolate" type="boolean" value="False"/>
+      <param name="loop" type="boolean" value="True"/>
+      <param name="visual_pub_topic_name" type="string" value="/$(arg actor_name)/markers"/>
+    </node>
    </group>
 </launch> 
