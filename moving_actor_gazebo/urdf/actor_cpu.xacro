@@ -17,6 +17,7 @@
       <odometryFrame>$(arg tf_prefix)/odom</odometryFrame>
       <odometryRate>20.0</odometryRate>
       <robotBaseFrame>$(arg tf_prefix)/base_footprint</robotBaseFrame>
+      <enableYAxis>1</enableYAxis>
     </plugin>
   </gazebo>
 
@@ -28,10 +29,26 @@
 
   <link name="$(arg tf_prefix)/base_link">
     <inertial>
+      <origin xyz="0.0 0.0 -0.85" rpy="0 0 0"/>
       <mass value="80"/>
       <inertia ixx="22.85" ixy="0.0" ixz="0.0" iyy="22.85" iyz="0.0" izz="2.5"/>
     </inertial>
-    <visual name="$(arg actor_name)_magic_carpet">
+
+    <collision name="$(arg actor_name)_collision">
+      <origin xyz="0 0 0.0" rpy="0.0 0 0"/>
+      <geometry>
+        <box size="0.5 0.5 1.8"/>
+      </geometry>
+    </collision> 
+
+    <visual name="$(arg actor_name)_visual">
+      <origin xyz="0 0 -0.9" rpy="0.0 0 1.54"/>
+      <geometry>
+        <mesh filename="model://person_standing/meshes/standing.dae"/>
+      </geometry>
+    </visual>
+
+    <!-- <visual name="$(arg actor_name)_magic_carpet">
       <origin xyz="0 0 0.0" rpy="0.0 0 0"/>
       <geometry>
         <box size="0.5 0.5 0.02"/>
@@ -43,18 +60,22 @@
       <geometry>
         <mesh filename="model://person_standing/meshes/standing.dae"/>
       </geometry>
-    </collision>
-
+    </collision> 
+    
     <visual name="$(arg actor_name)_visual">
       <origin xyz="0 0 0.03" rpy="0.0 0 1.54"/>
       <geometry>
         <mesh filename="model://person_standing/meshes/standing.dae"/>
       </geometry>
     </visual>
+    -->
+
   </link>
 
   <gazebo reference="$(arg tf_prefix)/base_link">
     <selfCollide>false</selfCollide>
+    <mu1>0.02</mu1>
+    <mu2>0.02</mu2>
   </gazebo>
 
 
@@ -75,7 +96,7 @@
     <parent link="$(arg tf_prefix)/base_link"/>
     <child link="$(arg tf_prefix)/hokuyo"/>
     <axis xyz="0 1 0" />
-    <origin xyz="0.175 0 0.73" rpy="0 0 0"/>
+    <origin xyz="0.27 0 -0.85" rpy="0 0 0"/>
   </joint>
 
 

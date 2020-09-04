@@ -22,8 +22,8 @@ TebLocalPlannerROS:
  acc_lim_x: 0.5
  acc_lim_theta:  3.2
 
- max_vel_x: 1.0
- min_vel_x: -1.0
+ max_vel_x: 0.6
+ min_vel_x: -0.3
 
  max_vel_theta: 1.0
  min_vel_theta: -1.0
@@ -109,7 +109,7 @@ TebLocalPlannerROS:
 
 ## The parameters must be added for each plugin separately
 costmap_converter/CostmapToLinesDBSRANSAC:
-   cluster_max_distance: 0.4
+   cluster_max_distance: 1.2
    cluster_min_pts: 2
    ransac_inlier_distance: 0.15
    ransac_min_inliers: 10
