@@ -20,7 +20,8 @@ import tf2_ros
 import tf2_geometry_msgs
 from visualization_msgs.msg import MarkerArray, Marker
 
-
+from gazebo_msgs.msg import ModelState 
+from gazebo_msgs.srv import SetModelState
 
 class GoalFeeder(object):
 
@@ -45,16 +46,41 @@ class GoalFeeder(object):
         while goOn:
           (x,y,yaw) = self.getGoals(self.goals_filename)
 
+          # teletransport the actor into the first position of the trajectory defined
+          # calling gazebo service
+          state_msg = ModelState()
+          state_msg.model_name = self.model_name
+          state_msg.pose.position.x = x[0]
+          state_msg.pose.position.y = y[0]
+
+          [qx,qy,qz,qw]=tf.transformations.quaternion_from_euler(0,0,yaw[0])
+          state_msg.pose.orientation.x = qx
+          state_msg.pose.orientation.y = qy
+          state_msg.pose.orientation.z = qz
+          state_msg.pose.orientation.w = qw
+
+          resp = self.set_state( state_msg )
+
           # send them one by one
-          for i in range(0,len(x)):          
+          for i in range(1,len(x)):          
             self.plotTargets(x[i:], y[i:], yaw[i:] )
             goal = self.createGoalMsg(x[i], y[i], yaw[i])
             self.move_base_client.send_goal(goal,feedback_cb=self.feedback_callback)
             self.waitForArrival(i)
 
           goOn = (not rospy.is_shutdown()) and self.loop
+
           if goOn:
             rospy.loginfo("["+rospy.get_name()+"] " + "Re-starting goal sending")        
+          else:
+            # call service to send the actor to a position which doesn't bother
+            state_msg = ModelState()
+            state_msg.model_name = self.model_name
+            state_msg.pose.position.x = 20
+            state_msg.pose.position.y = int(self.model_name[-1])
+
+            resp = self.set_state( state_msg )
+
    
     def waitForArrival(self, goal_i):      
       hasArrived = False
@@ -130,6 +156,7 @@ class GoalFeeder(object):
         return arrow
 
     def loadROSParams(self):
+        self.model_name = rospy.get_param('~model_name', "actor00")
         self.frame_id = rospy.get_param('~frame_id', "world")
         self.robot_base_frame_id = rospy.get_param('~robot_base_frame_id', "actor00/base_link")
 
@@ -138,6 +165,7 @@ class GoalFeeder(object):
 
         self.goals_filename = rospy.get_param(
             '~goals_filename', '../config/trajectories/trajectory.json')
+
 
         self.wait_time = rospy.get_param(
             '~wait_time', 0.00005)
@@ -155,8 +183,11 @@ class GoalFeeder(object):
         # publishers
         self.visual_pub = rospy.Publisher(self.visual_pub_topic_name, MarkerArray, queue_size=1, latch=True)
 
-        # service clients        
-        # ... none here
+        # service clients         
+        rospy.wait_for_service('/gazebo/set_model_state')
+        self.set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+        rospy.loginfo("Gazebo set_model_state service available")
+
         # action service clients        
         self.move_base_client = actionlib.SimpleActionClient(self.move_base_actionserver_name,MoveBaseAction)
         self.move_base_client.wait_for_server()
