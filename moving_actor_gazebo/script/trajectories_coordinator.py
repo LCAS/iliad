@@ -5,6 +5,7 @@ import numpy as np
 import json
 import roslaunch
 import rosnode
+from rosgraph_msgs.msg import Clock
 
 class trajectories_coordinator(object):
 
@@ -13,9 +14,10 @@ class trajectories_coordinator(object):
 		self.trajectories_file_name = rospy.get_param('~trajectories_file_name',"my_trajectories_example.txt")		
 		self.num_available_actors = rospy.get_param('~num_available_actors',2)
 		self.relative_times = rospy.get_param('~relative_times',1)
-		self.actor_trajectory_path = rospy.get_param('~relative_times',"$(find moving_actor_gazebo)/script/")
+		self.actor_trajectory_path = rospy.get_param('~actor_trajectory_path',"$(find moving_actor_gazebo)/script/")
 		
 		self.run()
+
 
 	def execute_trajecory(self,trajectory_to_execute):
 		print('execute_trajectory:'+str(trajectory_to_execute))
@@ -63,10 +65,13 @@ class trajectories_coordinator(object):
 		# Read trajectories file
 		self.trajectories_times = np.loadtxt(self.trajectories_file_name,delimiter=";",dtype="float",usecols=0)
 		self.my_trajectories = np.loadtxt(self.trajectories_file_name,delimiter=";",dtype="string",usecols=1)
+		while rospy.get_time()==0:
+			pass
 
 		if self.relative_times:
 			self.trajectories_times = self.trajectories_times + rospy.get_time()
-	
+
+		
 		self.actor_working = np.zeros(self.num_available_actors)
 		self.actor_processes = {}
 
@@ -95,11 +100,14 @@ class trajectories_coordinator(object):
 					print("All trajectories completed")
 					return
 			
-			#print("Actors working:",self.actor_working)
+			print("Actors working:",self.actor_working)
 			r.sleep()
 
 
 
 if __name__ == '__main__':
 	rospy.init_node('trajectories_coordinator_node', anonymous=True)
-	tc = trajectories_coordinator()
+	try:
+		tc = trajectories_coordinator()
+	except rospy.ROSInterruptException:
+		pass
