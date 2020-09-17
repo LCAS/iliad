@@ -32,7 +32,7 @@ class ConstraintsCostmapV2(object):
         Here lies the costmap logic.
     """
 
-    def __init__(self, ref_costmap, update_center_x, update_center_y, update_width, update_height, d2, d1, w, blind_offset ):        
+    def __init__(self, ref_costmap, update_width, update_height, d2, d1, w, blind_offset ):        
         # Robot shape: This is a rectangle, but we can use other stuff 
         self.d2 = d2  # robot center to fork edge distance
         self.d1 = d1  # robot center to front laser distance
@@ -81,31 +81,8 @@ class ConstraintsCostmapV2(object):
         self.update.header.seq = -1
       
         # update size
-        self.update.width  = update_width
+        self.update.width = update_width
         self.update.height = update_height
-
-        # initial clear space
-        self.update.data = np.zeros(self.update.width * self.update.height)
-
-        # get center cell
-        (ih0,jh0,valid) = self.pose2cell(update_center_x, update_center_y)
-
-        # update grid starts here                
-        self.update.x = ih0 - self.update.width/2
-        self.update.y = jh0 - self.update.height/2    
-
-        # grids
-        self.min_update_x = update_center_x -(self.update.width /2.0)* self.resolution 
-        self.max_update_x = update_center_x + (self.update.width /2.0)* self.resolution
-        self.min_update_y = update_center_y -(self.update.height/2.0)* self.resolution 
-        self.max_update_y = update_center_y + (self.update.height/2.0)* self.resolution
-
-        x = np.linspace(self.min_update_x, self.max_update_x, self.update.width)        
-        y = np.linspace(self.min_update_y, self.max_update_y , self.update.height)        
-        self.xx, self.yy = np.meshgrid(x, y)   
-        xg, yg = self.xx.flatten(), self.yy.flatten()
-        self.grid_points = np.vstack((xg,yg)).T 
-         
 
     def get_map(self):
         with self.lock: 
@@ -131,6 +108,53 @@ class ConstraintsCostmapV2(object):
             if not (robotPoseSt == None):
                 self.local_robot_pose = robotPoseSt            
                 #self.printPoseSt(robotPoseSt, "robot pose received")
+                                
+                update_center_x = robotPoseSt.pose.position.x
+                update_center_y = robotPoseSt.pose.position.y
+
+                # get center cell
+                (ih0,jh0,valid) = self.pose2cell(update_center_x, update_center_y)
+                #rospy.logdebug("Node [" + rospy.get_name() + "] " + "Update center at (" + str(ih0) + ", " + str(jh0) + ") " ) 
+                #rospy.logdebug("Node [" + rospy.get_name() + "] " + "Update dims  are (" + str(self.update.width) + ", " + str(self.update.height) + ") " ) 
+
+                # get update margins
+                minx = ih0 - self.update.width/2
+                miny = jh0 - self.update.height/2
+                maxx = ih0 + self.update.width/2
+                maxy = jh0 + self.update.height/2
+                #rospy.logdebug("Node [" + rospy.get_name() + "] " + "BB is (" + str(minx) + ", " + str(miny) + ") to (" + str(maxx) + ", " +str(maxy) + ")" ) 
+
+                # adjust update center to fit inside grid
+                if minx<0:
+                    ih0 = self.update.width/2
+                elif maxx > self.width:
+                    ih0 = self.width - self.update.width/2
+                if miny<0:
+                    jh0 = self.update.height/2
+                elif maxy > self.height:
+                    jh0 = self.height - self.update.height/2
+
+                #rospy.logdebug("Node [" + rospy.get_name() + "] " + "New update center at (" + str(ih0) + ", " + str(jh0) + ") " ) 
+
+                # update grid starts here                
+                self.update.x = ih0 - self.update.width/2
+                self.update.y = jh0 - self.update.height/2    
+
+                # grids
+                self.min_update_x = update_center_x -(self.update.width/2.0)* self.resolution 
+                self.max_update_x = update_center_x + (self.update.width /2.0)* self.resolution
+                self.min_update_y = update_center_y -(self.update.height/2.0)* self.resolution 
+                self.max_update_y = update_center_y + (self.update.height/2.0)* self.resolution
+
+                x = np.linspace(self.min_update_x, self.max_update_x, self.update.width)        
+                y = np.linspace(self.min_update_y, self.max_update_y , self.update.height)        
+                self.xx, self.yy = np.meshgrid(x, y)   
+                xg, yg = self.xx.flatten(), self.yy.flatten()
+                self.grid_points = np.vstack((xg,yg)).T 
+
+                # initial clear space
+                self.update.data = np.zeros(self.update.width * self.update.height)
+
 
     def update_angle_bounds(self, angle_bounds):
         with self.lock: 
@@ -248,6 +272,7 @@ class ConstraintsCostmapV2(object):
                 #             update.data[k] = 100
 
                 # distance to human in each cell
+                
                 dh = np.sqrt(np.power(self.xx-xh,2)+np.power(self.yy-yh,2))
                 
                 
@@ -429,7 +454,7 @@ class IliadConstraintsCostmapServerV2(object):
         self.map = map
         if not self.gotMap:
             rospy.loginfo("["+rospy.get_name()+"] " + "Map received. Creating costmap.")
-            self.icc = ConstraintsCostmapV2(self.map, self.update_center_x, self.update_center_y, self.update_width, self.update_height, self.d2, self.d1, self.w, self.blind_offset )
+            self.icc = ConstraintsCostmapV2(self.map, self.update_width, self.update_height, self.d2, self.d1, self.w, self.blind_offset )
             rospy.loginfo("["+rospy.get_name()+"] " + "Costmap created. Publishing initial Map.")
             self.costmap_topic_pub.publish(self.icc.get_map())
         self.gotMap = True
