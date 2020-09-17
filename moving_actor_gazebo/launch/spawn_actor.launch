@@ -30,7 +30,6 @@ MFC: based on Adam's spawn actor from RASberry
       <param name="publish_frequency" type="double" value="30.0" />
     </node>
 
-
     <node pkg="tf" type="static_transform_publisher" name="world_2_actor_odom_tfb"
             args="0.0 0.0 0.0  0.0 0.0 0.0 $(arg global_frame_id) $(arg actor_name)/odom 20"/>
       
@@ -39,15 +38,21 @@ MFC: based on Adam's spawn actor from RASberry
       <arg name="map_topic" value="$(arg map_topic)"/>
     </include>
 
+<!---
     <node pkg="moving_actor_gazebo" type="goal_feeder.py" name="goal_manager">
+      <param name="model_name" type="string" value="$(arg actor_name)"/>
       <param name="goals_filename" type="string" value="$(arg actor_trajectory_file)"/>
       <param name="frame_id" type="string" value="$(arg global_frame_id)"/>
       <param name="robot_base_frame_id" type="string" value="$(arg actor_name)/base_link"/>
       <param name="move_base_actionserver_name" type="string" value="/$(arg actor_name)/move_base"/>
       <param name="wait_time" type="double" value="0.00005"/>
       <param name="interpolate" type="boolean" value="False"/>
-      <param name="loop" type="boolean" value="True"/>
+      <param name="loop" type="boolean" value="False"/>
       <param name="visual_pub_topic_name" type="string" value="/$(arg actor_name)/markers"/>
     </node>
+-->
+
+
    </group>
+
 </launch> 
