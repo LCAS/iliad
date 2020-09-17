@@ -18,9 +18,8 @@ MFC: based on Adam's spawn actor from RASberry
 
   <arg name="actor_trajectory_file" default="$(find moving_actor_gazebo)/config/trajectories/trajectory.json"/>
 
-  <arg name="actor_xacro_file" default="$(find moving_actor_gazebo)/urdf/actor_cpu.xacro"/>
-  <arg name="actor_xacro_file" value="$(find moving_actor_gazebo)/urdf/actor_gpu.xacro" if="$(eval arg('use_gpu_gazebo_lidar') == 'true')"/>
-
+  <arg name="actor_xacro_file" default="$(find moving_actor_gazebo)/urdf/actor.xacro"/>
+  
   <group ns="$(arg actor_name)">
 
     <param name="robot_description" command="$(find xacro)/xacro '$(arg actor_xacro_file)' '--inorder' actor_name:='$(arg actor_name)' tf_prefix:='$(arg actor_name)' use_gpu:='$(arg use_gpu_gazebo_lidar)'"/>
