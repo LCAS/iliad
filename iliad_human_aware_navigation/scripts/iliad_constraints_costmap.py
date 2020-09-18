@@ -134,7 +134,8 @@ class ConstraintsCostmapV2(object):
                 elif maxy > self.height:
                     jh0 = self.height - self.update.height/2
 
-                #rospy.logdebug("Node [" + rospy.get_name() + "] " + "New update center at (" + str(ih0) + ", " + str(jh0) + ") " ) 
+                #rospy.logdebug("Node [" + rospy.get_name() + "] " + "New update center at (" + str(ih0) + ", " + str(jh0) + ") " )                                 
+                (update_center_x, update_center_y,valid) = self.cell2pose(ih0,jh0)
 
                 # update grid starts here                
                 self.update.x = ih0 - self.update.width/2
