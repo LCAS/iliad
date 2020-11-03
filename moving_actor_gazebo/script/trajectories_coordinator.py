@@ -11,7 +11,7 @@ class trajectories_coordinator(object):
 
 	def __init__(self):
 		#parameters
-		self.trajectories_file_name = rospy.get_param('~trajectories_file_name',"my_trajectories_example.txt")		
+		self.trajectories_file = rospy.get_param('~trajectories_file',"my_trajectories_example.txt")		
 		self.num_available_actors = rospy.get_param('~num_available_actors',2)
 		self.relative_times = rospy.get_param('~relative_times',1)
 		self.actor_trajectory_path = rospy.get_param('~actor_trajectory_path',"$(find moving_actor_gazebo)/script/")
@@ -34,7 +34,7 @@ class trajectories_coordinator(object):
 
 			# copy the trajectory to the file "actorXX.json"
 			my_json_trajectory = json.loads(self.my_trajectories[trajectory_to_execute])
-			with open('actor0'+str(actor_to_execute)+'.json','w') as jfile:
+			with open(self.actor_trajectory_path+'actor0'+str(actor_to_execute)+'.json','w') as jfile:
 				json.dump(my_json_trajectory,jfile)
 
 			actor_name = "actor0"+str(actor_to_execute)
@@ -63,8 +63,8 @@ class trajectories_coordinator(object):
 
 	def run(self):
 		# Read trajectories file
-		self.trajectories_times = np.loadtxt(self.trajectories_file_name,delimiter=";",dtype="float",usecols=0)
-		self.my_trajectories = np.loadtxt(self.trajectories_file_name,delimiter=";",dtype="string",usecols=1)
+		self.trajectories_times = np.loadtxt(self.trajectories_file,delimiter=";",dtype="float",usecols=0)
+		self.my_trajectories = np.loadtxt(self.trajectories_file,delimiter=";",dtype="string",usecols=1)
 		while rospy.get_time()==0:
 			pass
 

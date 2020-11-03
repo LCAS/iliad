@@ -76,8 +76,8 @@ class GoalFeeder(object):
             # call service to send the actor to a position which doesn't bother
             state_msg = ModelState()
             state_msg.model_name = self.model_name
-            state_msg.pose.position.x = 20
-            state_msg.pose.position.y = int(self.model_name[-1])
+            state_msg.pose.position.x = 30 + int(self.model_name[-1])
+            state_msg.pose.position.y = 0
 
             resp = self.set_state( state_msg )
 

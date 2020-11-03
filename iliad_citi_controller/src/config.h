@@ -1,5 +1,0 @@
-#define SW_BUILD_SIMULATION
-#define SW_ENABLE_LOGGING
-/* #undef SW_ENABLE_NAVSERVER_READER */
-
-const unsigned int SW_PREVIEW_WINDOW_LEN = 25;
