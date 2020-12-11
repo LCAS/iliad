@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+
+
+<launch>  
+
+  <node pkg="moving_actor_gazebo" type="timed_trajectories_coordinator.py" name="trajectory_coordinator_node" output="screen">
+    <param name="trajectories_file" value="$(find moving_actor_gazebo)/config/trajectories/orkla_rectangle.txt"/>
+    <param name="num_available_actors" value="1" />
+    <param name="relative_times" value="1"/>
+    <param name="actor_trajectory_path" value="$(find moving_actor_gazebo)/config/trajectories/" />
+  </node>
+
+</launch> 

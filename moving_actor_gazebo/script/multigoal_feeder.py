@@ -41,65 +41,84 @@ class GoalFeeder(object):
 
         rospy.loginfo("["+rospy.get_name()+"] " + "Init done.")
 
+        self.getTrajectories()
         # main loop here
         goOn = not rospy.is_shutdown()
         while goOn:
-          (x,y,yaw) = self.getGoals(self.goals_filename)
+          for t in range(0,len(self.trajectories_data)):
+            rospy.loginfo("Starting trajectory : "+str(t))
+            (x,y,yaw) = self.getGoals(t)
 
-          # teletransport the actor into the first position of the trajectory defined
-          # calling gazebo service
-          state_msg = ModelState()
-          state_msg.model_name = self.model_name
-          state_msg.pose.position.x = x[0]
-          state_msg.pose.position.y = y[0]
+            # teletransport the actor into the first position of the trajectory defined
+            # calling gazebo service
+            state_msg = ModelState()
+            state_msg.model_name = self.model_name
+            state_msg.pose.position.x = x[0]
+            state_msg.pose.position.y = y[0]
 
-          [qx,qy,qz,qw]=tf.transformations.quaternion_from_euler(0,0,yaw[0])
-          state_msg.pose.orientation.x = qx
-          state_msg.pose.orientation.y = qy
-          state_msg.pose.orientation.z = qz
-          state_msg.pose.orientation.w = qw
+            [qx,qy,qz,qw]=tf.transformations.quaternion_from_euler(0,0,yaw[0])
+            state_msg.pose.orientation.x = qx
+            state_msg.pose.orientation.y = qy
+            state_msg.pose.orientation.z = qz
+            state_msg.pose.orientation.w = qw
+            resp = self.set_state( state_msg )
 
-          resp = self.set_state( state_msg )
+            # send them one by one
+            for i in range(1,len(x)):          
+              self.plotTargets(x[i:], y[i:], yaw[i:] )
+              goal = self.createGoalMsg(x[i], y[i], yaw[i])
+              self.move_base_client.send_goal(goal)
+              
+              finished_within_time = self.move_base_client.wait_for_result(rospy.Duration(5)) 
+            
+              # If we don't get there in time, abort the goal
+              if not finished_within_time:
+                  self.move_base_client.cancel_goal()
+                  rospy.loginfo("Timed out achieving goal")
+              else:
+                  # We made it!
+                  state = self.move_base_client.get_state()
+                  if state == 3:
+                      rospy.loginfo("Goal succeeded!")
 
-          # send them one by one
-          for i in range(1,len(x)):          
-            self.plotTargets(x[i:], y[i:], yaw[i:] )
-            goal = self.createGoalMsg(x[i], y[i], yaw[i])
-            self.move_base_client.send_goal(goal,feedback_cb=self.feedback_callback)
-            self.waitForArrival(i)
+              #self.waitForArrival(i)
 
-          goOn = (not rospy.is_shutdown()) and self.loop
-
-          if goOn:
-            rospy.loginfo("["+rospy.get_name()+"] " + "Re-starting goal sending")        
-          else:
-            # call service to send the actor to a position which doesn't bother
+            # call service to send the actor to a position which doesn't bother when the traj is completed
             state_msg = ModelState()
             state_msg.model_name = self.model_name
             state_msg.pose.position.x = 20 + int(self.model_name[-1])
             state_msg.pose.position.y = 0
-
             resp = self.set_state( state_msg )
 
+          goOn = (not rospy.is_shutdown()) and self.loop
+
+          if goOn:
+            rospy.loginfo("["+rospy.get_name()+"] " + "Re-starting trajectories")        
    
-    def waitForArrival(self, goal_i):      
-      hasArrived = False
-      fails = 0
-      while (not hasArrived) and (not rospy.is_shutdown()):
-        hasArrived = self.move_base_client.wait_for_result(rospy.Duration.from_sec(self.wait_time))              
+    # def waitForArrival(self, goal_i):      
+    #   hasArrived = False
+    #   fails = 0
+    #   while (not hasArrived) and (not rospy.is_shutdown()):
+    #     hasArrived = self.move_base_client.wait_for_result(rospy.Duration.from_sec(self.wait_time))              
+    #     if hasArrived:
+    #         rospy.logdebug_throttle(5, "["+rospy.get_name()+"] Intermediate goal " + str(goal_i)+" reached")
+    #         fails = 0
+    #     else:
+    #         fails = fails + 1
+    #         rospy.logdebug_throttle(5, "["+rospy.get_name()+"] " + "Goal not reached yet ... ("+ str(fails) + ")")        
+    #         status = self.move_base_client.get_state()
+    #         rospy.logdebug_throttle(5, "["+rospy.get_name()+"] "+ "Base Status is: " + str(status) )
+    #         if fails ==( 30/self.wait_time): 
+    #           rospy.logwarn( "["+rospy.get_name()+"] " + "Skipping goal")        
+    #           hasArrived = True   
+    #     print self.move_base_client.get_state() 
+    #     rospy.sleep(0.1)  
 
-        if hasArrived:
-            rospy.logdebug_throttle(5, "["+rospy.get_name()+"] Intermediate goal " + str(goal_i)+" reached")
-            fails = 0
-        else:
-            fails = fails + 1
-            rospy.logdebug_throttle(5, "["+rospy.get_name()+"] " + "Goal not reached yet ... ("+ str(fails) + ")")        
-            status = self.move_base_client.get_state()
-            rospy.logdebug_throttle(5, "["+rospy.get_name()+"] "+ "Base Status is: " + str(status) )
-            if fails ==( 30/self.wait_time): 
-              rospy.logwarn( "["+rospy.get_name()+"] " + "Skipping goal")        
-              hasArrived = True      
 
+
+    # def feedback_callback(self,config):
+    #     #print(config)
+    #     pass
 
     def createGoalMsg(self,x,y,a):    
       goal = MoveBaseGoal()
@@ -159,25 +178,12 @@ class GoalFeeder(object):
         self.model_name = rospy.get_param('~model_name', "actor00")
         self.frame_id = rospy.get_param('~frame_id', "world")
         self.robot_base_frame_id = rospy.get_param('~robot_base_frame_id', "actor00/base_link")
-
-        self.move_base_actionserver_name = rospy.get_param(
-            '~move_base_actionserver_name', '/actor00/move_base')
-
-        self.goals_filename = rospy.get_param(
-            '~goals_filename', '../config/trajectories/trajectory.json')
-
-
-        self.wait_time = rospy.get_param(
-            '~wait_time', 0.00005)
-
-        self.interpolate = rospy.get_param(
-            '~interpolate', False)
-
-        self.loop = rospy.get_param(
-            '~loop', True)
-
-        self.visual_pub_topic_name = rospy.get_param(
-            '~visual_pub_topic_name', '/actor00/markers')
+        self.move_base_actionserver_name = rospy.get_param('~move_base_actionserver_name', '/actor00/move_base')
+        self.trajectories_filename = rospy.get_param('~trajectories_filename', '../config/trajectories/trajectories.json')
+        self.wait_time = rospy.get_param('~wait_time', 0.00005)
+        self.interpolate = rospy.get_param('~interpolate', False)
+        self.loop = rospy.get_param('~loop', True)
+        self.visual_pub_topic_name = rospy.get_param('~visual_pub_topic_name', '/actor00/markers')
         
     def initROS(self):
         # publishers
@@ -205,26 +211,33 @@ class GoalFeeder(object):
 
         # Others        
 
-    def getGoals(self,filename):
-      with open(filename) as json_file:
-        data = json.load(json_file)
-        xgl = np.array(data['x'])
-        ygl = np.array(data['y'])
+    def getGoals(self,trajectory_number):
+      data = json.loads(self.trajectories_data[trajectory_number])
+      xgl = np.array(data['x'])
+      ygl = np.array(data['y'])
 
-        if 'yaw' in data.keys():
-          agl = data['yaw'] 
-        else:
-          p0=self.getRobotPoseSt(self.frame_id)
-          xgl = np.insert(xgl,0,p0.pose.position.x)
-          ygl = np.insert(ygl,0,p0.pose.position.y)
-          agl = np.arctan2(np.diff(ygl), np.diff(xgl))
-          xgl = xgl[1:]
-          ygl = ygl[1:]
+      if 'yaw' in data.keys():
+        agl = data['yaw'] 
+      else:
+        p0=self.getRobotPoseSt(self.frame_id)
+        xgl = np.insert(xgl,0,p0.pose.position.x)
+        ygl = np.insert(ygl,0,p0.pose.position.y)
+        agl = np.arctan2(np.diff(ygl), np.diff(xgl))
+        xgl = xgl[1:]
+        ygl = ygl[1:]
 
-        if self.interpolate:
-          (xgl,ygl,agl) = self.interpolateGoals(xgl,ygl,agl)
+      if self.interpolate:
+        (xgl,ygl,agl) = self.interpolateGoals(xgl,ygl,agl)
           
       return (xgl,ygl,agl)
+
+    def getTrajectories(self):
+      with open(self.trajectories_filename) as traj_file:
+        self.trajectories_data = np.genfromtxt(self.trajectories_filename,dtype="string",delimiter="\n")     
+
+        #rospy.loginfo(self.trajectories_data)
+        #rospy.loginfo(self.trajectories_number)
+
     
     def getRobotPoseSt(self, destFrame):
 
@@ -264,25 +277,9 @@ class GoalFeeder(object):
       yn = yn[1:]
       return (xn, yn, an)
 
-    def feedback_callback(self,config):
-        pass
-        #print(config)
-
-    # not used
-    def poseDist(self, poseStInit,poseStEnd):
-        dist =  math.sqrt(math.pow(poseStEnd.pose.position.x - poseStInit.pose.position.x, 2) +
-                          math.pow(poseStEnd.pose.position.y - poseStInit.pose.position.y, 2) +
-                          math.pow(poseStEnd.pose.position.z - poseStInit.pose.position.z, 2))
-        return dist
-
-    # not used
-    def isClose(self, goal):
-        robotPoseSt = self.getRobotPoseSt()
-        d = self.poseDist(goal,robotPoseSt)
-        return (d<0.2)
 
 if __name__ == '__main__': 
-  rospy.init_node("goal_provider")#, log_level=rospy.DEBUG)
+  rospy.init_node("multigoal_provider")#, log_level=rospy.DEBUG)
     # Go to class functions that do all the heavy lifting. Do error checking.
   try:
       v = GoalFeeder(rospy.get_name())

@@ -12,7 +12,7 @@ class trajectories_coordinator(object):
 	def __init__(self):
 		#parameters
 		self.trajectories_file = rospy.get_param('~trajectories_file',"my_trajectories_example.txt")		
-		self.num_available_actors = rospy.get_param('~num_available_actors',2)
+		self.num_available_actors = rospy.get_param('~num_available_actors',1)
 		self.relative_times = rospy.get_param('~relative_times',1)
 		self.actor_trajectory_path = rospy.get_param('~actor_trajectory_path',"$(find moving_actor_gazebo)/script/")
 		
@@ -63,14 +63,18 @@ class trajectories_coordinator(object):
 
 	def run(self):
 		# Read trajectories file
-		self.trajectories_times = np.loadtxt(self.trajectories_file,delimiter=";",dtype="float",usecols=0)
-		self.my_trajectories = np.loadtxt(self.trajectories_file,delimiter=";",dtype="string",usecols=1)
+		self.trajectories_times = np.loadtxt(self.trajectories_file,delimiter=";",dtype="float",usecols=0,ndmin=1)
+		self.my_trajectories = np.loadtxt(self.trajectories_file,delimiter=";",dtype="string",usecols=1,ndmin=1)
 		while rospy.get_time()==0:
 			pass
 
 		if self.relative_times:
 			self.trajectories_times = self.trajectories_times + rospy.get_time()
 
+		print "TIme:"
+		print rospy.get_time()
+		print "Trajectory times:"
+		print self.trajectories_times
 		
 		self.actor_working = np.zeros(self.num_available_actors)
 		self.actor_processes = {}
