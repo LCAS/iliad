@@ -59,10 +59,10 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>orunav_msgs</build_depend>
 
-  <run_depend>message_runtime</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>orunav_msgs</run_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>orunav_msgs</exec_depend>
 
 
 
