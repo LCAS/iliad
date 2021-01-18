@@ -5,7 +5,7 @@
 <group if="$(env ZONE0)">
 	<include file="$(find moving_actor_gazebo)/launch/spawn_actor_moving.launch">
 	    <arg name="actor_name" value="actor00" />
-	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/zone0_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
+	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/trajectories_zone0_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
 	    <arg name="map_topic" value="/map_laser2d"/>
 	    <arg name="use_gpu_gazebo_lidar" value="$(env GPU_GAZEBO_LIDAR)"/>
 	    <arg name="start_pose_x" value="20" />
@@ -20,7 +20,7 @@
 
 	<include file="$(find moving_actor_gazebo)/launch/spawn_actor_moving.launch">
 	    <arg name="actor_name" value="actor01" />
-	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/zone1_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
+	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/trajectories_zone1_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
 	    <arg name="map_topic" value="/map_laser2d"/>
 	    <arg name="use_gpu_gazebo_lidar" value="$(env GPU_GAZEBO_LIDAR)"/>
 	    <arg name="start_pose_x" value="21" />
@@ -33,7 +33,7 @@
 
 	<include file="$(find moving_actor_gazebo)/launch/spawn_actor_moving.launch">
 	    <arg name="actor_name" value="actor02" />
-	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/zone2_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
+	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/trajectories_zone2_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
 	    <arg name="map_topic" value="/map_laser2d"/>
 	    <arg name="use_gpu_gazebo_lidar" value="$(env GPU_GAZEBO_LIDAR)"/>
 	    <arg name="start_pose_x" value="22" />
@@ -46,7 +46,7 @@
 
 	<include file="$(find moving_actor_gazebo)/launch/spawn_actor_moving.launch">
 	    <arg name="actor_name" value="actor03" />
-	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/zone3_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
+	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/trajectories_zone3_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
 	    <arg name="map_topic" value="/map_laser2d"/>
 	    <arg name="use_gpu_gazebo_lidar" value="$(env GPU_GAZEBO_LIDAR)"/>
 	    <arg name="start_pose_x" value="23" />
@@ -59,7 +59,7 @@
 
 	<include file="$(find moving_actor_gazebo)/launch/spawn_actor_moving.launch">
 	    <arg name="actor_name" value="actor04" />
-	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/zone4_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
+	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/trajectories_zone4_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
 	    <arg name="map_topic" value="/map_laser2d"/>
 	    <arg name="use_gpu_gazebo_lidar" value="$(env GPU_GAZEBO_LIDAR)"/>
 	    <arg name="start_pose_x" value="24" />
@@ -72,7 +72,7 @@
 
 	<include file="$(find moving_actor_gazebo)/launch/spawn_actor_moving.launch">
 	    <arg name="actor_name" value="actor05" />
-	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/zone5_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
+	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/trajectories_zone5_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
 	    <arg name="map_topic" value="/map_laser2d"/>
 	    <arg name="use_gpu_gazebo_lidar" value="$(env GPU_GAZEBO_LIDAR)"/>
 	    <arg name="start_pose_x" value="25" />
