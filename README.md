@@ -19,6 +19,9 @@ Nodes that take hrsi outputs and (potentially) change the way ILIAD robot naviga
 ## iliad_oru_local_planer
 Uses ROS local planners to perform local changes to orunav trajectories.
 
+## iliad_goal_manager
+High level scheduler for assigning missions to the active robots.
+
 ## Other relevant packages:
 
 * strands_hri
