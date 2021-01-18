@@ -1,0 +1,3 @@
+[submodule "stefmap_exploration"]
+	path = stefmap_exploration
+	url = https://github.com/sergimolina/stefmap_exploration.git
