@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
      <node pkg="iliad_goal_manager" type="goal_manager_node.py" name="goal_manager_node" output="screen">
+     	<param name="orders_file" value="$(find iliad_goal_manager)/config/OPTLoading_XMLoutput_20201208153254704_draft.xml"/>	
     	<param name="missions_file" value="$(find iliad_goal_manager)/config/orkla_missions.txt"/>
 		<param name="orders_times_file" value="$(find iliad_goal_manager)/config/orkla_orders_times.txt" />
     	<param name="items_locations_file" value="$(find iliad_goal_manager)/config/orkla_item_locations.json" />

@@ -96,19 +96,24 @@ class iliad_goal_manager(object):
 			# read orders file
 			if self.orders_file != "":
 				self.missions = self.parse_orders_file()
+				self.missions_file = ""
 			elif self.missions_file != "":
 				self.missions = self.parse_missions_file()
 			else:
 				print "NO MISSIONS BEING PROVIDED - CLOSING NODE"
 				return
 
-			print "\n",self.missions
+			#print "\n",self.missions
 			# Exmple of missions variable structure with 4 simple orders
 			#self.test_missions = [["pick:soup","go:home"], ["pick:soup","go:home"]]
 			#print "\n",self.test_missions
 
-
 			self.parse_orders_times_file()
+
+			if len(self.missions) != len(self.missions_times):
+				print "NUM MISSIONS IS DIFFERENT FROM NUM MISSION TIMES PROVIDED - CLOSING NODE"
+				return
+
 			self.parse_item_locations_file()
 			self.parse_location_coordinates_file()
 
@@ -133,7 +138,7 @@ class iliad_goal_manager(object):
 			print ""
 			print "> Order "+str(o)
 			for pallet_type in range(0,len(orders[o])):
-				if orders[o][pallet_type].tag == "FullPallets":
+				if orders[o][pallet_type].tag == "FullPallets" and len(orders[o][pallet_type]) > 0:
 					print "--> Num of full pallets: " + str(len(orders[o][pallet_type]))
 					for pallet in range(0,len(orders[o][pallet_type])):
 						print "----> Pallet "+str(pallet)
@@ -141,8 +146,14 @@ class iliad_goal_manager(object):
 						print "------> Item: "+item_name
 						mission.append("go:fullpallet_"+item_name)
 						mission.append("pick:fullpallet_"+item_name)
+						
+						mission.append("go:shipping_area")
+						mission.append("drop:pallet")
 
-				if orders[o][pallet_type].tag == "MixedPallets":
+				else:
+					print "--> Num of full pallets: 0"
+
+				if orders[o][pallet_type].tag == "MixedPallets" and len(orders[o][pallet_type]) > 0:
 					print "--> Num of mixed pallets: " + str(len(orders[o][pallet_type]))
 					for pallet in range(0,len(orders[o][pallet_type])):
 						print "----> Pallet "+str(pallet)
@@ -161,8 +172,10 @@ class iliad_goal_manager(object):
 								mission.append("pick:"+item_name)
 							previous_item_name = item_name
 
-				mission.append("go:shipping_area")
-				mission.append("drop:pallet")
+						mission.append("go:shipping_area")
+						mission.append("drop:pallet")
+				else:
+					print "--> Num of mixed pallets: 0"
 
 			mission.append("go:home")
 			missions.append(mission)
