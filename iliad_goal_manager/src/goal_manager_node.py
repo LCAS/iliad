@@ -8,6 +8,7 @@ import tkMessageBox
 import xml.etree.ElementTree as ET
 import json
 from orunav_msgs.msg import RobotReport
+import tf.transformations
 
 class iliad_goal_manager(object):
 
@@ -18,8 +19,8 @@ class iliad_goal_manager(object):
 		self.orders_times_file = rospy.get_param('~orders_times_file',"")
 		self.items_locations_file = rospy.get_param('~items_locations_file',"")
 		self.locations_coordinates_file = rospy.get_param('~locations_coordinates_file',"")
+		self.locations_frame_id = rospy.get_param('~locations_frame_id',"world")
 		self.mode = rospy.get_param('~mode',0) # [0]: click and point, [1]: missions 
-
 
 		# ini variables
 		self.missions_started = 0
@@ -116,11 +117,7 @@ class iliad_goal_manager(object):
 
 			self.parse_item_locations_file()
 			self.parse_location_coordinates_file()
-
-
-			#self.parse_locations_file()
-			self.locations = {"empty_pallet":[1,1,0],"Hallonsoppa":[2,2,0],"Jacky":[3,3,0],"Chocolate":[4,4,0]}
-
+			
 			#start gui variables		
 			self.start_gui()
 			
@@ -547,33 +544,6 @@ class iliad_goal_manager(object):
 
 		return
 
-	def robot1_pointclickgoal_callback(self,msg):
-		self.robot1_goal_pub.publish(msg)
-
-	def robot2_pointclickgoal_callback(self,msg):
-		self.robot2_goal_pub.publish(msg)
-
-	def robot3_pointclickgoal_callback(self,msg):
-		self.robot3_goal_pub.publish(msg)
-
-	def robot4_pointclickgoal_callback(self,msg):
-		self.robot4_goal_pub.publish(msg)
-
-	def robot5_pointclickgoal_callback(self,msg):
-		self.robot5_goal_pub.publish(msg)
-
-	def robot6_pointclickgoal_callback(self,msg):
-		self.robot6_goal_pub.publish(msg)
-
-	def robot7_pointclickgoal_callback(self,msg):
-		self.robot7_goal_pub.publish(msg)
-
-	def robot8_pointclickgoal_callback(self,msg):
-		self.robot8_goal_pub.publish(msg)
-
-	def robot9_pointclickgoal_callback(self,msg):
-		self.robot9_goal_pub.publish(msg)
-
 	def assign_missions_and_goals(self,timer):
 		if self.missions_started:
 			#check if there is any mission queued that can be assigned to a robot
@@ -634,32 +604,55 @@ class iliad_goal_manager(object):
 		if action == "go":
 			#send a goal to the coordinator
 			item = goal_description[1]
+			location = self.item_locations_data[item]
+			coordinates = self.location_coordinates_data[location]
+			x = coordinates[0]
+			y = coordinates[1]
+			yaw = coordinates[2]
+			print "Coordinates "+str(coordinates)
 
-			if item =="home":
-				location = self.item_locations_data[item+"_"+robot]
-				coordinates = self.location_coordinates_data[location]
-				x = coordinates[0]
-				y = coordinates[1]
-				yaw = coordinates[2]
-				print "Coordinates"+str(coordinates)
-			else:
-				location = self.item_locations_data[item]
-				coordinates = self.location_coordinates_data[location]
-				x = coordinates[0]
-				y = coordinates[1]
-				yaw = coordinates[2]
-				print "Coordinates"+str(coordinates)
+			location_goal = PoseStamped()
+			location_goal.header.stamp = rospy.get_rostime()
+			location_goal.header.frame_id = self.locations_frame_id
+			location_goal.pose.position.x = coordinates[0] 
+			location_goal.pose.position.y = coordinates[1]
+			[qx,qy,qz,qw]=tf.transformations.quaternion_from_euler(0,0,coordinates[2])
+			location_goal.pose.orientation.x = qx
+			location_goal.pose.orientation.y = qy
+			location_goal.pose.orientation.z = qz
+			location_goal.pose.orientation.w = qw
 
-			# now we use a 10 seconds wait instead
-			self.active_robots[robot]["wait"] = rospy.get_time() +10
+			if robot == "robot1":
+				self.robot1_goal_pub.publish(location_goal)
+			elif robot == "robot2":
+				self.robot2_goal_pub.publish(location_goal)
+			elif robot == "robot3":
+				self.robot3_goal_pub.publish(location_goal)
+			elif robot == "robot4":
+				self.robot4_goal_pub.publish(location_goal)
+			elif robot == "robot5":
+				self.robot5_goal_pub.publish(location_goal)
+			elif robot == "robot6":
+				self.robot6_goal_pub.publish(location_goal)
+			elif robot == "robot7":
+				self.robot7_goal_pub.publish(location_goal)
+			elif robot == "robot8":
+				self.robot8_goal_pub.publish(location_goal)
+			elif robot == "robot9":
+				self.robot9_goal_pub.publish(location_goal)
 
-		if action == "pick":
+			self.active_robots[robot]["wait"] = rospy.get_time() + 30
+
+		elif action == "pick":
 			object = goal_description[1]
 			# since there is not actual picking in the sim we use a wait instead
 			self.active_robots[robot]["wait"] = rospy.get_time() + 5
 
-		if action == "drop":
+		elif action == "drop":
 			# now we use a 10 seconds wait instead
+			self.active_robots[robot]["wait"] = rospy.get_time() + 10
+
+		else:
 			self.active_robots[robot]["wait"] = rospy.get_time() + 10
 
 		return
@@ -705,7 +698,7 @@ class iliad_goal_manager(object):
 
 
 		self.gui.update() # non blocking
-		
+
 	def run(self):
 		r = rospy.Rate(10)
 		while not rospy.is_shutdown() and self.shutdown_node == False:
@@ -733,6 +726,35 @@ class iliad_goal_manager(object):
 			self.mission_status_pub.publish(json.dumps(self.mission_status))
 
 			r.sleep()
+
+	
+	def robot1_pointclickgoal_callback(self,msg):
+		self.robot1_goal_pub.publish(msg)
+
+	def robot2_pointclickgoal_callback(self,msg):
+		self.robot2_goal_pub.publish(msg)
+
+	def robot3_pointclickgoal_callback(self,msg):
+		self.robot3_goal_pub.publish(msg)
+
+	def robot4_pointclickgoal_callback(self,msg):
+		self.robot4_goal_pub.publish(msg)
+
+	def robot5_pointclickgoal_callback(self,msg):
+		self.robot5_goal_pub.publish(msg)
+
+	def robot6_pointclickgoal_callback(self,msg):
+		self.robot6_goal_pub.publish(msg)
+
+	def robot7_pointclickgoal_callback(self,msg):
+		self.robot7_goal_pub.publish(msg)
+
+	def robot8_pointclickgoal_callback(self,msg):
+		self.robot8_goal_pub.publish(msg)
+
+	def robot9_pointclickgoal_callback(self,msg):
+		self.robot9_goal_pub.publish(msg)
+
 
 
 if __name__ == '__main__':
