@@ -3,8 +3,8 @@
      <node pkg="iliad_goal_manager" type="goal_manager_node.py" name="goal_manager_node" output="screen">
      	<param name="mode" value="1"/> <!-- [0] click and point mode,  [1] mission mode -->
      	<!--<param name="orders_file" value="$(find iliad_goal_manager)/config/OPTLoading_XMLoutput_20201208153254704_draft.xml"/>	-->
-    	<param name="missions_file" value="$(find iliad_goal_manager)/config/orkla_missions_test.txt"/>
-		<param name="orders_times_file" value="$(find iliad_goal_manager)/config/orkla_orders_times_test.txt" />
+    	<param name="missions_file" value="$(find iliad_goal_manager)/config/orkla_missions_test_simple.txt"/>
+		<param name="orders_times_file" value="$(find iliad_goal_manager)/config/orkla_orders_times_test_simple.txt" />
     	<param name="items_locations_file" value="$(find iliad_goal_manager)/config/orkla_item_locations_test.json" />
         <param name="locations_coordinates_file" value="$(find iliad_goal_manager)/config/orkla_location_coordinates_test.json" />
         <param name="locations_frame_id" value="map_laser2d"/>

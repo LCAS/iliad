@@ -3,7 +3,7 @@
 import rospy
 from geometry_msgs.msg import Pose,PoseStamped
 import Tkinter as tk
-from std_msgs.msg import String 
+from std_msgs.msg import String, Int16
 import tkMessageBox
 import xml.etree.ElementTree as ET
 import json
@@ -87,6 +87,7 @@ class iliad_goal_manager(object):
 			self.robot7_goal_pub = rospy.Publisher("/robot7/goal", PoseStamped,queue_size=1)
 			self.robot8_goal_pub = rospy.Publisher("/robot8/goal", PoseStamped,queue_size=1)
 			self.robot9_goal_pub = rospy.Publisher("/robot9/goal", PoseStamped,queue_size=1)
+			self.exploration_allowed_pub = rospy.Publisher("exploration_allowed",Int16,queue_size=1)
 			
 
 
@@ -724,6 +725,8 @@ class iliad_goal_manager(object):
 			else:
 				self.mission_status["seconds_left_next"] = 	"-"
 			self.mission_status_pub.publish(json.dumps(self.mission_status))
+
+			self.exploration_allowed_pub.publish(self.allow_exploration_value) 
 
 			r.sleep()
 
