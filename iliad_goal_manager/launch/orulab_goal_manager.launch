@@ -7,7 +7,7 @@
     <arg name="orders_times_file" value="$(find iliad_goal_manager)/config/orulab_missions_times.txt" />
     <arg name="items_locations_file" value="$(find iliad_goal_manager)/config/orulab_item_locations.json" />
     <arg name="locations_coordinates_file" value="$(find iliad_goal_manager)/config/orulab_location_coordinates.json" />
-    <arg name="locations_frame_id" value="map_laser2d"
+    <arg name="locations_frame_id" value="map_laser2d"/>
 
     <node pkg="iliad_goal_manager" type="goal_manager_node.py" name="goal_manager_node" output="screen">
      	<param name="mode" value="$(arg mode)"/>

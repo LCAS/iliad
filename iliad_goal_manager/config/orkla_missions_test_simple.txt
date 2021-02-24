@@ -1,1 +1,1 @@
-pick:soup,drop:pallet
+pick:soup,drop:pallet,go:home
