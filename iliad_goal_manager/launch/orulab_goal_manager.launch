@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+
+	<arg name="mode" value="1"/><!-- [0] click and point mode,  [1] mission mode -->
+    <arg name="orders_file" value=""/> <!--$(find iliad_goal_manager)/config/OPTLoading_XMLoutput_20201208153254704_draft.xml" /> -->
+    <arg name="missions_file" value="$(find iliad_goal_manager)/config/orulab_missions.txt" />
+    <arg name="orders_times_file" value="$(find iliad_goal_manager)/config/orulab_missions_times.txt" />
+    <arg name="items_locations_file" value="$(find iliad_goal_manager)/config/orulab_item_locations.json" />
+    <arg name="locations_coordinates_file" value="$(find iliad_goal_manager)/config/orulab_location_coordinates.json" />
+    <arg name="locations_frame_id" value="map_laser2d"
+
+    <node pkg="iliad_goal_manager" type="goal_manager_node.py" name="goal_manager_node" output="screen">
+     	<param name="mode" value="$(arg mode)"/>
+     	<param name="orders_file" value="$(arg orders_file)"/>
+    	<param name="missions_file" value="$(arg missions_file)"/>
+		<param name="orders_times_file" value="$(arg orders_times_file)" />
+    	<param name="items_locations_file" value="$(arg items_locations_file)" />
+        <param name="locations_coordinates_file" value="$(arg locations_coordinates_file)" />
+        <param name="locations_frame_id" value="$(arg locations_frame_id)"/>
+
+    </node>
+
+</launch>

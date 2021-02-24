@@ -1,0 +1,4 @@
+go:apple,pick:apple,pick:apple,go:orange,pick:orange,go:home
+go:apple,pick:apple,pick:apple,go:orange,pick:orange,go:home
+go:apple,pick:apple,pick:apple,go:orange,pick:orange,go:home
+go:apple,pick:apple,pick:apple,go:orange,pick:orange,go:home

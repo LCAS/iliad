@@ -1,0 +1,19 @@
+{
+	"loc1":[1,1,0],
+	"loc2":[2,2,0],
+	"loc3":[3,3,0],
+	"loc4":[4,4,0],
+	"loc5":[5,5,0],
+	"loc6":[6,6,0],
+	
+	"home_robot1":[1,0,0],
+	"home_robot2":[2,0,0],
+	"home_robot3":[3,0,0],
+	"home_robot4":[4,0,0],
+	"home_robot5":[5,0,0],
+	"home_robot6":[6,0,0],
+	"home_robot7":[7,0,0],
+	"home_robot8":[8,0,0],
+	"home_robot9":[9,0,0]
+
+}

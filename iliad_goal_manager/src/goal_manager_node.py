@@ -605,7 +605,10 @@ class iliad_goal_manager(object):
 		if action == "go":
 			#send a goal to the coordinator
 			item = goal_description[1]
-			location = self.item_locations_data[item]
+			if item == 'home':
+				location = 'home_'+str(robot)
+			else:	
+				location = self.item_locations_data[item]
 			coordinates = self.location_coordinates_data[location]
 			x = coordinates[0]
 			y = coordinates[1]
