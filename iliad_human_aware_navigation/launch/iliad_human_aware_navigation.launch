@@ -120,11 +120,6 @@
         <param name="human_tracking_topic_name"           type = "string" value="$(arg ppl_topic)"/>
         <param name="robot_pose_topic_name"               type = "string" value="$(arg robotST_topic)"/>
         <param name="situation_topic_name"                type = "string" value="$(arg situation_topic_name)"/>
-
-        <param name="update_center_x"                     type = "double" value="15.3"/>
-        <param name="update_center_y"                     type = "double" value="-3.03"/>
-        <param name="update_width"                        type = "int" value="375"/>
-        <param name="update_height"                       type = "int" value="306"/>
         <param name="update_publish_period"               type = "double" value="0.05"/>
 
         <!-- robot center to fork edge distance -->

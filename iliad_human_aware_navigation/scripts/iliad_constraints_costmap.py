@@ -81,8 +81,8 @@ class ConstraintsCostmapV2(object):
         self.update.header.seq = -1
       
         # update size
-        self.update.width = update_width
-        self.update.height = update_height
+        self.update.width = self.width
+        self.update.height = self.height
 
     def get_map(self):
         with self.lock: 
@@ -138,8 +138,8 @@ class ConstraintsCostmapV2(object):
                 (update_center_x, update_center_y,valid) = self.cell2pose(ih0,jh0)
 
                 # update grid starts here                
-                self.update.x = ih0 - self.update.width/2
-                self.update.y = jh0 - self.update.height/2    
+                self.update.x = 0#ih0 - self.update.width/2
+                self.update.y = 0#jh0 - self.update.height/2    
 
                 # grids
                 self.min_update_x = update_center_x -(self.update.width/2.0)* self.resolution 
@@ -341,6 +341,7 @@ class ConstraintsCostmapV2(object):
                 c[mask] = 0
 
                 self.update.data =  c.flatten(order='C')
+
 
                 # mark margins
                 # self.update.data[0] = 100
