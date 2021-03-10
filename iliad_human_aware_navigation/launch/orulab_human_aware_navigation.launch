@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+    <!--
+    
+   -->
+<launch>
+
+    <arg name="robot_id" default="3"/>
+    <arg name="sim" default="false"/>
+
+    <!-- derived args -->
+    <arg name="prefix" value="robot$(arg robot_id)"/>
+
+    <!-- args from hri -->
+    <arg name="map_frame_id"          default="/map_laser2d"/>
+    <arg name="map_topic_name"        default="/maps/map_laser2d"/>
+    <arg name="robot_base_frame_id"   default="$(arg prefix)/base_link"/>
+
+    <arg name="robotST_topic"         default = "/$(arg prefix)/robot_poseST"/>
+    <arg name="qtc_points_topic_name" default = "/$(arg prefix)/qsr/qtc_points"/>
+
+    <arg name="ppl_topic"             default="/$(arg prefix)/qsr/people_tracker/positions"/>
+    <arg name="person_topic"          default="/$(arg prefix)/human_perception/tracked_persons_in_map_frame"/>
+    <arg name="dperson_topic"         default="/$(arg prefix)/human_perception/detected_persons"/>
+    
+    <arg name="qtc_state_topic"       default="/$(arg prefix)/qsr/qtc_state"/>
+        
+    <arg name="vis_marker_topic"      default = "/$(arg prefix)/qsr/visualization_marker"/>
+    
+    <arg name="costmap_topic_name"        default = "/$(arg prefix)/qsr/constraints_costmap"/>
+    <arg name="reports_topic_name"        default = "/$(arg prefix)/control/controller/reports"/>
+    <arg name="task_topic_name"           default = "/$(arg prefix)/control/task"/>
+
+    <arg name="path_occ_grid_topic_name"  default = "/$(arg prefix)/qsr/constraints_costmap_path"/>
+    <arg name="curr_cost_topic_name"      default = "/$(arg prefix)/qsr/cost"/>
+    <arg name="situation_topic_name"      default = "/$(arg prefix)/qsr/situation_predictions"/>
+
+
+    <!-- the group -->
+    <group ns="$(arg prefix)/qsr">
+
+
+      <!-- casts spencer detection to bayes data format -->
+      <node pkg="iliad_hrsi" type="spencer_to_bayes.py" name="spenc2bay" output="screen">
+        <param name="robot_id" value="$(arg robot_id)"/>
+
+        <param name="ppl_topic"           type="string"  value="$(arg ppl_topic)"/>
+        <param name="person_topic"        type="string"  value="$(arg person_topic)"/>
+        <param name="target_frame"        type="string"  value="$(arg robot_base_frame_id)"/>
+      </node>
+
+     <!-- Publishes robot pose -->
+      <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
+          <param name="map_frame" value="$(arg map_frame_id)"/>
+          <param name="base_frame" value="$(arg robot_base_frame_id)"/>
+          <param name="is_stamped" value="true"/>
+          <remap from="robot_pose" to="$(arg robotST_topic)"/>
+      </node>
+
+      <!--  generate QTCs -->
+      <node name="QTC_generator" pkg="iliad_hrsi" type="QTC_generator.py" output="screen">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        
+        <!--  peopletracker(bayes, from STRANDS) OR trackedpersons (SPENCER) -->
+        <param name="human_detection_method" value="trackedpersons"/>
+
+        <!-- acording to the detection method, human detections would be in the corresponding topic -->
+        <param name="peopletracker_topic" value="$(arg ppl_topic)"/>
+        <param name="human_tracking_topic" value="$(arg person_topic)"/>
+
+        <param name="qtc_state_topic" value="$(arg qtc_state_topic)"/>
+        <param name="qtc_points_topic_name" value="$(arg qtc_points_topic_name)"/>
+
+        <param name="sampling_time" value="0.3"/>
+        <param name="global_frame" value="$(arg map_frame_id)"/>        
+        <param name="tf_timeout" value="1"/>
+   
+      </node>
+
+
+      <!--  Draws QTCs -->
+      <node name="QTCplot" pkg="iliad_hrsi" type="QTCplot.py" output="screen">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="qtc_state_topic" value="$(arg qtc_state_topic)"/>
+        
+        <param name="qtc_points_topic_name" value="$(arg qtc_points_topic_name)"/>
+        
+        <param name="visual_topic" value="$(arg vis_marker_topic)"/>
+
+        <param name="global_frame" value="$(arg map_frame_id)"/>        
+        <param name="tf_timeout" value="1.0"/>
+        <param name="visuals_publish_rate" value="5.0"/>
+        <!-- overlay descriptive text (true) OR qtcc state -->
+        <param name="pretty_text" value="true"/>        
+      </node>
+      
+      <!-- TODO: Here goes Laurence situation assessment module! 
+      <node pkg="************" type="***********" name="************" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="human_tracking_topic_name"    type = "string" value="$(arg ppl_topic)"/>
+        <param name="robot_pose_topic_name"        type = "string" value="$(arg robotST_topic)"/>
+        <param name="qtc_state_topic"              type = "string" value="$(arg qtc_state_topic)"/>
+        <param name="qtc_points_topic_name"        type = "string" value="$(arg qtc_points_topic_name)"/>
+        <param name="global_frame"                 type = "string" value="$(arg map_frame_id)"/>        
+        <! - - output - - >
+        <param name="situation_topic_name"         type = "string" value="$(arg situation_topic_name)"/>
+      </node>
+      -->
+
+      <!-- constraints costmap V2: creates human exclusion area -->
+      <node pkg="iliad_human_aware_navigation" type="iliad_constraints_costmap.py" name="constraints_costmap_server" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="costmap_topic_name"                  type = "string" value= "$(arg costmap_topic_name)"/>
+        <param name="map_topic_name"                      type = "string" value= "$(arg map_topic_name)"/>
+        <param name="human_tracking_topic_name"           type = "string" value="$(arg ppl_topic)"/>
+        <param name="robot_pose_topic_name"               type = "string" value="$(arg robotST_topic)"/>
+        <param name="situation_topic_name"                type = "string" value="$(arg situation_topic_name)"/>
+
+        <param name="update_center_x"                     type = "double" value="-34.5"/>
+        <param name="update_center_y"                     type = "double" value="-17"/>
+        <param name="update_width"                        type = "int" value="523"/>
+        <param name="update_height"                       type = "int" value="297"/>
+        <param name="update_publish_period"               type = "double" value="0.05"/>
+
+        <!-- robot center to fork edge distance -->
+        <param name="d2"                                  type = "double" value="0.65"/>  
+        <!-- robot center to front laser distance -->
+        <param name="d1"                                  type = "double" value="1.5"/>
+        <!-- truck width -->
+        <param name="w"                                   type = "double" value="0.8"/> 
+        <!-- extra margin for map clearing -->
+        <param name="blind_offset"                        type = "double" value="0.10"/> 
+
+      </node>
+
+      <!-- Extracts current task cost from constraints costmap -->
+      <node pkg="iliad_human_aware_navigation" type="iliad_task_cost_node.py" name="task_cost_node" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="robot_pose_topic_name"            type = "string" value="$(arg robotST_topic)"/>
+        <param name="costmap_topic_name"               type = "string" value= "$(arg costmap_topic_name)"/>      
+        <param name="task_topic_name"                  type = "string" value= "$(arg task_topic_name)"/>
+        <param name="task_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
+
+        <param name="path_occ_grid_topic_name"         type = "string" value= "$(arg path_occ_grid_topic_name)"/>      
+        <param name="curr_cost_topic_name"             type = "string" value= "$(arg curr_cost_topic_name)"/>
+        <param name="update_publish_period"            type = "double" value="0.05"/> 
+      </node>
+ 
+      <!-- This node decides about changing speed constraints or triggering a path replanning based on:
+         path cost
+         situation 
+         robot and human status ? Maybe
+      -->
+      <node pkg="iliad_human_aware_navigation" type="hrsi_plan_assessment.py" name="plan_assessment_node" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="human_tracking_topic_name"  type = "string" value="$(arg ppl_topic)"/>
+        <param name="robot_pose_topic_name"      type = "string" value="$(arg robotST_topic)"/>
+        <param name="situation_topic_name"       type = "string" value="$(arg situation_topic_name)"/>
+        <param name="curr_cost_topic_name"       type = "string" value= "$(arg curr_cost_topic_name)"/>
+        <param name="trigger_topic_name"         type = "string" value= "/$(arg prefix)/qsr/replan"/>      
+      </node>
+      
+
+      <!-- Upon demand, it stops the robot and asks coordinator to replan -->
+      <node pkg="iliad_human_aware_navigation" type="abort_and_replan.py" name="replan_node" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="task_topic_name"                  type = "string" value= "$(arg task_topic_name)"/>
+        <param name="reports_topic_name"               type = "string" value = "$(arg reports_topic_name)"/>
+
+        <param name="goal_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
+        <param name="goal_topic_name"            type = "string" value="/$(arg prefix)/goal"/>
+
+        <param name="update_task_srv_name"               type = "string" value= "/coordinator/update_task"/>      
+        <param name="trigger_topic_name"         type = "string" value= "/$(arg prefix)/qsr/replan"/>      
+      </node>
+
+      
+    </group>
+
+
+</launch>
+
+
+
+
+
+
