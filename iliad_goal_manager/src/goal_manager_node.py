@@ -8,6 +8,7 @@ import tkMessageBox
 import xml.etree.ElementTree as ET
 import json
 from orunav_msgs.msg import RobotReport
+from orunav_msgs.srv import Abort
 import tf.transformations
 
 class iliad_goal_manager(object):
@@ -89,6 +90,9 @@ class iliad_goal_manager(object):
 			self.robot9_goal_pub = rospy.Publisher("/robot9/goal", PoseStamped,queue_size=1)
 			self.exploration_allowed_pub = rospy.Publisher("exploration_allowed",Int16,queue_size=1)
 			
+			#services
+			rospy.wait_for_service('/coordinator/abort')
+			self.abort_goal_service_client = rospy.ServiceProxy('/coordinator/abort',Abort)
 
 
 			# create timers
@@ -359,6 +363,11 @@ class iliad_goal_manager(object):
 
 	def abort_missions_callback(self):
 		print "aborting all missions"
+
+		for robot in self.active_robots:
+			if self.robot_navigation_status[robot] == "NAVIGATING":
+				self.abort_goal(robot)
+
 		if self.missions_started:
 			self.available_list_updated = 0
 			self.missions_started = 0
@@ -385,6 +394,8 @@ class iliad_goal_manager(object):
 			print "skippin goal in robot: ", robot_selected
 
 			if self.active_robots[robot_selected]["mission"] != "-":
+				if self.robot_navigation_status[robot_selected] == "NAVIGATING":
+					self.abort_goal(robot_selected)
 				self.process_new_goal(robot_selected)
 		else:
 			tkMessageBox.showwarning("Warning","Select at least 1 robot\nfrom the active list")
@@ -396,6 +407,9 @@ class iliad_goal_manager(object):
 			robot_names = self.active_list.get(0,tk.END)
 			robot_selected  = robot_names[self.active_list.curselection()[0]]
 			print "skippin mission in robot: ", robot_selected
+			if self.robot_navigation_status[robot_selected] == "NAVIGATING":
+				self.abort_goal(robot_selected)
+
 			
 			if self.active_robots[robot_selected]["mission"] != "-":
 				self.completed_missions.append(self.active_robots[robot_selected]["mission"] )
@@ -406,6 +420,18 @@ class iliad_goal_manager(object):
 			tkMessageBox.showwarning("Warning","Select at least 1 robot\nfrom the active list")
 
 		return
+
+	def abort_goal(self,robot):
+		robot_num = robot[-1]
+		#call the service to abort task
+		self.abort_goal_service_client(int(robot_num))
+
+		#what for the robot navigation status to be free/idle
+		while self.robot_navigation_status[robot] == "NAVIGATING":
+			print "aborting navigation goal in ",robot
+			rospy.sleep(0.2)
+		print "goal aborted"
+
 
 	def exploration_goal_callback(self,exploration_goal_msg):
 		print "Exploration goal request received"

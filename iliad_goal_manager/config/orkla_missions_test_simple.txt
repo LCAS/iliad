@@ -1,1 +1,3 @@
 pick:soup,drop:pallet,go:home
+pick:soup,drop:pallet,go:home
+pick:soup,drop:pallet,go:home

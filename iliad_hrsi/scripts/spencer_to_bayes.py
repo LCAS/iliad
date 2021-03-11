@@ -58,6 +58,7 @@ class SpencerToBayes:
 			
 			person = PoseStamped()
 			person.header = msg.header
+			#person.header.frame_id = self.target_frame
 			
 			person.pose = t.pose.pose
 			
@@ -72,6 +73,7 @@ class SpencerToBayes:
 			x1 = transformed_person.pose.position.x
 			y1 = transformed_person.pose.position.y
 			z1 = transformed_person.pose.position.z
+
 			
 			dis = round(math.sqrt(math.pow(x1,2)+math.pow(y1,2)+math.pow(z1,2)),3)
 
