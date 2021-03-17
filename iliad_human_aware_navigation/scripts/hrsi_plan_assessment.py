@@ -31,6 +31,8 @@ class HRSIassessment():
         self.v_rev = self.v_rev_max
         self.w_rev = self.w_rev_max
 
+        self.replan_needed = 0
+
         # ................................................................
         # start ros subs/pubs/servs....
         self.initROS()
@@ -97,6 +99,10 @@ class HRSIassessment():
         rospy.Subscriber(self.curr_cost_topic_name, Float64, self.curr_cost_callback, queue_size=1)
         rospy.Subscriber(self.situation_topic_name, String, self.situation_callback, queue_size=1)
 
+        #timers
+        self.check_for_replan_timer = rospy.Timer(rospy.Duration(0.5),self.check_for_replan)
+            
+
     def curr_cost_callback(self, msg):
         update = False
         with self.lock:         
@@ -115,12 +121,16 @@ class HRSIassessment():
             
     def assesst(self):
         with self.lock:         
-            if (self.curr_cost)<45:
+            if (self.curr_cost)<35:
                 self.v = self.v_max
                 self.w = self.w_max
                 self.v_rev = self.v_rev_max
-                self.w_rev = self.w_rev_max                
-            if (self.curr_cost)>45:
+                self.w_rev = self.w_rev_max
+
+                self.replan_needed = 0
+
+            if (self.curr_cost)>35:
+                    #print self.situation
                     if self.situation == "PBL":
                         #  Both actors pass each-other on the left side from their perspective, moving in opposite directions.
                         self.v = np.max(0.5 * self.v_max, self.v_min)
@@ -153,20 +163,29 @@ class HRSIassessment():
                         self.w_rev = self.w_min
                     else:
                         # Unmodelled situation... 
-                        self.v = self.v_max 
-                        self.w = self.w_max 
-                        self.v_rev = self.v_rev_max
-                        self.w_rev = self.w_rev_max 
+                        self.v = np.max(0.5 * self.v_max, self.v_min) 
+                        self.w = self.w_min
+                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_min)
+                        self.w_rev = self.w_min 
+
+                    self.replan_needed = 0
+
             if (self.curr_cost)>75:
                 self.v = self.v_min
                 self.w = self.w_min
                 self.v_rev = self.v_min
                 self.w_rev = self.w_min                
-                rospy.logwarn("Node [" + rospy.get_name() + "] "+
-                "We should consider a replanning ..." )
+                #rospy.logwarn("Node [" + rospy.get_name() + "] "+
+                #"We should consider a replanning ..." )
+
+                self.replan_needed = 1
                 #self.trigger_topic_pub.publish(Empty())
 
+
+
             self.sendNewConstraints()
+
+
 
     def sendNewConstraints(self):
         msg = Float64MultiArray()
@@ -181,6 +200,25 @@ class HRSIassessment():
                             "W ( -" +
                             str(self.w_rev * 180.0/np.pi) + ", " + str(self.w * 180.0/np.pi) + " deg/sec) "
                             )
+
+    def check_for_replan(self,timer):
+        if self.replan_needed == 1 and self.replan_wait_start ==0:
+            self.replan_wait_start = 1
+            self.start_time = rospy.get_time()
+            rospy.loginfo("Doing a replanning in ..." )
+
+        if self.replan_needed == 1 and self.replan_wait_start == 1:
+            if rospy.get_time() - self.start_time > 10:
+                rospy.loginfo("Doing a replanning!!!" )
+
+                # ask the coordinator here to do a replan
+
+            else:
+                rospy.loginfo(10 - (rospy.get_time() - self.start_time))
+
+        if self.replan_needed == 0:
+            self.replan_wait_start = 0
+
 
 # Main function.
 if __name__ == '__main__':

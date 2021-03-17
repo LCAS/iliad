@@ -79,10 +79,14 @@ class ConstraintsCostmapV2(object):
         self.update = OccupancyGridUpdate()
         self.update.header = self.current_occ_grid.header
         self.update.header.seq = -1
-      
-        # update size
+
+        #sergi
+        
         self.update.width = self.width
         self.update.height = self.height
+        self.update.x = 0
+        self.update.y = 0
+        self.update.data = np.zeros(self.update.width * self.update.height)
 
     def get_map(self):
         with self.lock: 
@@ -154,7 +158,7 @@ class ConstraintsCostmapV2(object):
                 self.grid_points = np.vstack((xg,yg)).T 
 
                 # initial clear space
-                self.update.data = np.zeros(self.update.width * self.update.height)
+                #self.update.data = np.zeros(self.update.width * self.update.height)
 
 
     def update_angle_bounds(self, angle_bounds):
