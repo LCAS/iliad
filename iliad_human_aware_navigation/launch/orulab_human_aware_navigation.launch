@@ -119,7 +119,7 @@
         <param name="update_center_y"                     type = "double" value="-17"/>
         <param name="update_width"                        type = "int" value="523"/>
         <param name="update_height"                       type = "int" value="297"/>
-        <param name="update_publish_period"               type = "double" value="0.05"/>
+        <param name="update_publish_period"               type = "double" value="0.5"/>
 
         <!-- robot center to fork edge distance -->
         <param name="d2"                                  type = "double" value="0.65"/>  
