@@ -164,10 +164,10 @@ class HRSIassessment():
                         self.w_rev = self.w_min
                     else:
                         # Unmodelled situation... 
-                        self.v = self.v_max
-                        self.w = self.w_max
-                        self.v_rev = self.v_max
-                        self.w_rev = self.w_max
+                        self.v = 0.5*self.v_max
+                        self.w = 0.5*self.w_max
+                        self.v_rev = 0.5*self.v_max
+                        self.w_rev = 0.5*self.w_max
 
                     self.replan_needed = 0
 
