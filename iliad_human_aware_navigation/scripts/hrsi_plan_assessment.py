@@ -120,7 +120,8 @@ class HRSIassessment():
             self.assesst()
             
     def assesst(self):
-        with self.lock:         
+        with self.lock:
+            print self.situation         
             if (self.curr_cost)<35:
                 self.v = self.v_max
                 self.w = self.w_max
@@ -130,7 +131,7 @@ class HRSIassessment():
                 self.replan_needed = 0
 
             if (self.curr_cost)>35:
-                    #print self.situation
+                    
                     if self.situation == "PBL":
                         #  Both actors pass each-other on the left side from their perspective, moving in opposite directions.
                         self.v = np.max(0.5 * self.v_max, self.v_min)
@@ -163,10 +164,10 @@ class HRSIassessment():
                         self.w_rev = self.w_min
                     else:
                         # Unmodelled situation... 
-                        self.v = np.max(0.5 * self.v_max, self.v_min) 
-                        self.w = self.w_min
-                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_min)
-                        self.w_rev = self.w_min 
+                        self.v = self.v_max
+                        self.w = self.w_max
+                        self.v_rev = self.v_max
+                        self.w_rev = self.w_max
 
                     self.replan_needed = 0
 
