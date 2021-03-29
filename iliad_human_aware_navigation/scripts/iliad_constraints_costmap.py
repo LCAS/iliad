@@ -245,7 +245,7 @@ class ConstraintsCostmapV2(object):
         self.update.header.seq = self.update.header.seq + 1
         self.update.header.stamp = rospy.Time.now()
         with self.lock: 
-            if (not self.local_human_pose == None) and (not self.local_robot_pose == None):
+            if (not self.local_human_pose == None) and (not self.local_robot_pose == None) and (rospy.get_param('~use_qhrsi_planning', 'false')):
                 now = rospy.Time.now()
                 # ............................
 
@@ -356,6 +356,9 @@ class ConstraintsCostmapV2(object):
                 rospy.logdebug_throttle(5,"Node [" + rospy.get_name() + "] " +
                                 "Map update built in (" + str(dur.to_sec()) + ") secs"
                                 )
+            else:
+                self.update.data = np.zeros(self.update.width * self.update.height)
+
 
         # always send update, even if it's emtpy    
         return self.update
