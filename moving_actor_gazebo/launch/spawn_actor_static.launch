@@ -9,8 +9,8 @@ MFC: based on Adam's spawn actor from RASberry
   <arg name="actor_name" default="actor"/>
   <arg name="map_topic" default="/map"/>
   <arg name="global_frame_id" default="world"/>
-  <arg name="start_pose_x" default="0"/>
-  <arg name="start_pose_y" default="0"/>
+  <arg name="start_pose_x" default="10"/>
+  <arg name="start_pose_y" default="5"/>
   <arg name="start_pose_z" default="0"/>
   <arg name="start_pose_R" default="0"/>
   <arg name="start_pose_P" default="0"/>

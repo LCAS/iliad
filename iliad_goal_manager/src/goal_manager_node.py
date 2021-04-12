@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 import rospy
 from geometry_msgs.msg import Pose,PoseStamped
@@ -21,7 +21,7 @@ class iliad_goal_manager(object):
 		self.items_locations_file = rospy.get_param('~items_locations_file',"")
 		self.locations_coordinates_file = rospy.get_param('~locations_coordinates_file',"")
 		self.locations_frame_id = rospy.get_param('~locations_frame_id',"world")
-		self.mode = rospy.get_param('~mode',0) # [0]: click and point, [1]: missions 
+		self.mode = rospy.get_param('~mode',1) # [0]: click and point, [1]: missions 
 
 		# ini variables
 		self.missions_started = 0
@@ -91,7 +91,7 @@ class iliad_goal_manager(object):
 			self.exploration_allowed_pub = rospy.Publisher("exploration_allowed",Int16,queue_size=1)
 			
 			#services
-			rospy.wait_for_service('/coordinator/abort')
+			#rospy.wait_for_service('/coordinator/abort')
 			self.abort_goal_service_client = rospy.ServiceProxy('/coordinator/abort',Abort)
 
 
@@ -109,7 +109,7 @@ class iliad_goal_manager(object):
 				print "NO MISSIONS BEING PROVIDED - CLOSING NODE"
 				return
 
-			#print "\n",self.missions
+#			print "\n",self.missions
 			# Exmple of missions variable structure with 4 simple orders
 			#self.test_missions = [["pick:soup","go:home"], ["pick:soup","go:home"]]
 			#print "\n",self.test_missions
@@ -185,7 +185,7 @@ class iliad_goal_manager(object):
 		return missions
 
 	def parse_missions_file(self):
-		# the inputs is a string containing all
+		# the inputs is a string containing all goals
 		missions = []
 		with open(self.missions_file,"r") as file:
 			for line in file:
