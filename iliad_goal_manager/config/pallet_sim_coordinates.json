@@ -1,0 +1,16 @@
+{
+	"load_loc_1":[16,7,3.14],
+	"load_loc_2":[16,5,3.14],
+	"unload_loc_1":[5,7,0],
+	"unload_loc_2":[5,5,0],
+
+	"home_robot1":[9,2,1.57],
+	"home_robot2":[9,2,1.57],
+	"home_robot3":[9,2,1.57],
+	"home_robot4":[7,2,1.57],
+	"home_robot5":[9,2,1.57],
+	"home_robot6":[9,2,1.57],
+	"home_robot7":[9,2,1.57],
+	"home_robot8":[9,2,1.57],
+	"home_robot9":[9,2,1.57]
+}

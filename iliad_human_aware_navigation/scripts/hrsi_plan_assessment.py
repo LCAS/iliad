@@ -8,6 +8,7 @@
 
 import rospy
 from std_msgs.msg import Float64, Float64MultiArray, Empty, String
+from orunav_msgs.srv import  RePlan
 
 import numpy as np
 from threading import Lock
@@ -92,12 +93,15 @@ class HRSIassessment():
         # tf buffers
         # none here
 
-        # service servers
-        # none here
 
         # topic subscribers and other listeners
         rospy.Subscriber(self.curr_cost_topic_name, Float64, self.curr_cost_callback, queue_size=1)
         rospy.Subscriber(self.situation_topic_name, String, self.situation_callback, queue_size=1)
+
+        # service servers
+        rospy.loginfo("Waiting for the /coordinator/replan service to be available" )
+        rospy.wait_for_service('/coordinator/replan')
+        self.replan_service_client = rospy.ServiceProxy('/coordinator/replan',RePlan)
 
         #timers
         self.check_for_replan_timer = rospy.Timer(rospy.Duration(0.5),self.check_for_replan)
@@ -120,8 +124,7 @@ class HRSIassessment():
             self.assesst()
             
     def assesst(self):
-        with self.lock:
-            print self.situation         
+        with self.lock:       
             if (self.curr_cost)<35:
                 self.v = self.v_max
                 self.w = self.w_max
@@ -206,16 +209,25 @@ class HRSIassessment():
         if self.replan_needed == 1 and self.replan_wait_start ==0:
             self.replan_wait_start = 1
             self.start_time = rospy.get_time()
-            rospy.loginfo("Doing a replanning in ..." )
+            rospy.loginfo("Doing a replan in ..." )
 
         if self.replan_needed == 1 and self.replan_wait_start == 1:
-            if rospy.get_time() - self.start_time > 10:
-                rospy.loginfo("Doing a replanning!!!" )
+            if rospy.get_time() - self.start_time > 15:
+                rospy.loginfo("Replan triggered" )
 
-                # ask the coordinator here to do a replan
+                #ask the coordinator here to do a replan
+                success = self.replan_service_client(self.robot_id)
+                if success:
+                    rospy.loginfo("Replan succesful" )
+                    self.start_time = rospy.get_time()
+                else:
+                    rospy.loginfo("Replan failed" )
+                    self.start_time = rospy.get_time()
+
+
 
             else:
-                rospy.loginfo(10 - (rospy.get_time() - self.start_time))
+                rospy.loginfo(15 - (rospy.get_time() - self.start_time))
 
         if self.replan_needed == 0:
             self.replan_wait_start = 0

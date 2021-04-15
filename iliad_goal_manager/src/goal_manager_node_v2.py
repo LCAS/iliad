@@ -16,6 +16,7 @@ class iliad_goal_manager(object):
 	def __init__(self):
 		#parameters
 		self.orders_file = rospy.get_param('~orders_file',"")
+		self.parsed_orders_file = rospy.get_param('~parsed_orders_file',"")
 		self.orders_times_file = rospy.get_param('~orders_times_file',"")
 		self.items_locations_file = rospy.get_param('~items_locations_file',"")
 		self.locations_coordinates_file = rospy.get_param('~locations_coordinates_file',"")
@@ -78,15 +79,15 @@ class iliad_goal_manager(object):
 			# create topic publishers
 			self.active_robots_status_pub = rospy.Publisher('/active_robot_status', String,queue_size=10)
 			self.mission_status_pub = rospy.Publisher('/mission_status', String,queue_size=10)
-			self.robot1_goal_pub = rospy.Publisher("/robot1/goal", RobotTarget,queue_size=1)
-			self.robot2_goal_pub = rospy.Publisher("/robot2/goal", RobotTarget,queue_size=1)
-			self.robot3_goal_pub = rospy.Publisher("/robot3/goal", RobotTarget,queue_size=1)
-			self.robot4_goal_pub = rospy.Publisher("/robot4/goal", RobotTarget,queue_size=1)
-			self.robot5_goal_pub = rospy.Publisher("/robot5/goal", RobotTarget,queue_size=1)
-			self.robot6_goal_pub = rospy.Publisher("/robot6/goal", RobotTarget,queue_size=1)
-			self.robot7_goal_pub = rospy.Publisher("/robot7/goal", RobotTarget,queue_size=1)
-			self.robot8_goal_pub = rospy.Publisher("/robot8/goal", RobotTarget,queue_size=1)
-			self.robot9_goal_pub = rospy.Publisher("/robot9/goal", RobotTarget,queue_size=1)
+			self.robot1_goal_pub = rospy.Publisher("/robot1/robot_target", RobotTarget,queue_size=1)
+			self.robot2_goal_pub = rospy.Publisher("/robot2/robot_target", RobotTarget,queue_size=1)
+			self.robot3_goal_pub = rospy.Publisher("/robot3/robot_target", RobotTarget,queue_size=1)
+			self.robot4_goal_pub = rospy.Publisher("/robot4/robot_target", RobotTarget,queue_size=1)
+			self.robot5_goal_pub = rospy.Publisher("/robot5/robot_target", RobotTarget,queue_size=1)
+			self.robot6_goal_pub = rospy.Publisher("/robot6/robot_target", RobotTarget,queue_size=1)
+			self.robot7_goal_pub = rospy.Publisher("/robot7/robot_target", RobotTarget,queue_size=1)
+			self.robot8_goal_pub = rospy.Publisher("/robot8/robot_target", RobotTarget,queue_size=1)
+			self.robot9_goal_pub = rospy.Publisher("/robot9/robot_target", RobotTarget,queue_size=1)
 			self.exploration_allowed_pub = rospy.Publisher("exploration_allowed",Int16,queue_size=1)
 			
 			#services
@@ -100,15 +101,26 @@ class iliad_goal_manager(object):
 			#parse input files
 			# read orders file
 			if self.orders_file != "":
+				print "READING ORDERS FILE"
 				self.orders_data = self.parse_orders_file()
-				self.number_of_orders = len(self.orders_data["orders"])
+			elif self.parsed_orders_file != "":
+				print "READING PARSED FILE"
+				with open(self.parsed_orders_file,"r") as file:
+					self.orders_data = json.load(file)
 			else:
 				print "NO MISSIONS BEING PROVIDED - CLOSING NODE"
 				return
 
+			self.number_of_orders = len(self.orders_data["orders"])
+
 			self.parse_orders_times_file()
-			self.parse_item_locations_file()
-			self.parse_location_coordinates_file()
+
+			if self.items_locations_file != "" and self.locations_coordinates_file != "":
+				self.parse_item_locations_file()
+				self.parse_location_coordinates_file()
+			else:
+				print "NO ITEM OR COORDINATES LOCATIONS PROVIDED - CLOSING NODE"
+				return
 			
 			#start gui variables		
 			self.start_gui()
@@ -213,37 +225,33 @@ class iliad_goal_manager(object):
 			goal["operation"] = "NO_OPERATION"
 			order["mission"].append(goal)
 
-			order["mixed_pallers"] = mixed_pallets_num
+			order["mixed_pallets"] = mixed_pallets_num
 			order["full_pallets"] = full_pallets_num
 			orders_data["orders"].append(order)
+
+			with open(self.orders_file[:-4]+"_parsed.json", 'w') as pfile:
+				json.dump(orders_data, pfile, indent=4, sort_keys=True)
 		return orders_data
 
-	def parse_missions_file(self):
-		# the inputs is a string containing all goals
-		missions = []
-		with open(self.missions_file,"r") as file:
-			for line in file:
-				if line[-1] == '\n':
-					mission = line[:-1].split(",")
-				else:
-					mission = line.split(",")
-
-				missions.append(mission)
-		return missions
-
 	def parse_orders_times_file(self):
-		with open(self.orders_times_file,"r") as file:
-			orders_times_data = json.load(file)
+		if self.orders_times_file != "":
+			with open(self.orders_times_file,"r") as file:
+				orders_times_data = json.load(file)
 
-		self.missions_times = []
-		for o in range(0,self.number_of_orders):
-			try:
-				time_ = orders_times_data[self.orders_data["orders"][o]["id"]]
-				print "Updating time for order "+ self.orders_data["orders"][o]["id"]
-				self.orders_data["orders"][o]["starting_time"] = time_
-				self.missions_times.append(time_)
-			except:
-				print "No time given for order "+ self.orders_data["orders"][o]["id"]+ " . Keeping it as 0."
+			self.missions_times = []
+			for o in range(0,self.number_of_orders):
+				try:
+					time_ = orders_times_data[self.orders_data["orders"][o]["id"]]
+					print "Updating time for order "+ self.orders_data["orders"][o]["id"]
+					self.orders_data["orders"][o]["starting_time"] = time_
+					self.missions_times.append(time_)
+				except:
+					print "No time given for order "+ self.orders_data["orders"][o]["id"]+ " . Keeping it as 0."
+					self.missions_times.append(0)
+		else:
+			print "NO TIMES FILE PROVIDED"
+			self.missions_times = []
+			for o in range(0,self.number_of_orders):
 				self.missions_times.append(0)
 
 	def parse_item_locations_file(self):
@@ -280,19 +288,23 @@ class iliad_goal_manager(object):
 
 		#files frame
 		orders_label = tk.Label(self.files_frame, text = "Orders: ",font=("Arial Bold", 10))
+		parsed_orders_label = tk.Label(self.files_frame, text = "Parsed orders: ",font=("Arial Bold", 10))
 		orders_times_label = tk.Label(self.files_frame, text = "Orders times: ",font=("Arial Bold", 10)) 
 		items_locations_label = tk.Label(self.files_frame, text = "Items locations: ",font=("Arial Bold", 10))
 		locations_coordinates_label = tk.Label(self.files_frame, text = "Locations coordinates: ",font=("Arial Bold", 10))
 		orders_label.grid(               row=0,column=0,pady=3,padx=5,sticky="e")
+		parsed_orders_label.grid(        row=1,column=0,pady=3,padx=5,sticky="e")
 		orders_times_label.grid(         row=2,column=0,pady=3,padx=5,sticky="e")
 		items_locations_label.grid(      row=3,column=0,pady=3,padx=5,sticky="e")
 		locations_coordinates_label.grid(row=4,column=0,pady=3,padx=5,sticky="e")
 
 		orders_text = tk.Label(self.files_frame, text = self.orders_file,font=("Arial Bold", 10),bg="white",width=100)
+		parsed_orders_text = tk.Label(self.files_frame, text = self.parsed_orders_file,font=("Arial Bold", 10),bg="white",width=100)
 		orders_times_text = tk.Label(self.files_frame, text = self.orders_times_file,font=("Arial Bold", 10),bg="white",width=100)
 		items_locations_text = tk.Label(self.files_frame,       text = self.items_locations_file,font=("Arial Bold", 10),bg="white",width=100)
 		locations_coordinates_text = tk.Label(self.files_frame, text = self.locations_coordinates_file,font=("Arial Bold", 10),bg="white",width=100)
 		orders_text.grid(               row=0,column=1,sticky="w")
+		parsed_orders_text.grid(        row=1,column=1,sticky="w")
 		orders_times_text.grid(         row=2,column=1,sticky="w")
 		items_locations_text.grid(      row=3,column=1,sticky="w")
 		locations_coordinates_text.grid(row=4,column=1,sticky="w")
@@ -473,13 +485,13 @@ class iliad_goal_manager(object):
 	def abort_goal(self,robot):
 		robot_num = robot[-1]
 		#call the service to abort task
-		self.abort_goal_service_client(int(robot_num))
+		self.abort_goal_service_client(int(robot_num),False)
 
 		#what for the robot navigation status to be free/idle
-		while self.robot_report_status[robot] != "WAITING_FOR_TASK":
-			print "aborting navigation goal in ",robot
-			rospy.sleep(0.2)
-		print "goal aborted"
+		#while self.robot_report_status[robot] != "WAITING_FOR_TASK":
+		#	print "aborting navigation goal in ",robot
+		#	rospy.sleep(0.2)
+		#print "goal aborted"
 
 	def exploration_goal_callback(self,exploration_goal_msg):
 		print "Exploration goal request received"
@@ -696,7 +708,7 @@ class iliad_goal_manager(object):
 		elif robot == "robot9":
 			self.robot9_goal_pub.publish(robotgoal_msg)
 
-		self.active_robots[robot]["wait"] = rospy.get_time() + 10
+		self.active_robots[robot]["wait"] = rospy.get_time() + 25
 
 		return
 
@@ -782,7 +794,7 @@ class iliad_goal_manager(object):
 		if  msg.status == 3:
 			self.robot_report_status["robot1"] = "DRIVING"
 		if  msg.status == 4:
-			self.robot_report_status["robot1"] = "PERFORMING_START_OPERATION"
+			self.robot_report_status["robot1"] = "PERFORMING_GOAL_OPERATION"
 		if  msg.status == 5:
 			self.robot_report_status["robot1"] = "TASK_FAILED"
 
@@ -798,7 +810,7 @@ class iliad_goal_manager(object):
 		if  msg.status == 3:
 			self.robot_report_status["robot2"] = "DRIVING"
 		if  msg.status == 4:
-			self.robot_report_status["robot2"] = "PERFORMING_START_OPERATION"
+			self.robot_report_status["robot2"] = "PERFORMING_GOAL_OPERATION"
 		if  msg.status == 5:
 			self.robot_report_status["robot2"] = "TASK_FAILED"
 
@@ -814,7 +826,7 @@ class iliad_goal_manager(object):
 		if  msg.status == 3:
 			self.robot_report_status["robot3"] = "DRIVING"
 		if  msg.status == 4:
-			self.robot_report_status["robot3"] = "PERFORMING_START_OPERATION"
+			self.robot_report_status["robot3"] = "PERFORMING_GOAL_OPERATION"
 		if  msg.status == 5:
 			self.robot_report_status["robot3"] = "TASK_FAILED"
 
@@ -830,7 +842,7 @@ class iliad_goal_manager(object):
 		if  msg.status == 3:
 			self.robot_report_status["robot4"] = "DRIVING"
 		if  msg.status == 4:
-			self.robot_report_status["robot4"] = "PERFORMING_START_OPERATION"
+			self.robot_report_status["robot4"] = "PERFORMING_GOAL_OPERATION"
 		if  msg.status == 5:
 			self.robot_report_status["robot4"] = "TASK_FAILED"
 
@@ -846,7 +858,7 @@ class iliad_goal_manager(object):
 		if  msg.status == 3:
 			self.robot_report_status["robot5"] = "DRIVING"
 		if  msg.status == 4:
-			self.robot_report_status["robot5"] = "PERFORMING_START_OPERATION"
+			self.robot_report_status["robot5"] = "PERFORMING_GOAL_OPERATION"
 		if  msg.status == 5:
 			self.robot_report_status["robot5"] = "TASK_FAILED"
 
@@ -858,7 +870,7 @@ class iliad_goal_manager(object):
 		if  msg.status == 1:
 			self.robot_report_status["robot6"] = "WAITING_FOR_TASK"
 		if  msg.status == 2:
-			self.robot_report_status["robot6"] = "PERFORMING_START_OPERATION"
+			self.robot_report_status["robot6"] = "PERFORMING_GOAL_OPERATION"
 		if  msg.status == 3:
 			self.robot_report_status["robot6"] = "DRIVING"
 		if  msg.status == 4:
@@ -878,7 +890,7 @@ class iliad_goal_manager(object):
 		if  msg.status == 3:
 			self.robot_report_status["robot7"] = "DRIVING"
 		if  msg.status == 4:
-			self.robot_report_status["robot7"] = "PERFORMING_START_OPERATION"
+			self.robot_report_status["robot7"] = "PERFORMING_GOAL_OPERATION"
 		if  msg.status == 5:
 			self.robot_report_status["robot7"] = "TASK_FAILED"
 
@@ -894,7 +906,7 @@ class iliad_goal_manager(object):
 		if  msg.status == 3:
 			self.robot_report_status["robot8"] = "DRIVING"
 		if  msg.status == 4:
-			self.robot_report_status["robot8"] = "PERFORMING_START_OPERATION"
+			self.robot_report_status["robot8"] = "PERFORMING_GOAL_OPERATION"
 		if  msg.status == 5:
 			self.robot_report_status["robot8"] = "TASK_FAILED"
 
@@ -910,7 +922,7 @@ class iliad_goal_manager(object):
 		if  msg.status == 3:
 			self.robot_report_status["robot9"] = "DRIVING"
 		if  msg.status == 4:
-			self.robot_report_status["robot9"] = "PERFORMING_START_OPERATION"
+			self.robot_report_status["robot9"] = "PERFORMING_GOAL_OPERATION"
 		if  msg.status == 5:
 			self.robot_report_status["robot9"] = "TASK_FAILED"
 

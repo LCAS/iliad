@@ -2,11 +2,11 @@
 <launch>
 
 	<arg name="mode" value="1"/><!-- [0] click and point mode,  [1] mission mode -->
-    <arg name="orders_file" value="$(find iliad_goal_manager)/config/OPTLoading_XMLoutput_20201208153254704.xml"/> <!--$(find iliad_goal_manager)/config/OPTLoading_XMLoutput_20201208153254704.xml" /> -->
-    <arg name="parsed_orders_file" value="$(find iliad_goal_manager)/config/orkla_missions_test_simple.txt" />
-    <arg name="orders_times_file" value="$(find iliad_goal_manager)/config/OPTLoading_XMLoutput_20201208153254704_times.json" />
-    <arg name="items_locations_file" value="$(find iliad_goal_manager)/config/orkla_item_locations.json" />
-    <arg name="locations_coordinates_file" value="$(find iliad_goal_manager)/config/orkla_location_coordinates.json" />
+    <arg name="orders_file" value=""/> <!--$(find iliad_goal_manager)/config/OPTLoading_XMLoutput_20201208153254704.xml" /> -->
+    <arg name="parsed_orders_file" value="$(find iliad_goal_manager)/config/pallet_load_unload_orders_parsed.json" />
+    <arg name="orders_times_file" value="" />
+    <arg name="items_locations_file" value="$(find iliad_goal_manager)/config/pallet_sim_locations.json" />
+    <arg name="locations_coordinates_file" value="$(find iliad_goal_manager)/config/pallet_sim_coordinates.json" />
     <arg name="locations_frame_id" value="map_laser2d"/>
 
     <node pkg="iliad_goal_manager" type="goal_manager_node_v2.py" name="goal_manager_node" output="screen">

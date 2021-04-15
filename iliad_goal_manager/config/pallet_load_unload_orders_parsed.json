@@ -1,0 +1,45 @@
+{
+    "orders": [
+        {
+            "full_pallets": 1, 
+            "id": "1", 
+            "mission": [
+                {
+                    "location": "load_loc_1", 
+                    "operation": "LOAD_DETECT"
+                }, 
+                {
+                    "location": "unload_loc_1", 
+                    "operation": "NO_OPERATION"
+                },
+                {
+                    "location": "home", 
+                    "operation": "NO_OPERATION"
+                }
+
+            ], 
+            "mixed_pallets": 0, 
+            "starting_time": 0
+        },
+        {
+            "full_pallets": 1, 
+            "id": "2", 
+            "mission": [
+                {
+                    "location": "load_loc_2", 
+                    "operation": "NO_OPERATION"
+                }, 
+                {
+                    "location": "unload_loc_2", 
+                    "operation": "NO_OPERATION"
+                },
+                {
+                    "location": "home", 
+                    "operation": "NO_OPERATION"
+                }
+            ], 
+            "mixed_pallets": 0, 
+            "starting_time": 0
+        }
+    ]
+}

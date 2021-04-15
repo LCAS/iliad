@@ -4,8 +4,8 @@
    -->
 <launch>
 
-    <arg name="robot_id" default="3"/>
-    <arg name="sim" default="false"/>
+    <arg name="robot_id" default="4"/>
+    <arg name="sim" default="true"/>
 
     <!-- derived args -->
     <arg name="prefix" value="robot$(arg robot_id)"/>
@@ -19,7 +19,7 @@
     <arg name="qtc_points_topic_name" default = "/$(arg prefix)/qsr/qtc_points"/>
 
     <arg name="ppl_topic"             default="/$(arg prefix)/qsr/people_tracker/positions"/>
-    <arg name="person_topic"          default="/$(arg prefix)/human_perception/tracked_persons_in_map_frame"/>
+    <arg name="person_topic"          default="/$(arg prefix)/human_perception/tracked_persons"/>
     <arg name="dperson_topic"         default="/$(arg prefix)/human_perception/detected_persons"/>
     
     <arg name="qtc_state_topic"       default="/$(arg prefix)/qsr/qtc_state"/>
@@ -38,6 +38,12 @@
     <!-- the group -->
     <group ns="$(arg prefix)/qsr">
 
+      <!-- Publish groundtruth tracks and detections from Gazebo -->
+      <node name="groundtruth_tracks_from_gazebo" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true"  if="$(arg sim)">
+              <remap from="/groundtruth/detected_persons" to="$(arg dperson_topic)"/>
+              <remap from="/groundtruth/tracked_persons" to="$(arg person_topic)"/>            
+      </node>
+
 
       <!-- casts spencer detection to bayes data format -->
       <node pkg="iliad_hrsi" type="spencer_to_bayes.py" name="spenc2bay" output="screen">
@@ -48,7 +54,7 @@
         <param name="target_frame"        type="string"  value="$(arg robot_base_frame_id)"/>
       </node>
 
-     <!-- Publishes robot pose -->
+      <!-- Publishes robot pose -->
       <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
           <param name="map_frame" value="$(arg map_frame_id)"/>
           <param name="base_frame" value="$(arg robot_base_frame_id)"/>
@@ -94,17 +100,17 @@
       </node>
       
       <!-- TODO: Here goes Laurence situation assessment module! 
-      <node pkg="************" type="***********" name="************" output="screen" respawn="true">
+      <node pkg="realtime_hrsi_situation_classifier" type="realtime_sit_classifier.py" name="realtime_sit_classifier" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="human_tracking_topic_name"    type = "string" value="$(arg ppl_topic)"/>
         <param name="robot_pose_topic_name"        type = "string" value="$(arg robotST_topic)"/>
         <param name="qtc_state_topic"              type = "string" value="$(arg qtc_state_topic)"/>
         <param name="qtc_points_topic_name"        type = "string" value="$(arg qtc_points_topic_name)"/>
         <param name="global_frame"                 type = "string" value="$(arg map_frame_id)"/>        
-        <! - - output - - >
+
         <param name="situation_topic_name"         type = "string" value="$(arg situation_topic_name)"/>
       </node>
-      -->
+-->
 
       <!-- constraints costmap V2: creates human exclusion area -->
       <node pkg="iliad_human_aware_navigation" type="iliad_constraints_costmap.py" name="constraints_costmap_server" output="screen" respawn="true">
@@ -114,12 +120,6 @@
         <param name="human_tracking_topic_name"           type = "string" value="$(arg ppl_topic)"/>
         <param name="robot_pose_topic_name"               type = "string" value="$(arg robotST_topic)"/>
         <param name="situation_topic_name"                type = "string" value="$(arg situation_topic_name)"/>
-        <!--
-        <param name="update_center_x"                     type = "double" value="-34.5"/>
-        <param name="update_center_y"                     type = "double" value="-17"/>
-        <param name="update_width"                        type = "int" value="523"/>
-        <param name="update_height"                       type = "int" value="297"/>
-        -->
         <param name="update_publish_period"               type = "double" value="0.5"/>
 
         <!-- robot center to fork edge distance -->
@@ -130,6 +130,8 @@
         <param name="w"                                   type = "double" value="0.8"/> 
         <!-- extra margin for map clearing -->
         <param name="blind_offset"                        type = "double" value="0.10"/> 
+
+        <param name="use_qhrsi_planning"                  type = "bool" value="true"/>
 
       </node>
 
@@ -161,7 +163,7 @@
       </node>
       
 
-      <!-- Upon demand, it stops the robot and asks coordinator to replan -->
+      <!-- Upon demand, it stops the robot and asks coordinator to replan 
       <node pkg="iliad_human_aware_navigation" type="abort_and_replan.py" name="replan_node" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="task_topic_name"                  type = "string" value= "$(arg task_topic_name)"/>
@@ -173,7 +175,7 @@
         <param name="update_task_srv_name"               type = "string" value= "/coordinator/update_task"/>      
         <param name="trigger_topic_name"         type = "string" value= "/$(arg prefix)/qsr/replan"/>      
       </node>
-
+-->
       
     </group>
 
