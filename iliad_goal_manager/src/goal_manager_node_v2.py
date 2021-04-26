@@ -638,8 +638,7 @@ class iliad_goal_manager(object):
 			robotgoal_msg.start_op = operation_msg
 			robotgoal_msg.current_load.status = 1
 			robotgoal_msg.goal_load.status = 0
-			robotgoal_msg.goal_op.opearation = 1
-
+			robotgoal_msg.goal_op.operation = 1
 
 		if operation == "LOAD":
 			operation_msg.operation = 3
