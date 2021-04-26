@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+    <!--
+    
+   -->
+<launch>
+
+    <arg name="robot_id" default="3"/>
+    <arg name="sim" default="false"/>
+
+    <!-- derived args -->
+    <arg name="prefix" value="robot$(arg robot_id)"/>
+
+    <!-- args from hri -->
+    <arg name="map_frame_id"          default="/map_laser2d"/>
+    <arg name="map_topic_name"        default="/maps/map_laser2d"/>
+    <arg name="robotST_topic"         default = "/$(arg prefix)/robot_poseST"/>
+    <arg name="robot_base_frame_id"   default="$(arg prefix)/base_link"/>
+    
+    <arg name="costmap_topic_name"        default = "/$(arg prefix)/sampling_based_planner/generate_path_iliad_smp/iliad_smp_costmap/costmap"/>
+    <arg name="task_topic_name"           default = "/$(arg prefix)/control/task"/>
+
+    <arg name="curr_cost_topic_name"      default = "/$(arg prefix)/object_aware/cost"/>
+
+    <arg name="path_occ_grid_topic_name"  default = "/$(arg prefix)/object_aware/constraints_costmap_path"/>
+
+    <!-- the group -->
+    <group ns="$(arg prefix)/object_aware">
+
+
+           <!-- Publishes robot pose -->
+      <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
+          <param name="map_frame" value="$(arg map_frame_id)"/>
+          <param name="base_frame" value="$(arg robot_base_frame_id)"/>
+          <param name="is_stamped" value="true"/>
+          <remap from="robot_pose" to="$(arg robotST_topic)"/>
+      </node>
+
+      <!-- Extracts current task cost from constraints costmap -->
+      <node pkg="iliad_human_aware_navigation" type="iliad_task_cost_node.py" name="object_task_cost_node" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="robot_pose_topic_name"            type = "string" value="$(arg robotST_topic)"/>
+        <param name="costmap_topic_name"               type = "string" value= "$(arg costmap_topic_name)"/>      
+        <param name="task_topic_name"                  type = "string" value= "$(arg task_topic_name)"/>
+        <param name="task_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
+        
+        <param name="path_occ_grid_topic_name"         type = "string" value= "$(arg path_occ_grid_topic_name)"/> 
+        <param name="curr_cost_topic_name"             type = "string" value= "$(arg curr_cost_topic_name)"/>
+        <param name="update_publish_period"            type = "double" value="0.5"/> 
+      </node>
+ 
+
+      <node pkg="iliad_human_aware_navigation" type="object_aware_plan_assessment.py" name="object_aware_plan_assessment_node" output="screen" respawn="true">
+        <param name="robot_id" value="$(arg robot_id)"/>
+        <param name="robot_pose_topic_name"      type = "string" value="$(arg robotST_topic)"/>
+        <param name="curr_cost_topic_name"       type = "string" value= "$(arg curr_cost_topic_name)"/>
+      </node>
+      
+      
+    </group>
+
+
+</launch>
+
+
+
+
+
+
