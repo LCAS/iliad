@@ -1,0 +1,8 @@
+<class_libraries>
+  <library path="lib/libhanp_filters">
+    <class name="hanp_filters/LaserFilter" type="hanp_filters::LaserFilter"
+        base_class_type="filters::FilterBase<sensor_msgs::LaserScan>">
+      <description>filters humans from sensor_msgs::LaserScan messages</description>
+    </class>
+  </library>
+</class_libraries>

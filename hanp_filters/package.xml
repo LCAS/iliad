@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<package>
+  <name>hanp_filters</name>
+
+  <version>0.0.1</version>
+
+  <description>the hanp_filters package</description>
+
+  <maintainer email="harmish@laas.fr">harmish khambhaita</maintainer>
+
+  <license>BSD</license>
+
+  <!--  <url website >http://wiki.ors.org/hanp_filters</url>  -->
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>class_loader</build_depend>
+  <build_depend>filters</build_depend>
+<!--  <build_depend>hanp_msgs</build_depend> -->
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>tf</build_depend>
+
+  <run_depend>class_loader</run_depend>
+  <run_depend>filters</run_depend>
+<!--  <run_depend>hanp_msgs</run_depend> -->
+  <run_depend>laser_filters</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>tf</run_depend>
+
+  <!-- <test_depend>some_pkg</test_depend>  -->
+
+  <!--  <conflict>some_pkg</conflict>  -->
+
+  <!--  <replace>some_pkg</replace>  -->
+
+  <export>
+    <filters plugin="${prefix}/hanp_filters_plugins.xml"/>
+  </export>
+</package>

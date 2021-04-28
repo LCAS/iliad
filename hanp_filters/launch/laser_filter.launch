@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<launch>
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="hanp_laser_filter_front">
+        <!-- <remap from="scan" to="/spencer/sensors/laser_front/echo0"/> -->
+        <remap from="scan" to="/spencer/navigation/laser_front/maxrange_filtered"/>
+
+        <remap from="scan_filtered" to="/spencer/navigation/laser_front/scan_filtered"/>
+
+        <remap from="hanp_laser_filter_front/humans" to="/spencer/perception/tracked_persons_confirmed_by_HOG_or_upper_body_or_moving"/>
+        <!--  <remap from="hanp_laser_filter_front/humans" to="/spencer/perception/tracked_persons"/> -->
+
+        <rosparam command="load" file="$(find hanp_filters)/launch/laser_filter.yaml"/>
+    </node>
+
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="hanp_laser_filter_rear">
+       <!-- <remap from="scan" to="/spencer/sensors/laser_rear/echo0"/> -->
+        <remap from="scan" to="/spencer/navigation/laser_rear/maxrange_filtered"/>
+
+        <remap from="scan_filtered" to="/spencer/navigation/laser_rear/scan_filtered"/>
+
+        <remap from="hanp_laser_filter_rear/humans" to="/spencer/perception/tracked_persons_confirmed_by_HOG_or_upper_body_or_moving"/> 
+        <!--  <remap from="hanp_laser_filter_rear/humans" to="/spencer/perception/tracked_persons"/> -->
+
+        <rosparam command="load" file="$(find hanp_filters)/launch/laser_filter.yaml"/>
+    </node>
+</launch>
