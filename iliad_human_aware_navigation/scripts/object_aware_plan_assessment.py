@@ -168,7 +168,7 @@ class object_aware_assessment():
             rospy.loginfo("Object on the way. Doing a replan in ..." )
 
         if self.replan_needed == 1 and self.replan_wait_start == 1:
-            if rospy.get_time() - self.start_time > 15:
+            if rospy.get_time() - self.start_time > 10:
                 rospy.loginfo("Replan triggered" )
 
                 #ask the coordinator here to do a replan
@@ -183,7 +183,7 @@ class object_aware_assessment():
 
 
             else:
-                rospy.loginfo(15 - (rospy.get_time() - self.start_time))
+                rospy.loginfo(10 - (rospy.get_time() - self.start_time))
 
         if self.replan_needed == 0:
             self.replan_wait_start = 0
