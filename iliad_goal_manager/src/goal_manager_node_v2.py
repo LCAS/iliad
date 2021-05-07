@@ -630,6 +630,7 @@ class iliad_goal_manager(object):
 		operation = self.orders_data["orders"][int(current_mission)]["mission"][int(new_goal)]["operation"]
 
 		if operation == "NO_OPERATION":
+			robotgoal_msg.start_op.operation = 1
 			operation_msg.operation = 1
 			robotgoal_msg.goal_op = operation_msg
 
@@ -641,22 +642,27 @@ class iliad_goal_manager(object):
 			robotgoal_msg.goal_op.operation = 1
 
 		if operation == "LOAD":
+			robotgoal_msg.start_op.operation = 1
 			operation_msg.operation = 3
 			robotgoal_msg.goal_op = operation_msg
 
 		if operation == "LOAD_DETECT":
+			robotgoal_msg.start_op.operation = 1
 			operation_msg.operation = 4
 			robotgoal_msg.goal_op = operation_msg
 
 		if operation == "ACTIVATE_SUPPORT_LEGS":
+			robotgoal_msg.start_op.operation = 1
 			operation_msg.operation = 5
 			robotgoal_msg.goal_op = operation_msg
 
 		if operation == "LOAD_DETECT_ACTIVE":
+			robotgoal_msg.start_op.operation = 1
 			operation_msg.operation = 6
 			robotgoal_msg.goal_op = operation_msg
 
 		if operation == "PICK_ITEMS":
+			robotgoal_msg.start_op.operation = 1
 			operation_msg.operation = 7
 
 			#check which items to pick
