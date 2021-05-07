@@ -40,30 +40,40 @@ class iliad_goal_manager(object):
 		if self.mode==0: #click and point 
 			print "GOAL MANAGER STARTED WITH POINT AND CLICK MODE"
 			#subscribers
-			rospy.Subscriber("/robot1/point_click_goal", PoseStamped, self.robot1_pointclickgoal_callback,queue_size=1)
-			rospy.Subscriber("/robot2/point_click_goal", PoseStamped, self.robot2_pointclickgoal_callback,queue_size=1)
-			rospy.Subscriber("/robot3/point_click_goal", PoseStamped, self.robot3_pointclickgoal_callback,queue_size=1)
-			rospy.Subscriber("/robot4/point_click_goal", PoseStamped, self.robot4_pointclickgoal_callback,queue_size=1)
-			rospy.Subscriber("/robot5/point_click_goal", PoseStamped, self.robot5_pointclickgoal_callback,queue_size=1)
-			rospy.Subscriber("/robot6/point_click_goal", PoseStamped, self.robot6_pointclickgoal_callback,queue_size=1)
-			rospy.Subscriber("/robot7/point_click_goal", PoseStamped, self.robot7_pointclickgoal_callback,queue_size=1)
-			rospy.Subscriber("/robot8/point_click_goal", PoseStamped, self.robot8_pointclickgoal_callback,queue_size=1)
-			rospy.Subscriber("/robot9/point_click_goal", PoseStamped, self.robot9_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot1/goal", PoseStamped, self.robot1_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot2/goal", PoseStamped, self.robot2_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot3/goal", PoseStamped, self.robot3_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot4/goal", PoseStamped, self.robot4_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot5/goal", PoseStamped, self.robot5_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot6/goal", PoseStamped, self.robot6_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot7/goal", PoseStamped, self.robot7_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot8/goal", PoseStamped, self.robot8_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot9/goal", PoseStamped, self.robot9_pointclickgoal_callback,queue_size=1)
 
 			# publishers
-			self.robot1_goal_pub = rospy.Publisher("/robot1/goal", PoseStamped,queue_size=1)
-			self.robot2_goal_pub = rospy.Publisher("/robot2/goal", PoseStamped,queue_size=1)
-			self.robot3_goal_pub = rospy.Publisher("/robot3/goal", PoseStamped,queue_size=1)
-			self.robot4_goal_pub = rospy.Publisher("/robot4/goal", PoseStamped,queue_size=1)
-			self.robot5_goal_pub = rospy.Publisher("/robot5/goal", PoseStamped,queue_size=1)
-			self.robot6_goal_pub = rospy.Publisher("/robot6/goal", PoseStamped,queue_size=1)
-			self.robot7_goal_pub = rospy.Publisher("/robot7/goal", PoseStamped,queue_size=1)
-			self.robot8_goal_pub = rospy.Publisher("/robot8/goal", PoseStamped,queue_size=1)
-			self.robot9_goal_pub = rospy.Publisher("/robot9/goal", PoseStamped,queue_size=1)
+			self.robot1_goal_pub = rospy.Publisher("/robot1/robot_target", RobotTarget,queue_size=1)
+			self.robot2_goal_pub = rospy.Publisher("/robot2/robot_target", RobotTarget,queue_size=1)
+			self.robot3_goal_pub = rospy.Publisher("/robot3/robot_target", RobotTarget,queue_size=1)
+			self.robot4_goal_pub = rospy.Publisher("/robot4/robot_target", RobotTarget,queue_size=1)
+			self.robot5_goal_pub = rospy.Publisher("/robot5/robot_target", RobotTarget,queue_size=1)
+			self.robot6_goal_pub = rospy.Publisher("/robot6/robot_target", RobotTarget,queue_size=1)
+			self.robot7_goal_pub = rospy.Publisher("/robot7/robot_target", RobotTarget,queue_size=1)
+			self.robot8_goal_pub = rospy.Publisher("/robot8/robot_target", RobotTarget,queue_size=1)
+			self.robot9_goal_pub = rospy.Publisher("/robot9/robot_target", RobotTarget,queue_size=1)
 
 			rospy.spin()
 
 		else: # missions mode
+			rospy.Subscriber("/robot1/goal", PoseStamped, self.robot1_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot2/goal", PoseStamped, self.robot2_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot3/goal", PoseStamped, self.robot3_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot4/goal", PoseStamped, self.robot4_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot5/goal", PoseStamped, self.robot5_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot6/goal", PoseStamped, self.robot6_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot7/goal", PoseStamped, self.robot7_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot8/goal", PoseStamped, self.robot8_pointclickgoal_callback,queue_size=1)
+			rospy.Subscriber("/robot9/goal", PoseStamped, self.robot9_pointclickgoal_callback,queue_size=1)
+
 			# subscribe to topics
 			rospy.Subscriber("/exploration_goal", PoseStamped, self.exploration_goal_callback,queue_size=1)
 			rospy.Subscriber("/robot1/control/report", RobotReport, self.robot1_status_callback,queue_size=1)
@@ -940,31 +950,96 @@ class iliad_goal_manager(object):
 				self.active_robots[robot]["report"] = self.robot_report_status[robot]
 	
 	def robot1_pointclickgoal_callback(self,msg):
-		self.robot1_goal_pub.publish(msg)
+		robotgoal_msg = RobotTarget()
+		robotgoal_msg.robot_id = 1
+		goal_msg = PoseSteering()
+		goal_msg.pose = msg.pose
+		robotgoal_msg.goal = goal_msg
+		robotgoal_msg.start_op.operation = 1
+		robotgoal_msg.goal_op.operation = 1
+
+		self.robot1_goal_pub.publish(robotgoal_msg)
 
 	def robot2_pointclickgoal_callback(self,msg):
-		self.robot2_goal_pub.publish(msg)
+		robotgoal_msg = RobotTarget()
+		robotgoal_msg.robot_id = 2
+		goal_msg = PoseSteering()
+		goal_msg.pose = msg.pose
+		robotgoal_msg.goal = goal_msg
+		robotgoal_msg.start_op.operation = 1
+		robotgoal_msg.goal_op.operation = 1
+
+		self.robot2_goal_pub.publish(robotgoal_msg)
 
 	def robot3_pointclickgoal_callback(self,msg):
-		self.robot3_goal_pub.publish(msg)
+		robotgoal_msg = RobotTarget()
+		robotgoal_msg.robot_id = 3
+		goal_msg = PoseSteering()
+		goal_msg.pose = msg.pose
+		robotgoal_msg.goal = goal_msg
+		robotgoal_msg.start_op.operation = 1
+		robotgoal_msg.goal_op.operation = 1
+		self.robot3_goal_pub.publish(robotgoal_msg)
 
 	def robot4_pointclickgoal_callback(self,msg):
-		self.robot4_goal_pub.publish(msg)
+		robotgoal_msg = RobotTarget()
+		robotgoal_msg.robot_id = 4
+		goal_msg = PoseSteering()
+		goal_msg.pose = msg.pose
+		robotgoal_msg.goal = goal_msg
+		robotgoal_msg.start_op.operation = 1
+		robotgoal_msg.goal_op.operation = 1
+		self.robot4_goal_pub.publish(robotgoal_msg)
 
 	def robot5_pointclickgoal_callback(self,msg):
-		self.robot5_goal_pub.publish(msg)
+		robotgoal_msg = RobotTarget()
+		robotgoal_msg.robot_id = 5
+		goal_msg = PoseSteering()
+		goal_msg.pose = msg.pose
+		robotgoal_msg.goal = goal_msg
+		robotgoal_msg.start_op.operation = 1
+		robotgoal_msg.goal_op.operation = 1
+		self.robot5_goal_pub.publish(robotgoal_msg)
 
 	def robot6_pointclickgoal_callback(self,msg):
-		self.robot6_goal_pub.publish(msg)
+		robotgoal_msg = RobotTarget()
+		robotgoal_msg.robot_id = 6
+		goal_msg = PoseSteering()
+		goal_msg.pose = msg.pose
+		robotgoal_msg.goal = goal_msg
+		robotgoal_msg.start_op.operation = 1
+		robotgoal_msg.goal_op.operation = 1
+		self.robot6_goal_pub.publish(robotgoal_msg)
 
 	def robot7_pointclickgoal_callback(self,msg):
-		self.robot7_goal_pub.publish(msg)
+		robotgoal_msg = RobotTarget()
+		robotgoal_msg.robot_id = 7
+		goal_msg = PoseSteering()
+		goal_msg.pose = msg.pose
+		robotgoal_msg.goal = goal_msg
+		robotgoal_msg.start_op.operation = 1
+		robotgoal_msg.goal_op.operation = 1
+		self.robot7_goal_pub.publish(robotgoal_msg)
 
 	def robot8_pointclickgoal_callback(self,msg):
-		self.robot8_goal_pub.publish(msg)
+		robotgoal_msg = RobotTarget()
+		robotgoal_msg.robot_id = 8
+		goal_msg = PoseSteering()
+		goal_msg.pose = msg.pose
+		robotgoal_msg.goal = goal_msg
+		robotgoal_msg.start_op.operation = 1
+		robotgoal_msg.goal_op.operation = 1
+		self.robot8_goal_pub.publish(robotgoal_msg)
 
 	def robot9_pointclickgoal_callback(self,msg):
-		self.robot9_goal_pub.publish(msg)
+		robotgoal_msg = RobotTarget()
+		robotgoal_msg.robot_id = 9
+		goal_msg = PoseSteering()
+		goal_msg.pose = msg.pose
+		robotgoal_msg.goal = goal_msg
+		robotgoal_msg.start_op.operation = 1
+		robotgoal_msg.goal_op.operation = 1
+		self.robot9_goal_pub.publish(robotgoal_msg)
 
 
 
