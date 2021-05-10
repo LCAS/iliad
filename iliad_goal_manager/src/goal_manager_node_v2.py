@@ -8,7 +8,7 @@ import tkMessageBox
 import xml.etree.ElementTree as ET
 import json
 from orunav_msgs.msg import RobotReport, RobotTarget, PoseSteering, Operation, IliadItemArray,IliadItem
-from orunav_msgs.srv import Abort
+from orunav_msgs.srv import Trigger
 import tf.transformations
 
 class iliad_goal_manager(object):
@@ -102,7 +102,7 @@ class iliad_goal_manager(object):
 			
 			#services
 			#rospy.wait_for_service('/coordinator/abort')
-			self.abort_goal_service_client = rospy.ServiceProxy('/coordinator/abort',Abort)
+			self.abort_goal_service_client = rospy.ServiceProxy('/coordinator/abort',Trigger)
 
 
 			# create timers
@@ -456,6 +456,18 @@ class iliad_goal_manager(object):
 
 		return
 
+	def finish_missions(self):
+		print "all missions finished"
+		self.available_list_updated = 0
+		self.missions_started = 0
+		self.available_robots = {}
+		self.active_robots = {}
+		self.next_mission = 0
+		self.queued_missions = []
+		self.all_missions_added = 0
+		self.completed_missions = []
+
+
 	def skip_goal_callback(self):
 		if len(self.active_list.curselection()) > 0:
 			robot_names = self.active_list.get(0,tk.END)
@@ -495,13 +507,13 @@ class iliad_goal_manager(object):
 	def abort_goal(self,robot):
 		robot_num = robot[-1]
 		#call the service to abort task
-		self.abort_goal_service_client(int(robot_num),False)
+		self.abort_goal_service_client(int(robot_num))
 
 		#what for the robot navigation status to be free/idle
-		#while self.robot_report_status[robot] != "WAITING_FOR_TASK":
-		#	print "aborting navigation goal in ",robot
-		#	rospy.sleep(0.2)
-		#print "goal aborted"
+		while self.robot_report_status[robot] != "WAITING_FOR_TASK":
+			print "...aborting navigation goal in robot",robot
+			rospy.sleep(0.2)
+		print "goal aborted"
 
 	def exploration_goal_callback(self,exploration_goal_msg):
 		print "Exploration goal request received"
@@ -786,6 +798,11 @@ class iliad_goal_manager(object):
 					self.next_mission = self.next_mission + 1
 					if self.next_mission >= len(self.corrected_missions_times):
 						self.all_missions_added = 1
+
+			if self.all_missions_added == 1 and len(self.mission_status["completed"])==self.number_of_orders and self.allow_exploration_value == 0:
+			   self.finish_missions()
+
+
 
 			#update all the gui fields with the new info
 			self.gui_update()
