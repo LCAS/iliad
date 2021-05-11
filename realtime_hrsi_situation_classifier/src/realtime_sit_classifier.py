@@ -81,9 +81,9 @@ class situation_prediction():
         elif qtc_state_str != self.qtc_seq[-1]:
             self.qtc_seq.append(qtc_state_str)
 
-        print(self.qtc_seq)
+        #print(self.qtc_seq)
         sit = self.classify_QTC_seqs(np.array([self.QTC_C_seq_to_num_seq(self.qtc_seq)]))
-        print(sit, "\n")
+        #print(sit, "\n")
         self.sitTopic.publish(roslibpy.Message({'data': sit}))
 
         self.prev_time = current_time
@@ -121,27 +121,7 @@ class situation_prediction():
         return num_seq
 
 
-
-
 # Main function.
 if __name__ == '__main__':
    robot_id = sys.argv[1]
    sp = situation_prediction(robot_id)
-
-# def setup_ros_connections():
-#     # read parameters
-#     print("ROS connected:", ros_client.is_connected)
-    
-#     # subscribtions
-
-#     # publishers
-
-
-# print("1")
-# ros_client = roslibpy.Ros(host='localhost', port=9090)
-# print("2")
-# ros_client.on_ready(setup_ros_connections)
-# print("3")
-# #print('Is ROS connected?', client.is_connected)
-# ros_client.run_forever()
-
