@@ -68,7 +68,7 @@
     </group>
 
       <!-- laser filter around the people detected     -->
-      <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="hanp_laser_filter_floor">
+      <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_hanp_laser_filter_floor">
         <remap from="scan" to="/$(arg prefix)/sensors/laser2d_floor"/>
 
         <remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_floor/human_filtered"/>
