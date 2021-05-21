@@ -317,11 +317,11 @@ class ConstraintsCostmapV2(object):
                 if self.situation == None:
                     c = c_no_sit
                 else:
-                    if self.situation in ["PBL", "ROL", "PCL"]:
+                    if self.situation in ["PBL", "ROTL", "PCL"]:
                         # allow left side of human ...
                         lower_angle_lim = 0
                         upper_angle_lim = np.pi
-                    elif self.situation in ["PBR", "ROR", "PCR"]:
+                    elif self.situation in ["PBR", "ROTR", "PCR"]:
                         # allow right side of human ...
                         lower_angle_lim = np.pi
                         upper_angle_lim = 2.0*np.pi
@@ -445,7 +445,7 @@ class IliadConstraintsCostmapServerV2(object):
 
     def sit_callback(self, sit_string):
       
-        if str(sit_string.data) in ["PBL", "PBR", "ROL", "ROR", "PCL", "PCR", "DEBUG"]:
+        if str(sit_string.data) in ["PBL", "PBR", "ROTL", "ROTR", "PCL", "PCR", "DEBUG"]:
             #rospy.loginfo("["+rospy.get_name()+"] " + "Situation: " + str(sit_string.data))
             self.situation = str(sit_string.data)
         else:

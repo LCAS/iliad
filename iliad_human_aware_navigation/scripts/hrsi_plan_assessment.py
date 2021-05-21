@@ -8,7 +8,7 @@
 
 import rospy
 from std_msgs.msg import Float64, Float64MultiArray, Empty, String
-from orunav_msgs.srv import  RePlan
+from orunav_msgs.srv import  Trigger
 
 import numpy as np
 from threading import Lock
@@ -101,7 +101,7 @@ class HRSIassessment():
         # service servers
         rospy.loginfo("Waiting for the /coordinator/replan service to be available" )
         rospy.wait_for_service('/coordinator/replan')
-        self.replan_service_client = rospy.ServiceProxy('/coordinator/replan',RePlan)
+        self.replan_service_client = rospy.ServiceProxy('/coordinator/replan',Trigger)
 
         #timers
         self.check_for_replan_timer = rospy.Timer(rospy.Duration(0.5),self.check_for_replan)
@@ -137,29 +137,35 @@ class HRSIassessment():
                     
                     if self.situation == "PBL":
                         #  Both actors pass each-other on the left side from their perspective, moving in opposite directions.
-                        self.v = np.max(0.5 * self.v_max, self.v_min)
+                        self.v = np.max([0.5 * self.v_max, self.v_min])
                         self.w = self.w_min
-                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_min)
+                        self.v_rev = np.max([0.5 * self.v_rev_max, self.v_min])
                         self.w_rev = self.w_rev_max
                     elif self.situation == "PBR":
                         # Both actors pass each-other on the right side from their perspective, moving in opposite directions.
-                        self.v = np.max(0.5 * self.v_max, self.v_min)
+                        self.v = np.max([0.5 * self.v_max, self.v_min])
                         self.w = self.w_max
-                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_min)
+                        self.v_rev = np.max([0.5 * self.v_rev_max, self.v_min])
                         self.w_rev = self.w_min
                     elif self.situation == "ROTL":
                         # robot passes on the left of the human while both move in the same direction.
-                        self.v = np.max(0.5 * self.v_max, self.v_min)
+                        self.v = np.max([0.5 * self.v_max, self.v_min])
                         self.w = self.w_min
-                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_min)
+                        self.v_rev = np.max([0.5 * self.v_rev_max, self.v_min])
                         self.w_rev = self.w_rev_max
                     elif self.situation == "ROTR":
                         # robot passes on the right of the human while
-                        self.v = np.max(0.5 * self.v_max, self.v_min)
+                        self.v = np.max([0.5 * self.v_max, self.v_min])
                         self.w = self.w_max
-                        self.v_rev = np.max(0.5 * self.v_rev_max, self.v_min)
+                        self.v_rev = np.max([0.5 * self.v_rev_max, self.v_min])
                         self.w_rev = self.w_min
-                    elif self.situation == "PC":
+                    elif self.situation == "PCL":
+                        # The robot has to slow or stop movement to allow the human to move across the robot’s intended path
+                        self.v = self.v_min
+                        self.w = self.w_min
+                        self.v_rev = self.v_min
+                        self.w_rev = self.w_min
+                    elif self.situation == "PCR":
                         # The robot has to slow or stop movement to allow the human to move across the robot’s intended path
                         self.v = self.v_min
                         self.w = self.w_min

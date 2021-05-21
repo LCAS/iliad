@@ -8,7 +8,7 @@
 
 import rospy
 from std_msgs.msg import Float64, Float64MultiArray, Empty, String
-from orunav_msgs.srv import  RePlan
+from orunav_msgs.srv import  Trigger
 
 import numpy as np
 from threading import Lock
@@ -101,7 +101,7 @@ class object_aware_assessment():
         # service servers
         rospy.loginfo("Waiting for the /coordinator/replan service to be available" )
         rospy.wait_for_service('/coordinator/replan')
-        self.replan_service_client = rospy.ServiceProxy('/coordinator/replan',RePlan)
+        self.replan_service_client = rospy.ServiceProxy('/coordinator/replan',Trigger)
 
         #timers
         self.check_for_replan_timer = rospy.Timer(rospy.Duration(0.5),self.check_for_replan)

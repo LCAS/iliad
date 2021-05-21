@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!-- launcher to programatically record topics involved in qtc online classification -->
+
+<launch>
+    <arg name="robot_id" default="4"/>
+    
+    <!-- derived params -->
+    <arg name="prefix" default="robot$(arg robot_id)"/>
+    
+    <!-- Run required nodes -->
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+
+    <group ns="$(arg prefix)/qsr">
+
+        <param name="situation_rejection_threshold" value="0.1"/>
+        <node name="realtime_sit_classifier" pkg="realtime_hrsi_situation_classifier" type="realtime_sit_classifier.py" output="screen" respawn="false" args="$(arg robot_id)">
+        </node>
+        
+    </group>
+</launch>
+ 
