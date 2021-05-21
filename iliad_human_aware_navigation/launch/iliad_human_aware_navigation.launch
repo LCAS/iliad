@@ -34,8 +34,9 @@
     <arg name="curr_cost_topic_name"      default = "/$(arg prefix)/qsr/cost"/>
     <arg name="situation_topic_name"      default = "/$(arg prefix)/qsr/situation_predictions"/>
 
+    <!--
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"></include>
-
+    -->
     <!-- the group -->
     <group ns="$(arg prefix)/qsr">
 
@@ -94,10 +95,11 @@
         <param name="pretty_text" value="true"/>        
       </node>
       
-      <!-- TODO: Here goes Laurence situation assessment module! -->
+      <!-- TODO: Here goes Laurence situation assessment module! 
         <param name="situation_rejection_threshold" value="0.1"/>
         <node name="realtime_sit_classifier" pkg="realtime_hrsi_situation_classifier" type="realtime_sit_classifier.py" output="screen" respawn="false" args="$(arg robot_id)">
         </node>
+        -->
 
       <!-- constraints costmap V2: creates human exclusion area -->
       <node pkg="iliad_human_aware_navigation" type="iliad_constraints_costmap.py" name="constraints_costmap_server" output="screen" respawn="true">
