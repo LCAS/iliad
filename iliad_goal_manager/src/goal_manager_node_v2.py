@@ -176,7 +176,7 @@ class iliad_goal_manager(object):
 					for pallet in range(0,len(orders_xml[o_num][pallet_type])):
 						goal = {}
 						goal["location"] = "empty_pallet"
-						goal["operation"] = "LOAD"
+						goal["operation"] = "LOAD_DETECT"
 						order["mission"].append(goal)
 
 
@@ -197,7 +197,7 @@ class iliad_goal_manager(object):
 								previous_item_name = item_name
 
 							else:
-								goal["location"] = item_name
+								goal["location"] = previous_item_name
 								goal["operation"] = "PICK_ITEMS"
 								order["mission"].append(goal)
 								
