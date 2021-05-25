@@ -152,8 +152,8 @@ class iliad_goal_manager(object):
 			order["mission"] = []
 			for pallet_type in range(0,len(orders_xml[o_num])):
 				if orders_xml[o_num][pallet_type].tag == "FullPallets" and len(orders_xml[o_num][pallet_type]) > 0:
-					full_pallets_num = full_pallets_num + 1
 					for pallet in range(0,len(orders_xml[o_num][pallet_type])):
+						full_pallets_num = full_pallets_num + 1
 						item_name = orders_xml[o_num][pallet_type][pallet][0][0].attrib["name"]
 						goal = {}
 						goal["location"] = "fullpallet_"+item_name
@@ -172,8 +172,8 @@ class iliad_goal_manager(object):
 
 
 				if orders_xml[o_num][pallet_type].tag == "MixedPallets" and len(orders_xml[o_num][pallet_type]) > 0:
-					mixed_pallets_num = mixed_pallets_num + 1
 					for pallet in range(0,len(orders_xml[o_num][pallet_type])):
+						mixed_pallets_num = mixed_pallets_num + 1
 						goal = {}
 						goal["location"] = "empty_pallet"
 						goal["operation"] = "LOAD_DETECT"
