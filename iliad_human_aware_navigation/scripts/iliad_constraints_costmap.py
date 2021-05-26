@@ -450,7 +450,7 @@ class IliadConstraintsCostmapServerV2(object):
             self.situation = str(sit_string.data)
         else:
             self.situation = None
-            rospy.logwarn("["+rospy.get_name()+"] " + "Situation: Unmodelled")
+            #rospy.logwarn("["+rospy.get_name()+"] " + "Situation: Unmodelled")
 
         try:
             self.icc.update_situation(self.situation)

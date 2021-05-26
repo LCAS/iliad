@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/home/sergi/hmms_venv/bin/python3.5
 import roslibpy
 import hmms
 import time
