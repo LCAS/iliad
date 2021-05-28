@@ -53,6 +53,7 @@
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="robot_pose_topic_name"      type = "string" value="$(arg robotST_topic)"/>
         <param name="curr_cost_topic_name"       type = "string" value= "$(arg curr_cost_topic_name)"/>
+        <param name="time_needed_before_replan"  type = "double" value="10"/>
       </node>
 
       <!-- Run the costmap node to obstain just he obstacle layer -->
