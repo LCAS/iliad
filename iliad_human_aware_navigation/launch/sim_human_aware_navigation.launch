@@ -148,8 +148,8 @@
         <param name="human_tracking_topic_name"  type = "string" value="$(arg ppl_topic)"/>
         <param name="robot_pose_topic_name"      type = "string" value="$(arg robotST_topic)"/>
         <param name="situation_topic_name"       type = "string" value="$(arg situation_topic_name)"/>
-        <param name="curr_cost_topic_name"       type = "string" value= "$(arg curr_cost_topic_name)"/>
-        <param name="trigger_topic_name"         type = "string" value= "/$(arg prefix)/qsr/replan"/>      
+        <param name="curr_cost_topic_name"       type = "string" value= "$(arg curr_cost_topic_name)"/>     
+        <param name="time_needed_before_replan"  type = "double" value="15"/>
       </node>
       
       
