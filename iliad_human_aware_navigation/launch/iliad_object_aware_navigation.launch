@@ -19,7 +19,9 @@
     <arg name="costmap_topic_name"        default = "/$(arg prefix)/object_costmap_node/costmap/costmap"/>
     <arg name="task_topic_name"           default = "/$(arg prefix)/control/task"/>
 
-    <arg name="curr_cost_topic_name"      default = "/$(arg prefix)/object_aware/cost"/>
+    <arg name="envelope_topic_name"            default = "/$(arg prefix)/status"/>
+    <arg name="curr_cost_topic_name"           default = "/$(arg prefix)/object_aware/cost"/>
+    <arg name="envelope_gridmap_topic_name"    default = "/$(arg prefix)/object_aware/envelope_gridmap"/>
 
     <arg name="path_occ_grid_topic_name"  default = "/$(arg prefix)/object_aware/constraints_costmap_path"/>
 
@@ -27,15 +29,16 @@
     <group ns="$(arg prefix)">
 
 
-           <!-- Publishes robot pose -->
+           <!-- Publishes robot pose
       <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
           <param name="map_frame" value="$(arg map_frame_id)"/>
           <param name="base_frame" value="$(arg robot_base_frame_id)"/>
           <param name="is_stamped" value="true"/>
           <remap from="robot_pose" to="$(arg robotST_topic)"/>
       </node>
+      -->
 
-      <!-- Extracts current task cost from constraints costmap-->
+      <!-- Extracts current task cost from constraints costmap
       <node pkg="iliad_human_aware_navigation" type="iliad_task_cost_node.py" name="object_task_cost_node" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="robot_pose_topic_name"            type = "string" value="$(arg robotST_topic)"/>
@@ -47,11 +50,21 @@
         <param name="curr_cost_topic_name"             type = "string" value= "$(arg curr_cost_topic_name)"/>
         <param name="update_publish_period"            type = "double" value="0.1"/> 
       </node>
- 
+      -->
+
+      <!-- Use the path envelope to calculate the object cost -->
+      <node pkg="iliad_human_aware_navigation" type="object_aware_cost.py" name="object_aware_cost_node" output="screen" respawn="true">
+        <param name="object_costamp_topic_name"   type = "string" value= "$(arg costmap_topic_name)"/>
+        <param name="envelope_topic_name"         type = "string" value= "$(arg envelope_topic_name)"/>
+        <param name="curr_cost_topic_name"        type = "string" value= "$(arg curr_cost_topic_name)"/>
+        <param name="envelope_gridmap_topic_name" type = "string" value= "$(arg envelope_gridmap_topic_name)"/>
+      </node>
+
+
+
       <!-- read the object and replan if it is necesary -->
       <node pkg="iliad_human_aware_navigation" type="object_aware_plan_assessment.py" name="object_aware_plan_assessment_node" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
-        <param name="robot_pose_topic_name"      type = "string" value="$(arg robotST_topic)"/>
         <param name="curr_cost_topic_name"       type = "string" value= "$(arg curr_cost_topic_name)"/>
         <param name="time_needed_before_replan"  type = "double" value="10"/>
       </node>
