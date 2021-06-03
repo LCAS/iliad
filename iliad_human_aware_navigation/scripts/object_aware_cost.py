@@ -9,7 +9,6 @@ from std_msgs.msg import Int64, Float64
 from matplotlib import path
 import numpy as np
 import cell_tools as ctools
-from threading import Lock
 
 class checking_cells(object):
     def __init__(self):
@@ -24,7 +23,6 @@ class checking_cells(object):
         self.cells_points_computed = False
         self.envelope_received = False
         self.old_envelope_points = None
-        self.lock = Lock()
 
         # init ros
         rospy.Subscriber(self.object_costamp_topic_name, OccupancyGrid, self.costmap_callback, queue_size=1)
@@ -67,36 +65,37 @@ class checking_cells(object):
     def envelope_callback(self,marker_msg):
         #print "robot status received"
         # check if the enveloped has changed
-        envelope_points =  marker_msg.markers[2].points
-        if envelope_points != self.old_envelope_points:
-            #print "New envelope received..."
-            self.old_envelope_points = envelope_points
+        if len(marker_msg.markers)> 2 and self.cells_points_computed == True:
+            envelope_points =  marker_msg.markers[2].points
+            if envelope_points != self.old_envelope_points:
+                #print "New envelope received..."
+                self.old_envelope_points = envelope_points
 
-            
-            envelope_polygon_x = np.array([])
-            envelope_polygon_y = np.array([])
-            for pe in range(0, len(envelope_points)):
-                envelope_polygon_x = np.append(envelope_polygon_x,envelope_points[pe].x)
-                envelope_polygon_y = np.append(envelope_polygon_y,envelope_points[pe].y)
+                
+                envelope_polygon_x = np.array([])
+                envelope_polygon_y = np.array([])
+                for pe in range(0, len(envelope_points)):
+                    envelope_polygon_x = np.append(envelope_polygon_x,envelope_points[pe].x)
+                    envelope_polygon_y = np.append(envelope_polygon_y,envelope_points[pe].y)
 
-            #calculate the cells (using the center of the cells) inside the envelope
-            envelope_map = np.zeros(self.width*self.height)
-            envelope_cell_index = np.array([])
-            points_inside = self.inpolygon(self.xq, self.yq, envelope_polygon_x , envelope_polygon_y )
+                #calculate the cells (using the center of the cells) inside the envelope
+                envelope_map = np.zeros(self.width*self.height)
+                envelope_cell_index = np.array([])
+                points_inside = self.inpolygon(self.xq, self.yq, envelope_polygon_x , envelope_polygon_y )
 
-            #set a value >0 to the cells inside the envelope
-            for pi in range(0,len(points_inside)):
-                if points_inside[pi] == True:
-                    index = ctools.point2index(self.xq[pi],self.yq[pi],self.envelope_map_msg.info.origin.position.x,self.envelope_map_msg.info.origin.position.x+self.width*self.resolution,self.envelope_map_msg.info.origin.position.y,self.envelope_map_msg.info.origin.position.y+self.height*self.resolution,self.resolution,self.width, self.height)
-                    envelope_cell_index = np.append(envelope_cell_index,index)
-                    envelope_map[index] = 100            
+                #set a value >0 to the cells inside the envelope
+                for pi in range(0,len(points_inside)):
+                    if points_inside[pi] == True:
+                        index = ctools.point2index(self.xq[pi],self.yq[pi],self.envelope_map_msg.info.origin.position.x,self.envelope_map_msg.info.origin.position.x+self.width*self.resolution,self.envelope_map_msg.info.origin.position.y,self.envelope_map_msg.info.origin.position.y+self.height*self.resolution,self.resolution,self.width, self.height)
+                        envelope_cell_index = np.append(envelope_cell_index,index)
+                        envelope_map[index] = 100            
 
-            self.envelope_map_msg.data = envelope_map
-            self.envelope_cell_index = envelope_cell_index
-            self.envelope_received = True
-            # publish an occupancy map to see in rviz the cells that are taken into account to compute the cost
-            self.envelope_map_pub.publish(self.envelope_map_msg)
-            rospy.loginfo("Enveloped updated")
+                self.envelope_map_msg.data = envelope_map
+                self.envelope_cell_index = envelope_cell_index
+                self.envelope_received = True
+                # publish an occupancy map to see in rviz the cells that are taken into account to compute the cost
+                self.envelope_map_pub.publish(self.envelope_map_msg)
+                #rospy.loginfo("Enveloped updated")
 
     def update_obstacle_cost(self,timer):
         if self.envelope_received:
@@ -106,8 +105,8 @@ class checking_cells(object):
             for i in range(0,len(cell_index)):
                 cost = cost + costmap_data.data[int(cell_index[i])]
 
-            if cost > 0:
-                rospy.loginfo("cost: "+str(cost))
+            #if cost > 0:
+            #    rospy.loginfo("cost: "+str(cost))
             self.envelope_cost_pub.publish(cost)
 
 
@@ -127,7 +126,7 @@ class checking_cells(object):
 
 
 if __name__ == '__main__':
-    rospy.init_node("task_cost_evaluator")#, log_level=rospy.DEBUG)
+    rospy.init_node("object_cost_evaluator")#, log_level=rospy.DEBUG)
     try:
         cc = checking_cells()
     except rospy.ROSInterruptException:
