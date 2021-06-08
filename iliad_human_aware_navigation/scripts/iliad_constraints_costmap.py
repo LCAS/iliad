@@ -106,6 +106,8 @@ class ConstraintsCostmapV2(object):
             if not (humanPoseSt == None):
                 self.local_human_pose = humanPoseSt            
                 #self.printPoseSt(humanPoseSt, "human pose received")
+            else:
+                self.local_human_pose = None
 
     def update_robot(self, robotPoseSt):
         with self.lock: 
@@ -388,6 +390,7 @@ class IliadConstraintsCostmapServerV2(object):
         # ................................................................
         # other params
         self.gotMap = False
+        self.last_time_human_detection_received = rospy.get_time()
         
         # ................................................................
         # start ros subs/pubs/servs....
@@ -423,7 +426,7 @@ class IliadConstraintsCostmapServerV2(object):
 
         # Timers
         rospy.Timer(rospy.Duration(self.update_publish_period), self.update_map, oneshot=False)
-
+        rospy.Timer(rospy.Duration(2), self.check_last_human_detection, oneshot=False)
 
     def angle_bounds_callback(self, msg):
         coefs = msg.data
@@ -535,9 +538,24 @@ class IliadConstraintsCostmapServerV2(object):
         try:
             # we could have potentially several maps here, each one tracking a different human
             self.icc.update_human(self.get_local_pose(humanPoseSt, self.map.header.frame_id))
+            self.last_time_human_detection_received = rospy.get_time()
         except AttributeError as ae:
             # first msg may arrive even before the map....
             pass
+
+
+    def check_last_human_detection(self,timer):
+        # if more than 2 seconds has passed since the last person detection, update the last position as None,
+        # so that the costamp published is removed on the last seen location.
+        # This is to avoid a persisting map left in the costamp when the person disappears
+        print "last Person detected was (seconds): ", rospy.get_time()-self.last_time_human_detection_received
+        if rospy.get_time()-self.last_time_human_detection_received > 2:
+            try:
+                self.icc.update_human(None)
+            except AttributeError as ae:
+                # first msg may arrive even before the map....
+                pass
+
 
     def robot_pose_callback(self, msg):
         self.robotPoseSt = msg
