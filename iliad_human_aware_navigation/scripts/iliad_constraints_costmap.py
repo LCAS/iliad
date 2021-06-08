@@ -548,7 +548,6 @@ class IliadConstraintsCostmapServerV2(object):
         # if more than 2 seconds has passed since the last person detection, update the last position as None,
         # so that the costamp published is removed on the last seen location.
         # This is to avoid a persisting map left in the costamp when the person disappears
-        print "last Person detected was (seconds): ", rospy.get_time()-self.last_time_human_detection_received
         if rospy.get_time()-self.last_time_human_detection_received > 2:
             try:
                 self.icc.update_human(None)
