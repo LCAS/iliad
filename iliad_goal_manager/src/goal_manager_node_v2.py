@@ -86,15 +86,15 @@ class iliad_goal_manager(object):
 			rospy.Subscriber("/robot8/control/report", RobotReport, self.robot8_status_callback,queue_size=1)
 			rospy.Subscriber("/robot9/control/report", RobotReport, self.robot9_status_callback,queue_size=1)
 
-			#rospy.Subscriber("/robot1/compute_task/status", ComputeTaskStatus, self.robot1_computetaskstatus_callback,queue_size=1)
-			#rospy.Subscriber("/robot2/compute_task/status", ComputeTaskStatus, self.robot2_computetaskstatus_callback,queue_size=1)
-			#rospy.Subscriber("/robot3/compute_task/status", ComputeTaskStatus, self.robot3_computetaskstatus_callback,queue_size=1)
+			rospy.Subscriber("/robot1/compute_task/status", ComputeTaskStatus, self.robot1_computetaskstatus_callback,queue_size=1)
+			rospy.Subscriber("/robot2/compute_task/status", ComputeTaskStatus, self.robot2_computetaskstatus_callback,queue_size=1)
+			rospy.Subscriber("/robot3/compute_task/status", ComputeTaskStatus, self.robot3_computetaskstatus_callback,queue_size=1)
 			rospy.Subscriber("/robot4/compute_task/status", ComputeTaskStatus, self.robot4_computetaskstatus_callback,queue_size=1)
-			#rospy.Subscriber("/robot5/compute_task/status", ComputeTaskStatus, self.robot5_computetaskstatus_callback,queue_size=1)
-			#rospy.Subscriber("/robot6/compute_task/status", ComputeTaskStatus, self.robot6_computetaskstatus_callback,queue_size=1)
-			#rospy.Subscriber("/robot7/compute_task/status", ComputeTaskStatus, self.robot7_computetaskstatus_callback,queue_size=1)
-			#rospy.Subscriber("/robot8/compute_task/status", ComputeTaskStatus, self.robot8_computetaskstatus_callback,queue_size=1)
-			#rospy.Subscriber("/robot9/compute_task/status", ComputeTaskStatus, self.robot9_computetaskstatus_callback,queue_size=1)
+			rospy.Subscriber("/robot5/compute_task/status", ComputeTaskStatus, self.robot5_computetaskstatus_callback,queue_size=1)
+			rospy.Subscriber("/robot6/compute_task/status", ComputeTaskStatus, self.robot6_computetaskstatus_callback,queue_size=1)
+			rospy.Subscriber("/robot7/compute_task/status", ComputeTaskStatus, self.robot7_computetaskstatus_callback,queue_size=1)
+			rospy.Subscriber("/robot8/compute_task/status", ComputeTaskStatus, self.robot8_computetaskstatus_callback,queue_size=1)
+			rospy.Subscriber("/robot9/compute_task/status", ComputeTaskStatus, self.robot9_computetaskstatus_callback,queue_size=1)
 
 			# create topic publishers
 			self.active_robots_status_pub = rospy.Publisher('/active_robot_status', String,queue_size=10)
@@ -868,7 +868,11 @@ class iliad_goal_manager(object):
 
 		if self.missions_started:
 			for robot in self.active_robots:
-				self.active_robots[robot]["report"] = self.robot_report_status[robot]
+				if msg.status == 2 or msg.status == 3 or msg.status==4:
+					self.active_robots[robot]["computing_task"] = 0
+
+				if self.active_robots[robot]["computing_task"] == 0:
+					self.active_robots[robot]["report"] = self.robot_report_status[robot]
 
 	def robot2_status_callback(self,msg):
 		if  msg.status == 1:
@@ -884,7 +888,11 @@ class iliad_goal_manager(object):
 
 		if self.missions_started:
 			for robot in self.active_robots:
-				self.active_robots[robot]["report"] = self.robot_report_status[robot]
+				if msg.status == 2 or msg.status == 3 or msg.status==4:
+					self.active_robots[robot]["computing_task"] = 0
+
+				if self.active_robots[robot]["computing_task"] == 0:
+					self.active_robots[robot]["report"] = self.robot_report_status[robot]
 
 	def robot3_status_callback(self,msg):
 		if  msg.status == 1:
@@ -900,7 +908,11 @@ class iliad_goal_manager(object):
 
 		if self.missions_started:
 			for robot in self.active_robots:
-				self.active_robots[robot]["report"] = self.robot_report_status[robot]
+				if msg.status == 2 or msg.status == 3 or msg.status==4:
+					self.active_robots[robot]["computing_task"] = 0
+
+				if self.active_robots[robot]["computing_task"] == 0:
+					self.active_robots[robot]["report"] = self.robot_report_status[robot]
 
 	def robot4_status_callback(self,msg):
 		if  msg.status == 1:
@@ -936,7 +948,11 @@ class iliad_goal_manager(object):
 
 		if self.missions_started:
 			for robot in self.active_robots:
-				self.active_robots[robot]["report"] = self.robot_report_status[robot]
+				if msg.status == 2 or msg.status == 3 or msg.status==4:
+					self.active_robots[robot]["computing_task"] = 0
+
+				if self.active_robots[robot]["computing_task"] == 0:
+					self.active_robots[robot]["report"] = self.robot_report_status[robot]
 
 	def robot6_status_callback(self,msg):
 		if  msg.status == 1:
@@ -952,7 +968,11 @@ class iliad_goal_manager(object):
 
 		if self.missions_started:
 			for robot in self.active_robots:
-				self.active_robots[robot]["report"] = self.robot_report_status[robot]
+				if msg.status == 2 or msg.status == 3 or msg.status==4:
+					self.active_robots[robot]["computing_task"] = 0
+
+				if self.active_robots[robot]["computing_task"] == 0:
+					self.active_robots[robot]["report"] = self.robot_report_status[robot]
 
 	def robot7_status_callback(self,msg):
 		if  msg.status == 1:
@@ -968,7 +988,11 @@ class iliad_goal_manager(object):
 
 		if self.missions_started:
 			for robot in self.active_robots:
-				self.active_robots[robot]["report"] = self.robot_report_status[robot]
+				if msg.status == 2 or msg.status == 3 or msg.status==4:
+					self.active_robots[robot]["computing_task"] = 0
+
+				if self.active_robots[robot]["computing_task"] == 0:
+					self.active_robots[robot]["report"] = self.robot_report_status[robot]
 
 	def robot8_status_callback(self,msg):
 		if  msg.status == 1:
@@ -984,7 +1008,11 @@ class iliad_goal_manager(object):
 
 		if self.missions_started:
 			for robot in self.active_robots:
-				self.active_robots[robot]["report"] = self.robot_report_status[robot]
+				if msg.status == 2 or msg.status == 3 or msg.status==4:
+					self.active_robots[robot]["computing_task"] = 0
+
+				if self.active_robots[robot]["computing_task"] == 0:
+					self.active_robots[robot]["report"] = self.robot_report_status[robot]
 
 	def robot9_status_callback(self,msg):
 		if  msg.status == 1:
@@ -1000,8 +1028,155 @@ class iliad_goal_manager(object):
 
 		if self.missions_started:
 			for robot in self.active_robots:
-				self.active_robots[robot]["report"] = self.robot_report_status[robot]
+				if msg.status == 2 or msg.status == 3 or msg.status==4:
+					self.active_robots[robot]["computing_task"] = 0
 
+				if self.active_robots[robot]["computing_task"] == 0:
+					self.active_robots[robot]["report"] = self.robot_report_status[robot]
+
+	def robot1_computetaskstatus_callback(self,msg):
+		if msg.status == 0:
+			message = "COMPUTE_TASK_START"
+		if msg.status == 1:
+			message = "COMPUTE_TASK_SUCCESS"
+		if msg.status == 2:	
+			message = "INVALID_TARGET"
+		if msg.status == 3:
+			message = "INVALID_MAP"
+		if msg.status == 4:
+			message = "INVALID_START"
+		if msg.status == 5:	
+			message = "VECTOR_MAP_SERVICE_SUCCESS"
+		if msg.status == 6:
+			message = "VECTOR_MAP_SERVICE_FAILURE"
+		if msg.status == 7:
+			message = "GEOFENCE_CALL_SUCCESS"
+		if msg.status == 8:	
+			message = "GEOFENCE_CALL_FAILURE"
+		if msg.status == 9:
+			message = "PATH_PLANNER_SERVICE_SUCCESS"
+		if msg.status == 10:
+			message = "PATH_PLANNER_SERVICE_FAILED"
+		if msg.status == 11:	
+			message = "PATH_PLANNER_FAILED"
+		if msg.status == 12:
+			message = "PATH_PLANNER_REPOSITIONING_FAILED"
+		if msg.status == 13:
+			message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
+		if msg.status == 14:	
+			message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+		if msg.status == 15:
+			message = "SMOOTHING_SERVICE_SUCCESS"
+		if msg.status == 16:
+			message = "SMOOTHING_SERVICE_FAILED"
+		if msg.status == 17:
+			message = "SMOOTHING_FAILED"
+		if msg.status == 18:
+			message = "DELTATVEC_SERVICE_SUCCESS"
+		if msg.status == 19:
+			message = "DELTATVEC_SERVICE_FAILURE"
+		if msg.status == 20:	
+			message = "DELTATVEC_CONSTRAINT_FAILURE"
+
+		for robot in self.active_robots:
+			if self.active_robots[robot]["computing_task"] == 1:
+				self.active_robots[robot]["report"] = message
+
+	def robot2_computetaskstatus_callback(self,msg):
+		if msg.status == 0:
+			message = "COMPUTE_TASK_START"
+		if msg.status == 1:
+			message = "COMPUTE_TASK_SUCCESS"
+		if msg.status == 2:	
+			message = "INVALID_TARGET"
+		if msg.status == 3:
+			message = "INVALID_MAP"
+		if msg.status == 4:
+			message = "INVALID_START"
+		if msg.status == 5:	
+			message = "VECTOR_MAP_SERVICE_SUCCESS"
+		if msg.status == 6:
+			message = "VECTOR_MAP_SERVICE_FAILURE"
+		if msg.status == 7:
+			message = "GEOFENCE_CALL_SUCCESS"
+		if msg.status == 8:	
+			message = "GEOFENCE_CALL_FAILURE"
+		if msg.status == 9:
+			message = "PATH_PLANNER_SERVICE_SUCCESS"
+		if msg.status == 10:
+			message = "PATH_PLANNER_SERVICE_FAILED"
+		if msg.status == 11:	
+			message = "PATH_PLANNER_FAILED"
+		if msg.status == 12:
+			message = "PATH_PLANNER_REPOSITIONING_FAILED"
+		if msg.status == 13:
+			message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
+		if msg.status == 14:	
+			message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+		if msg.status == 15:
+			message = "SMOOTHING_SERVICE_SUCCESS"
+		if msg.status == 16:
+			message = "SMOOTHING_SERVICE_FAILED"
+		if msg.status == 17:
+			message = "SMOOTHING_FAILED"
+		if msg.status == 18:
+			message = "DELTATVEC_SERVICE_SUCCESS"
+		if msg.status == 19:
+			message = "DELTATVEC_SERVICE_FAILURE"
+		if msg.status == 20:	
+			message = "DELTATVEC_CONSTRAINT_FAILURE"
+
+		for robot in self.active_robots:
+			if self.active_robots[robot]["computing_task"] == 1:
+				self.active_robots[robot]["report"] = message
+
+	def robot3_computetaskstatus_callback(self,msg):
+		if msg.status == 0:
+			message = "COMPUTE_TASK_START"
+		if msg.status == 1:
+			message = "COMPUTE_TASK_SUCCESS"
+		if msg.status == 2:	
+			message = "INVALID_TARGET"
+		if msg.status == 3:
+			message = "INVALID_MAP"
+		if msg.status == 4:
+			message = "INVALID_START"
+		if msg.status == 5:	
+			message = "VECTOR_MAP_SERVICE_SUCCESS"
+		if msg.status == 6:
+			message = "VECTOR_MAP_SERVICE_FAILURE"
+		if msg.status == 7:
+			message = "GEOFENCE_CALL_SUCCESS"
+		if msg.status == 8:	
+			message = "GEOFENCE_CALL_FAILURE"
+		if msg.status == 9:
+			message = "PATH_PLANNER_SERVICE_SUCCESS"
+		if msg.status == 10:
+			message = "PATH_PLANNER_SERVICE_FAILED"
+		if msg.status == 11:	
+			message = "PATH_PLANNER_FAILED"
+		if msg.status == 12:
+			message = "PATH_PLANNER_REPOSITIONING_FAILED"
+		if msg.status == 13:
+			message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
+		if msg.status == 14:	
+			message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+		if msg.status == 15:
+			message = "SMOOTHING_SERVICE_SUCCESS"
+		if msg.status == 16:
+			message = "SMOOTHING_SERVICE_FAILED"
+		if msg.status == 17:
+			message = "SMOOTHING_FAILED"
+		if msg.status == 18:
+			message = "DELTATVEC_SERVICE_SUCCESS"
+		if msg.status == 19:
+			message = "DELTATVEC_SERVICE_FAILURE"
+		if msg.status == 20:	
+			message = "DELTATVEC_CONSTRAINT_FAILURE"
+
+		for robot in self.active_robots:
+			if self.active_robots[robot]["computing_task"] == 1:
+				self.active_robots[robot]["report"] = message
 
 	def robot4_computetaskstatus_callback(self,msg):
 		if msg.status == 0:
@@ -1052,7 +1227,7 @@ class iliad_goal_manager(object):
 				self.active_robots[robot]["report"] = message
 
 
-	
+
 	def robot1_pointclickgoal_callback(self,msg):
 		robotgoal_msg = RobotTarget()
 		robotgoal_msg.robot_id = 1
@@ -1144,6 +1319,294 @@ class iliad_goal_manager(object):
 		robotgoal_msg.start_op.operation = 1
 		robotgoal_msg.goal_op.operation = 1
 		self.robot9_goal_pub.publish(robotgoal_msg)
+
+	def robot4_computetaskstatus_callback(self,msg):
+		if msg.status == 0:
+			message = "COMPUTE_TASK_START"
+		if msg.status == 1:
+			message = "COMPUTE_TASK_SUCCESS"
+		if msg.status == 2:	
+			message = "INVALID_TARGET"
+		if msg.status == 3:
+			message = "INVALID_MAP"
+		if msg.status == 4:
+			message = "INVALID_START"
+		if msg.status == 5:	
+			message = "VECTOR_MAP_SERVICE_SUCCESS"
+		if msg.status == 6:
+			message = "VECTOR_MAP_SERVICE_FAILURE"
+		if msg.status == 7:
+			message = "GEOFENCE_CALL_SUCCESS"
+		if msg.status == 8:	
+			message = "GEOFENCE_CALL_FAILURE"
+		if msg.status == 9:
+			message = "PATH_PLANNER_SERVICE_SUCCESS"
+		if msg.status == 10:
+			message = "PATH_PLANNER_SERVICE_FAILED"
+		if msg.status == 11:	
+			message = "PATH_PLANNER_FAILED"
+		if msg.status == 12:
+			message = "PATH_PLANNER_REPOSITIONING_FAILED"
+		if msg.status == 13:
+			message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
+		if msg.status == 14:	
+			message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+		if msg.status == 15:
+			message = "SMOOTHING_SERVICE_SUCCESS"
+		if msg.status == 16:
+			message = "SMOOTHING_SERVICE_FAILED"
+		if msg.status == 17:
+			message = "SMOOTHING_FAILED"
+		if msg.status == 18:
+			message = "DELTATVEC_SERVICE_SUCCESS"
+		if msg.status == 19:
+			message = "DELTATVEC_SERVICE_FAILURE"
+		if msg.status == 20:	
+			message = "DELTATVEC_CONSTRAINT_FAILURE"
+
+		for robot in self.active_robots:
+			if self.active_robots[robot]["computing_task"] == 1:
+				self.active_robots[robot]["report"] = message
+
+	def robot5_computetaskstatus_callback(self,msg):
+		if msg.status == 0:
+			message = "COMPUTE_TASK_START"
+		if msg.status == 1:
+			message = "COMPUTE_TASK_SUCCESS"
+		if msg.status == 2:	
+			message = "INVALID_TARGET"
+		if msg.status == 3:
+			message = "INVALID_MAP"
+		if msg.status == 4:
+			message = "INVALID_START"
+		if msg.status == 5:	
+			message = "VECTOR_MAP_SERVICE_SUCCESS"
+		if msg.status == 6:
+			message = "VECTOR_MAP_SERVICE_FAILURE"
+		if msg.status == 7:
+			message = "GEOFENCE_CALL_SUCCESS"
+		if msg.status == 8:	
+			message = "GEOFENCE_CALL_FAILURE"
+		if msg.status == 9:
+			message = "PATH_PLANNER_SERVICE_SUCCESS"
+		if msg.status == 10:
+			message = "PATH_PLANNER_SERVICE_FAILED"
+		if msg.status == 11:	
+			message = "PATH_PLANNER_FAILED"
+		if msg.status == 12:
+			message = "PATH_PLANNER_REPOSITIONING_FAILED"
+		if msg.status == 13:
+			message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
+		if msg.status == 14:	
+			message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+		if msg.status == 15:
+			message = "SMOOTHING_SERVICE_SUCCESS"
+		if msg.status == 16:
+			message = "SMOOTHING_SERVICE_FAILED"
+		if msg.status == 17:
+			message = "SMOOTHING_FAILED"
+		if msg.status == 18:
+			message = "DELTATVEC_SERVICE_SUCCESS"
+		if msg.status == 19:
+			message = "DELTATVEC_SERVICE_FAILURE"
+		if msg.status == 20:	
+			message = "DELTATVEC_CONSTRAINT_FAILURE"
+
+		for robot in self.active_robots:
+			if self.active_robots[robot]["computing_task"] == 1:
+				self.active_robots[robot]["report"] = message
+
+	def robot6_computetaskstatus_callback(self,msg):
+		if msg.status == 0:
+			message = "COMPUTE_TASK_START"
+		if msg.status == 1:
+			message = "COMPUTE_TASK_SUCCESS"
+		if msg.status == 2:	
+			message = "INVALID_TARGET"
+		if msg.status == 3:
+			message = "INVALID_MAP"
+		if msg.status == 4:
+			message = "INVALID_START"
+		if msg.status == 5:	
+			message = "VECTOR_MAP_SERVICE_SUCCESS"
+		if msg.status == 6:
+			message = "VECTOR_MAP_SERVICE_FAILURE"
+		if msg.status == 7:
+			message = "GEOFENCE_CALL_SUCCESS"
+		if msg.status == 8:	
+			message = "GEOFENCE_CALL_FAILURE"
+		if msg.status == 9:
+			message = "PATH_PLANNER_SERVICE_SUCCESS"
+		if msg.status == 10:
+			message = "PATH_PLANNER_SERVICE_FAILED"
+		if msg.status == 11:	
+			message = "PATH_PLANNER_FAILED"
+		if msg.status == 12:
+			message = "PATH_PLANNER_REPOSITIONING_FAILED"
+		if msg.status == 13:
+			message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
+		if msg.status == 14:	
+			message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+		if msg.status == 15:
+			message = "SMOOTHING_SERVICE_SUCCESS"
+		if msg.status == 16:
+			message = "SMOOTHING_SERVICE_FAILED"
+		if msg.status == 17:
+			message = "SMOOTHING_FAILED"
+		if msg.status == 18:
+			message = "DELTATVEC_SERVICE_SUCCESS"
+		if msg.status == 19:
+			message = "DELTATVEC_SERVICE_FAILURE"
+		if msg.status == 20:	
+			message = "DELTATVEC_CONSTRAINT_FAILURE"
+
+		for robot in self.active_robots:
+			if self.active_robots[robot]["computing_task"] == 1:
+				self.active_robots[robot]["report"] = message
+
+	def robot7_computetaskstatus_callback(self,msg):
+		if msg.status == 0:
+			message = "COMPUTE_TASK_START"
+		if msg.status == 1:
+			message = "COMPUTE_TASK_SUCCESS"
+		if msg.status == 2:	
+			message = "INVALID_TARGET"
+		if msg.status == 3:
+			message = "INVALID_MAP"
+		if msg.status == 4:
+			message = "INVALID_START"
+		if msg.status == 5:	
+			message = "VECTOR_MAP_SERVICE_SUCCESS"
+		if msg.status == 6:
+			message = "VECTOR_MAP_SERVICE_FAILURE"
+		if msg.status == 7:
+			message = "GEOFENCE_CALL_SUCCESS"
+		if msg.status == 8:	
+			message = "GEOFENCE_CALL_FAILURE"
+		if msg.status == 9:
+			message = "PATH_PLANNER_SERVICE_SUCCESS"
+		if msg.status == 10:
+			message = "PATH_PLANNER_SERVICE_FAILED"
+		if msg.status == 11:	
+			message = "PATH_PLANNER_FAILED"
+		if msg.status == 12:
+			message = "PATH_PLANNER_REPOSITIONING_FAILED"
+		if msg.status == 13:
+			message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
+		if msg.status == 14:	
+			message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+		if msg.status == 15:
+			message = "SMOOTHING_SERVICE_SUCCESS"
+		if msg.status == 16:
+			message = "SMOOTHING_SERVICE_FAILED"
+		if msg.status == 17:
+			message = "SMOOTHING_FAILED"
+		if msg.status == 18:
+			message = "DELTATVEC_SERVICE_SUCCESS"
+		if msg.status == 19:
+			message = "DELTATVEC_SERVICE_FAILURE"
+		if msg.status == 20:	
+			message = "DELTATVEC_CONSTRAINT_FAILURE"
+
+		for robot in self.active_robots:
+			if self.active_robots[robot]["computing_task"] == 1:
+				self.active_robots[robot]["report"] = message
+
+	def robot8_computetaskstatus_callback(self,msg):
+		if msg.status == 0:
+			message = "COMPUTE_TASK_START"
+		if msg.status == 1:
+			message = "COMPUTE_TASK_SUCCESS"
+		if msg.status == 2:	
+			message = "INVALID_TARGET"
+		if msg.status == 3:
+			message = "INVALID_MAP"
+		if msg.status == 4:
+			message = "INVALID_START"
+		if msg.status == 5:	
+			message = "VECTOR_MAP_SERVICE_SUCCESS"
+		if msg.status == 6:
+			message = "VECTOR_MAP_SERVICE_FAILURE"
+		if msg.status == 7:
+			message = "GEOFENCE_CALL_SUCCESS"
+		if msg.status == 8:	
+			message = "GEOFENCE_CALL_FAILURE"
+		if msg.status == 9:
+			message = "PATH_PLANNER_SERVICE_SUCCESS"
+		if msg.status == 10:
+			message = "PATH_PLANNER_SERVICE_FAILED"
+		if msg.status == 11:	
+			message = "PATH_PLANNER_FAILED"
+		if msg.status == 12:
+			message = "PATH_PLANNER_REPOSITIONING_FAILED"
+		if msg.status == 13:
+			message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
+		if msg.status == 14:	
+			message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+		if msg.status == 15:
+			message = "SMOOTHING_SERVICE_SUCCESS"
+		if msg.status == 16:
+			message = "SMOOTHING_SERVICE_FAILED"
+		if msg.status == 17:
+			message = "SMOOTHING_FAILED"
+		if msg.status == 18:
+			message = "DELTATVEC_SERVICE_SUCCESS"
+		if msg.status == 19:
+			message = "DELTATVEC_SERVICE_FAILURE"
+		if msg.status == 20:	
+			message = "DELTATVEC_CONSTRAINT_FAILURE"
+
+		for robot in self.active_robots:
+			if self.active_robots[robot]["computing_task"] == 1:
+				self.active_robots[robot]["report"] = message
+
+	def robot9_computetaskstatus_callback(self,msg):
+		if msg.status == 0:
+			message = "COMPUTE_TASK_START"
+		if msg.status == 1:
+			message = "COMPUTE_TASK_SUCCESS"
+		if msg.status == 2:	
+			message = "INVALID_TARGET"
+		if msg.status == 3:
+			message = "INVALID_MAP"
+		if msg.status == 4:
+			message = "INVALID_START"
+		if msg.status == 5:	
+			message = "VECTOR_MAP_SERVICE_SUCCESS"
+		if msg.status == 6:
+			message = "VECTOR_MAP_SERVICE_FAILURE"
+		if msg.status == 7:
+			message = "GEOFENCE_CALL_SUCCESS"
+		if msg.status == 8:	
+			message = "GEOFENCE_CALL_FAILURE"
+		if msg.status == 9:
+			message = "PATH_PLANNER_SERVICE_SUCCESS"
+		if msg.status == 10:
+			message = "PATH_PLANNER_SERVICE_FAILED"
+		if msg.status == 11:	
+			message = "PATH_PLANNER_FAILED"
+		if msg.status == 12:
+			message = "PATH_PLANNER_REPOSITIONING_FAILED"
+		if msg.status == 13:
+			message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
+		if msg.status == 14:	
+			message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+		if msg.status == 15:
+			message = "SMOOTHING_SERVICE_SUCCESS"
+		if msg.status == 16:
+			message = "SMOOTHING_SERVICE_FAILED"
+		if msg.status == 17:
+			message = "SMOOTHING_FAILED"
+		if msg.status == 18:
+			message = "DELTATVEC_SERVICE_SUCCESS"
+		if msg.status == 19:
+			message = "DELTATVEC_SERVICE_FAILURE"
+		if msg.status == 20:	
+			message = "DELTATVEC_CONSTRAINT_FAILURE"
+
+		for robot in self.active_robots:
+			if self.active_robots[robot]["computing_task"] == 1:
+				self.active_robots[robot]["report"] = message
 
 
 
