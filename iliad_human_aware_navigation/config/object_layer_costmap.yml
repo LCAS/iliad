@@ -18,5 +18,5 @@ static_map:
 
 obstacles_laser:
   observation_sources: laserScanner
-  laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: /robot3/sensors/laser2d_floor/human_filtered, sensor_frame: /robot3/laser2d_floor_link, obstacle_range: 20.0, raytrace_range: 21, inf_is_valid: true}
+  laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: /robot4/sensors/laser2d_floor/human_filtered, sensor_frame: /robot4/laser2d_floor_link, obstacle_range: 20.0, raytrace_range: 21, inf_is_valid: true}
   
