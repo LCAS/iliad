@@ -37,7 +37,7 @@
     <arg name="situation_topic_name"      default = "/$(arg prefix)/qsr/situation_predictions"/>
 
 
-    <group if="use_realtime_situation_prediction">
+    <group if="$(arg use_realtime_situation_prediction)">
       <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"></include>
     </group>
 
@@ -106,7 +106,7 @@
       </node>
       
       <!-- TODO: Here goes Laurence situation assessment module! -->
-      <group if="use_realtime_situation_prediction">
+      <group if="$(arg use_realtime_situation_prediction)">
         <param name="situation_rejection_threshold" value="0.1"/>
         <node name="realtime_sit_classifier" pkg="realtime_hrsi_situation_classifier" type="realtime_sit_classifier.py" output="screen" respawn="false" args="$(arg robot_id)">
         </node>
