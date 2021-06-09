@@ -497,7 +497,7 @@ class iliad_goal_manager(object):
 		if len(self.active_list.curselection()) > 0:
 			robot_names = self.active_list.get(0,tk.END)
 			robot_selected  = robot_names[self.active_list.curselection()[0]]
-			print "Cancel order in robot: ", robot_selected
+			print "Cancel order in: ", robot_selected
 			if self.robot_report_status[robot_selected] != "WAITING_FOR_TASK":
 				self.abort_goal(robot_selected)
 
@@ -528,11 +528,12 @@ class iliad_goal_manager(object):
 		#call the service to abort task
 		self.abort_goal_service_client(int(robot_num))
 
+		# this is removed because the aborting does not workign in many occasion and it block the system
 		#what for the robot navigation status to be free/idle
-		while self.robot_report_status[robot] != "WAITING_FOR_TASK":
-			print "...aborting goal in robot",robot
-			rospy.sleep(0.2)
-		print "goal aborted"
+		#while self.robot_report_status[robot] != "WAITING_FOR_TASK":
+		#	print "...aborting goal in robot",robot
+		#	rospy.sleep(0.2)
+		#print "goal aborted"
 
 	def exploration_goal_callback(self,exploration_goal_msg):
 		print "Exploration goal request received"

@@ -9,7 +9,7 @@
 import rospy
 from std_msgs.msg import Float64, Float64MultiArray, Empty, String
 from orunav_msgs.srv import  Trigger
-from orunav_msgs.msg import Task
+from orunav_msgs.msg import Task, ComputeTaskStatus
 
 import numpy as np
 from threading import Lock
@@ -32,6 +32,11 @@ class object_aware_assessment():
         self.w = self.w_max 
         self.v_rev = self.v_rev_max
         self.w_rev = self.w_rev_max
+
+        self.old_v = None
+        self.old_w = None
+        self.old_v_rev = None
+        self.old_w_rev = None
 
         self.replan_needed = 0
         self.path_computed = False
@@ -82,7 +87,7 @@ class object_aware_assessment():
         self.w_min = 0.01 
 
         # topic to read to ensure that the path has been computed
-        self.path_computed_topic_name = rospy.get_param('~path_computed_topic_name','/robot' + str(self.robot_id) + '/control/task')
+        self.path_computed_topic_name = rospy.get_param('~path_computed_topic_name','/robot' + str(self.robot_id) + '/compute_task/status')
         self.time_needed_before_replan = rospy.get_param('~time_needed_before_replan',10)
 
     def initROS(self):
@@ -99,7 +104,7 @@ class object_aware_assessment():
 
         # topic subscribers and other listeners
         rospy.Subscriber(self.curr_cost_topic_name, Float64, self.curr_cost_callback, queue_size=1)
-        rospy.Subscriber(self.path_computed_topic_name, Task, self.path_computed_callback, queue_size=1)
+        rospy.Subscriber(self.path_computed_topic_name, ComputeTaskStatus, self.path_computed_callback, queue_size=1)
 
         # service servers
         rospy.loginfo("Waiting for the /coordinator/replan service to be available" )
@@ -108,9 +113,6 @@ class object_aware_assessment():
 
         #timers
         self.check_for_replan_timer = rospy.Timer(rospy.Duration(0.5),self.check_for_replan)
-
-    def path_computed_callback(self,msg_data):
-        self.path_computed = True
 
 
     def curr_cost_callback(self, msg):
@@ -146,22 +148,76 @@ class object_aware_assessment():
 
 
     def sendNewConstraints(self):
-        msg = Float64MultiArray()
-        msg.data.append(self.v)
-        msg.data.append(self.w)
-        msg.data.append(self.v_rev)
-        msg.data.append(self.w_rev)
-        self.velocity_constraints_pub.publish(msg)
-        rospy.loginfo("Node [" + rospy.get_name() + "] " +
-                            "New speed Constraints sent : V ( -" +
-                            str(self.v_rev) + ", " + str(self.v) + " m/s), " +
-                            "W ( -" +
-                            str(self.w_rev * 180.0/np.pi) + ", " + str(self.w * 180.0/np.pi) + " deg/sec) "
-                            )
+        #only update constraints if they are different
+        if self.old_v != self.v and self.old_w != self.w and self.old_v_rev != self.v_rev and self.old_w_rev != self.w_rev:
+            self.old_v = self.v
+            self.old_w = self.w
+            self.old_v_rev = self.v_rev
+            self.old_w_rev = self.w_rev
+            msg = Float64MultiArray()
+            msg.data.append(self.v)
+            msg.data.append(self.w)
+            msg.data.append(self.v_rev)
+            msg.data.append(self.w_rev)
+            self.velocity_constraints_pub.publish(msg)
+            rospy.loginfo("Node [" + rospy.get_name() + "] " +
+                                "New speed Constraints sent : V ( -" +
+                                str(self.v_rev) + ", " + str(self.v) + " m/s), " +
+                                "W ( -" +
+                                str(self.w_rev * 180.0/np.pi) + ", " + str(self.w * 180.0/np.pi) + " deg/sec) "
+                                )
+
+    def path_computed_callback(self,msg):
+        if self.replan_triggered == True:
+            if msg.status == 0:
+                message = "COMPUTE_TASK_START"
+            if msg.status == 1:
+                message = "COMPUTE_TASK_SUCCESS"
+                self.path_computed = True
+            if msg.status == 2: 
+                message = "INVALID_TARGET"
+            if msg.status == 3:
+                message = "INVALID_MAP"
+            if msg.status == 4:
+                message = "INVALID_START"
+            if msg.status == 5: 
+                message = "VECTOR_MAP_SERVICE_SUCCESS"
+            if msg.status == 6:
+                message = "VECTOR_MAP_SERVICE_FAILURE"
+            if msg.status == 7:
+                message = "GEOFENCE_CALL_SUCCESS"
+            if msg.status == 8: 
+                message = "GEOFENCE_CALL_FAILURE"
+            if msg.status == 9:
+                message = "PATH_PLANNER_SERVICE_SUCCESS"
+            if msg.status == 10:
+                message = "PATH_PLANNER_SERVICE_FAILED"
+            if msg.status == 11:    
+                message = "PATH_PLANNER_FAILED"
+            if msg.status == 12:
+                message = "PATH_PLANNER_REPOSITIONING_FAILED"
+            if msg.status == 13:
+                message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
+            if msg.status == 14:    
+                message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+            if msg.status == 15:
+                message = "SMOOTHING_SERVICE_SUCCESS"
+            if msg.status == 16:
+                message = "SMOOTHING_SERVICE_FAILED"
+            if msg.status == 17:
+                message = "SMOOTHING_FAILED"
+            if msg.status == 18:
+                message = "DELTATVEC_SERVICE_SUCCESS"
+            if msg.status == 19:
+                message = "DELTATVEC_SERVICE_FAILURE"
+            if msg.status == 20:    
+                message = "DELTATVEC_CONSTRAINT_FAILURE"
+
+            rospy.loginfo(message)
 
     def check_for_replan(self,timer):
         if self.replan_triggered == True and self.path_computed == False:
-            rospy.loginfo("Waiting for replan to be computed" )
+            rospy.loginfo("Waiting for replan to be computed..." )
             self.replan_wait_start = 0
         else:
             self.replan_triggered = False
