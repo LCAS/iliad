@@ -1,7 +1,8 @@
 static_map: true
 track_unknown_space: false # mfc: I think this param has no use here ...
 always_send_full_costmap: true
-footprint: [[-0.2, -0.3], [-0.2, 0.3], [1.7, 0.3], [1.7, -0.3]] # previously defined ad 1.9, for citi trucks
+#footprint: [[-0.2, -0.3], [-0.2, 0.3], [1.7, 0.3], [1.7, -0.3]] # previously defined ad 1.9, for citi trucks
+footprint: [[-0.38, -0.45], [-0.38, 0.45], [2.50, 0.45], [2.50, -0.45]] # for bt trucks, front x increased from 2.07 to 2.50 to stop Sick from firing
 global_frame: "/map_laser2d"
 robot_base_frame: "base_footprint_ground_truth"
 publish_frequency: 3.0
@@ -9,7 +10,8 @@ update_frequency: 5.0
 plugins:
   - {name: static_map, type: "costmap_2d::StaticLayer"}
   - {name: obstacles_laser, type: "costmap_2d::ObstacleLayer"}
-
+  - {name: obstacles_3d, type: "costmap_2d::ObstacleLayer"}
+  
 static_map:
   track_unknown_space: true
   map_topic: "/maps/map_laser2d"
@@ -18,5 +20,8 @@ static_map:
 
 obstacles_laser:
   observation_sources: laserScanner
-  laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: /robot3/sensors/laser2d_floor/human_filtered, sensor_frame: /robot3/laser2d_floor_link, obstacle_range: 20.0, raytrace_range: 21, inf_is_valid: true}
-  
+  laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: /robot3/sensors/laser2d_floor/human_filtered, sensor_frame: /robot3/laser2d_floor_link, obstacle_range: 6.0, raytrace_range: 6.5, inf_is_valid: true}
+obstacles_3d:
+  observation_sources: velodyne
+  velodyne: {sensor_frame: '/robot3/velodyne_link', data_type: PointCloud2, topic: '/robot3/localized_cloud', min_obstacle_height: 0.50, max_obstacle_height: 2,  marking: true,  clearing: true,  obstacle_range: 6,  raytrace_range: 6.5,  expected_update_rate: 10}
+
