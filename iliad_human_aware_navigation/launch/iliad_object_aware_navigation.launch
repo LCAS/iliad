@@ -19,7 +19,7 @@
     <arg name="costmap_topic_name"        default = "/$(arg prefix)/object_costmap_node/costmap/costmap"/>
     <arg name="task_topic_name"           default = "/$(arg prefix)/control/task"/>
 
-    <arg name="envelope_topic_name"            default = "/$(arg prefix)/status"/>
+    <arg name="envelope_topic_name"            default = "/$(arg prefix)/envelope"/> <!-- `envelope` is a republished version of `status` -->
     <arg name="curr_cost_topic_name"           default = "/$(arg prefix)/object_aware/cost"/>
     <arg name="envelope_gridmap_topic_name"    default = "/$(arg prefix)/object_aware/envelope_gridmap"/>
 
