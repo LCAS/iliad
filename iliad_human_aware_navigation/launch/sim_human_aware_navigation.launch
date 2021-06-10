@@ -7,6 +7,8 @@
     <arg name="robot_id" default="4"/>
     <arg name="sim" default="true"/>
 
+    <arg name="use_realtime_situation_prediction" default="false" />
+
     <!-- derived args -->
     <arg name="prefix" value="robot$(arg robot_id)"/>
 
@@ -34,7 +36,10 @@
     <arg name="curr_cost_topic_name"      default = "/$(arg prefix)/qsr/cost"/>
     <arg name="situation_topic_name"      default = "/$(arg prefix)/qsr/situation_predictions"/>
 
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"></include>
+
+    <group if="$(arg use_realtime_situation_prediction)">
+      <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"></include>
+    </group>
 
     <!-- the group -->
     <group ns="$(arg prefix)/qsr">
@@ -101,9 +106,11 @@
       </node>
       
       <!-- TODO: Here goes Laurence situation assessment module! -->
+      <group if="$(arg use_realtime_situation_prediction)">
         <param name="situation_rejection_threshold" value="0.1"/>
         <node name="realtime_sit_classifier" pkg="realtime_hrsi_situation_classifier" type="realtime_sit_classifier.py" output="screen" respawn="false" args="$(arg robot_id)">
         </node>
+      </group>
 
       <!-- constraints costmap V2: creates human exclusion area -->
       <node pkg="iliad_human_aware_navigation" type="iliad_constraints_costmap.py" name="constraints_costmap_server" output="screen" respawn="true">
