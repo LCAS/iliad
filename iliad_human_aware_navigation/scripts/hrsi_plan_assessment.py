@@ -277,6 +277,7 @@ class HRSIassessment():
             if msg.status == 20:    
                 message = "DELTATVEC_CONSTRAINT_FAILURE"
 
+
             rospy.loginfo(message)
 
     def check_for_replan(self,timer):

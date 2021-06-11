@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-	<arg name="mode" value="1"/><!-- [0] click and point mode,  [1] mission mode -->
+	<arg name="mode" default="0"/><!-- [0] click and point mode,  [1] mission mode -->
     <arg name="orders_file" value=""/> <!--$(find iliad_goal_manager)/config/OPTLoading_XMLoutput_20201208153254704.xml" /> -->
     <arg name="parsed_orders_file" value="$(find iliad_goal_manager)/config/pallet_load_unload_orders_parsed.json" />
     <arg name="orders_times_file" value="" />
