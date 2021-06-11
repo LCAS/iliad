@@ -255,24 +255,28 @@ class HRSIassessment():
                 message = "PATH_PLANNER_SERVICE_FAILED"
             if msg.status == 11:    
                 message = "PATH_PLANNER_FAILED"
+                self.path_computed = True # try replan if planner failed
             if msg.status == 12:
                 message = "PATH_PLANNER_REPOSITIONING_FAILED"
             if msg.status == 13:
                 message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
             if msg.status == 14:    
                 message = "POLYGONCONSTRAINT_SERVICE_FAILED"
+                self.path_computed = True # try replan if constraint extractor failed
             if msg.status == 15:
                 message = "SMOOTHING_SERVICE_SUCCESS"
             if msg.status == 16:
                 message = "SMOOTHING_SERVICE_FAILED"
             if msg.status == 17:
                 message = "SMOOTHING_FAILED"
+                self.path_computed = True # try replan if smoothing failed
             if msg.status == 18:
                 message = "DELTATVEC_SERVICE_SUCCESS"
             if msg.status == 19:
                 message = "DELTATVEC_SERVICE_FAILURE"
             if msg.status == 20:    
                 message = "DELTATVEC_CONSTRAINT_FAILURE"
+
 
             rospy.loginfo(message)
 
