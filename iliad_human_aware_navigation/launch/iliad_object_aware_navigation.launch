@@ -75,7 +75,7 @@
     <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_humans_from_localized_cloud_laser2d">
         <remap from="scan"          to="/$(arg prefix)/localized_cloud/laser2d/robots_filtered"/>
         <remap from="scan_filtered" to="/$(arg prefix)/localized_cloud/laser2d/robots_filtered/humans_filtered"/>
-        <remap from="$(arg prefix)_filter_humans_from_laser_floor/humans" to="/$(arg prefix)/human_perception/tracked_persons"/>
+        <remap from="$(arg prefix)_filter_humans_from_localized_cloud_laser2d/humans" to="/$(arg prefix)/human_perception/tracked_persons"/>
         <rosparam command="load" file="$(find iliad_human_aware_navigation)/config/human_laser_filter.yaml"/>
     </node>
 
