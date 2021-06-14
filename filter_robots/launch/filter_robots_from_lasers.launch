@@ -20,13 +20,13 @@
       <rosparam command="load" file="$(find filter_robots)/config/robot_laser_filter.yaml"/>
     </node>
 
-<!-- laser filter for the localised cloud  -->
-    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="$(arg prefix)_pointcloud_to_laserscan"  if="$(arg is_cititruck)">
-        <remap from="cloud_in" to="/$(arg prefix)/localized_cloud"/>
-        <remap from="scan" to="/$(arg prefix)/localized_cloud/laser2d"/>
+<!-- laser filter for the velodyne (BT) -->
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="$(arg prefix)_pointcloud_to_laserscan"  unless="$(arg is_cititruck)">
+        <remap from="cloud_in" to="/$(arg prefix)/sensors/velodyne_points"/>
+        <remap from="scan"     to="/$(arg prefix)/sensors/velodyne_points/laser2d"/>
         <rosparam>
-            min_height: -0.1 
-            max_height: 0.1
+            min_height: -1.4
+            max_height: 0.5
             angle_min: -3.14159 # -M_PI
             angle_max: 3.14159 # M_PI
             angle_increment: 0.004363 # M_PI/720
@@ -36,26 +36,18 @@
         </rosparam>
     </node>
 
-    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="$(arg prefix)_pointcloud_to_laserscan"  unless="$(arg is_cititruck)">
-        <remap from="cloud_in" to="/$(arg prefix)/localized_cloud"/>
-        <remap from="scan" to="/$(arg prefix)/localized_cloud/laser2d"/>
-        <rosparam>
-            min_height: -1.5
-            max_height: 0.5
-            angle_min: -3.14159 # -M_PI
-            angle_max: 3.14159 # M_PI
-            angle_increment: 0.004363 # M_PI/720
-            range_min: 3
-            range_max: 100
-            use_inf: true
-        </rosparam>
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_robots_from_localized_laser" unless="$(arg is_cititruck)">
+      <remap from="scan"          to="/$(arg prefix)/sensors/velodyne_points/laser2d"/>
+      <remap from="scan_filtered" to="/$(arg prefix)/sensors/velodyne_points/laser2d/robots_filtered"/>
+      <remap from="$(arg prefix)_filter_robots_from_localized_laser/humans" to="/robots_fake_people"/>
+      <rosparam command="load" file="$(find filter_robots)/config/robot_laser_filter.yaml"/>
     </node>
 
-
-    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_robots_from_localized_laser">
-      <remap from="scan"          to="/$(arg prefix)/localized_cloud/laser2d"/>
-      <remap from="scan_filtered" to="/$(arg prefix)/localized_cloud/laser2d/robots_filtered"/>
-      <remap from="$(arg prefix)_filter_robots_from_localized_laser/humans" to="/robots_fake_people"/>
+    <!-- laser filter for the laser top (citis) -->
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_robots_from_laser_top" if="$(arg is_cititruck)">
+      <remap from="scan"          to="/$(arg prefix)/sensors/laser2d_top"/>
+      <remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_top/robots_filtered"/>
+      <remap from="$(arg prefix)_filter_robots_from_laser_top/humans" to="/robots_fake_people"/>
       <rosparam command="load" file="$(find filter_robots)/config/robot_laser_filter.yaml"/>
     </node>
 
