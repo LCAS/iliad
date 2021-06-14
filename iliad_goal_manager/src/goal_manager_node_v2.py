@@ -1070,8 +1070,9 @@ class iliad_goal_manager(object):
 		if msg.status == 20:	
 			message = "DELTATVEC_CONSTRAINT_FAILURE"
 
-		if self.active_robots["robot1"]["computing_task"] == 1:
-			self.active_robots["robot1"]["report"] = message
+		if self.missions_started:
+			if self.active_robots["robot1"]["computing_task"] == 1:
+				self.active_robots["robot1"]["report"] = message
 
 	def robot2_computetaskstatus_callback(self,msg):
 		if msg.status == 0:
@@ -1117,8 +1118,9 @@ class iliad_goal_manager(object):
 		if msg.status == 20:	
 			message = "DELTATVEC_CONSTRAINT_FAILURE"
 
-		if self.active_robots["robot2"]["computing_task"] == 1:
-			self.active_robots["robot2"]["report"] = message
+		if self.missions_started:
+			if self.active_robots["robot2"]["computing_task"] == 1:
+				self.active_robots["robot2"]["report"] = message
 
 	def robot3_computetaskstatus_callback(self,msg):
 		if msg.status == 0:
@@ -1164,8 +1166,9 @@ class iliad_goal_manager(object):
 		if msg.status == 20:	
 			message = "DELTATVEC_CONSTRAINT_FAILURE"
 
-		if self.active_robots["robot3"]["computing_task"] == 1:
-			self.active_robots["robot3"]["report"] = message
+		if self.missions_started:
+			if self.active_robots["robot3"]["computing_task"] == 1:
+				self.active_robots["robot3"]["report"] = message
 
 	def robot4_computetaskstatus_callback(self,msg):
 		if msg.status == 0:
@@ -1211,8 +1214,9 @@ class iliad_goal_manager(object):
 		if msg.status == 20:	
 			message = "DELTATVEC_CONSTRAINT_FAILURE"
 
-		if self.active_robots["robot4"]["computing_task"] == 1:
-			self.active_robots["robot4"]["report"] = message
+		if self.missions_started:
+			if self.active_robots["robot4"]["computing_task"] == 1:
+				self.active_robots["robot4"]["report"] = message
 
 
 	def robot5_computetaskstatus_callback(self,msg):
@@ -1259,8 +1263,9 @@ class iliad_goal_manager(object):
 		if msg.status == 20:	
 			message = "DELTATVEC_CONSTRAINT_FAILURE"
 
-		if self.active_robots["robot5"]["computing_task"] == 1:
-			self.active_robots["robot5"]["report"] = message
+		if self.missions_started:
+			if self.active_robots["robot5"]["computing_task"] == 1:
+				self.active_robots["robot5"]["report"] = message
 
 	def robot6_computetaskstatus_callback(self,msg):
 		if msg.status == 0:
@@ -1306,8 +1311,9 @@ class iliad_goal_manager(object):
 		if msg.status == 20:	
 			message = "DELTATVEC_CONSTRAINT_FAILURE"
 
-		if self.active_robots["robot6"]["computing_task"] == 1:
-			self.active_robots["robot6"]["report"] = message
+		if self.missions_started:
+			if self.active_robots["robot6"]["computing_task"] == 1:
+				self.active_robots["robot6"]["report"] = message
 
 	def robot7_computetaskstatus_callback(self,msg):
 		if msg.status == 0:
@@ -1353,8 +1359,9 @@ class iliad_goal_manager(object):
 		if msg.status == 20:	
 			message = "DELTATVEC_CONSTRAINT_FAILURE"
 
-		if self.active_robots["robot7"]["computing_task"] == 1:
-			self.active_robots["robot7"]["report"] = message
+		if self.missions_started:
+			if self.active_robots["robot7"]["computing_task"] == 1:
+				self.active_robots["robot7"]["report"] = message
 
 	def robot8_computetaskstatus_callback(self,msg):
 		if msg.status == 0:
@@ -1400,8 +1407,9 @@ class iliad_goal_manager(object):
 		if msg.status == 20:	
 			message = "DELTATVEC_CONSTRAINT_FAILURE"
 
-		if self.active_robots["robot8"]["computing_task"] == 1:
-			self.active_robots["robot8"]["report"] = message
+		if self.missions_started:
+			if self.active_robots["robot8"]["computing_task"] == 1:
+				self.active_robots["robot8"]["report"] = message
 
 	def robot9_computetaskstatus_callback(self,msg):
 		if msg.status == 0:
@@ -1447,8 +1455,9 @@ class iliad_goal_manager(object):
 		if msg.status == 20:	
 			message = "DELTATVEC_CONSTRAINT_FAILURE"
 
-		if self.active_robots["robot9"]["computing_task"] == 1:
-			self.active_robots["robot9"]["report"] = message
+		if self.missions_started:
+			if self.active_robots["robot9"]["computing_task"] == 1:
+				self.active_robots["robot9"]["report"] = message
 
 
 
