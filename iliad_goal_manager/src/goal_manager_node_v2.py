@@ -872,7 +872,7 @@ class iliad_goal_manager(object):
 				self.active_robots["robot1"]["computing_task"] = 0
 
 			if self.active_robots["robot1"]["computing_task"] == 0:
-				self.active_robots["robot1"]["report"] = self.robot_report_status[robot]
+				self.active_robots["robot1"]["report"] = self.robot_report_status["robot1"]
 
 	def robot2_status_callback(self,msg):
 		if  msg.status == 1:
@@ -891,7 +891,7 @@ class iliad_goal_manager(object):
 				self.active_robots["robot2"]["computing_task"] = 0
 
 			if self.active_robots["robot2"]["computing_task"] == 0:
-				self.active_robots["robot2"]["report"] = self.robot_report_status[robot]
+				self.active_robots["robot2"]["report"] = self.robot_report_status["robot2"]
 
 	def robot3_status_callback(self,msg):
 		if  msg.status == 1:
@@ -910,7 +910,7 @@ class iliad_goal_manager(object):
 				self.active_robots["robot3"]["computing_task"] = 0
 
 			if self.active_robots["robot3"]["computing_task"] == 0:
-				self.active_robots["robot3"]["report"] = self.robot_report_status[robot]
+				self.active_robots["robot3"]["report"] = self.robot_report_status["robot3"]
 
 	def robot4_status_callback(self,msg):
 		if  msg.status == 1:
@@ -929,7 +929,7 @@ class iliad_goal_manager(object):
 				self.active_robots["robot4"]["computing_task"] = 0
 
 			if self.active_robots["robot4"]["computing_task"] == 0:
-				self.active_robots["robot4"]["report"] = self.robot_report_status[robot]
+				self.active_robots["robot4"]["report"] = self.robot_report_status["robot4"]
 
 	def robot5_status_callback(self,msg):
 		if  msg.status == 1:
@@ -948,7 +948,7 @@ class iliad_goal_manager(object):
 				self.active_robots["robot5"]["computing_task"] = 0
 
 			if self.active_robots["robot5"]["computing_task"] == 0:
-				self.active_robots["robot5"]["report"] = self.robot_report_status[robot]
+				self.active_robots["robot5"]["report"] = self.robot_report_status["robot5"]
 
 	def robot6_status_callback(self,msg):
 		if  msg.status == 1:
@@ -967,7 +967,7 @@ class iliad_goal_manager(object):
 				self.active_robots["robot6"]["computing_task"] = 0
 
 			if self.active_robots["robot6"]["computing_task"] == 0:
-				self.active_robots["robot6"]["report"] = self.robot_report_status[robot]
+				self.active_robots["robot6"]["report"] = self.robot_report_status["robot6"]
 
 	def robot7_status_callback(self,msg):
 		if  msg.status == 1:
@@ -986,7 +986,7 @@ class iliad_goal_manager(object):
 				self.active_robots["robot7"]["computing_task"] = 0
 
 			if self.active_robots["robot7"]["computing_task"] == 0:
-				self.active_robots["robot7"]["report"] = self.robot_report_status[robot]
+				self.active_robots["robot7"]["report"] = self.robot_report_status["robot7"]
 
 	def robot8_status_callback(self,msg):
 		if  msg.status == 1:
@@ -1005,7 +1005,7 @@ class iliad_goal_manager(object):
 				self.active_robots["robot8"]["computing_task"] = 0
 
 			if self.active_robots["robot8"]["computing_task"] == 0:
-				self.active_robots["robot8"]["report"] = self.robot_report_status[robot]
+				self.active_robots["robot8"]["report"] = self.robot_report_status["robot8"]
 
 	def robot9_status_callback(self,msg):
 		if  msg.status == 1:
@@ -1024,7 +1024,7 @@ class iliad_goal_manager(object):
 				self.active_robots["robot9"]["computing_task"] = 0
 
 			if self.active_robots["robot9"]["computing_task"] == 0:
-				self.active_robots["robot9"]["report"] = self.robot_report_status[robot]
+				self.active_robots["robot9"]["report"] = self.robot_report_status["robot9"]
 
 	def robot1_computetaskstatus_callback(self,msg):
 		if msg.status == 0:
