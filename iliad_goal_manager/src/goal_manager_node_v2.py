@@ -116,7 +116,7 @@ class iliad_goal_manager(object):
 
 
 			# create timers
-			self.assign_missions_and_goals_timer = rospy.Timer(rospy.Duration(0.5),self.assign_missions_and_goals)
+			self.assign_missions_and_goals_timer = rospy.Timer(rospy.Duration(2),self.assign_missions_and_goals)
 			
 			#parse input files
 			# read orders file
@@ -770,7 +770,7 @@ class iliad_goal_manager(object):
 
 		# add waiting time for specific operations 
 		if operation == "PICK_ITEMS":
-			self.active_robots[robot]["wait"] = rospy.get_time() + 25
+			self.active_robots[robot]["wait"] = rospy.get_time() + 5
 		else:
 			self.active_robots[robot]["wait"] = rospy.get_time() + 5
 
