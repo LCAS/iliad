@@ -6,9 +6,11 @@
 
     <arg name="robot_id" default="4"/>
     <arg name="sim" default="true"/>
-
+    <arg name="robot_type" default="cititruck"/> 
     <!-- derived args -->
     <arg name="prefix" value="robot$(arg robot_id)"/>
+    <arg name="is_cititruck" value="$(eval arg('robot_type')=='cititruck')"/>
+
 
     <!-- args from hri -->
     <arg name="map_frame_id"          default="/map_laser2d"/>
@@ -28,30 +30,6 @@
     <!-- the group -->
     <group ns="$(arg prefix)">
 
-
-           <!-- Publishes robot pose
-      <node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_poseST_publisher" output="screen">
-          <param name="map_frame" value="$(arg map_frame_id)"/>
-          <param name="base_frame" value="$(arg robot_base_frame_id)"/>
-          <param name="is_stamped" value="true"/>
-          <remap from="robot_pose" to="$(arg robotST_topic)"/>
-      </node>
-      -->
-
-      <!-- Extracts current task cost from constraints costmap
-      <node pkg="iliad_human_aware_navigation" type="iliad_task_cost_node.py" name="object_task_cost_node" output="screen" respawn="true">
-        <param name="robot_id" value="$(arg robot_id)"/>
-        <param name="robot_pose_topic_name"            type = "string" value="$(arg robotST_topic)"/>
-        <param name="costmap_topic_name"               type = "string" value= "$(arg costmap_topic_name)"/>      
-        <param name="task_topic_name"                  type = "string" value= "$(arg task_topic_name)"/>
-        <param name="task_frame_id"                    type = "string" value= "$(arg map_frame_id)"/>
-        
-        <param name="path_occ_grid_topic_name"         type = "string" value= "$(arg path_occ_grid_topic_name)"/> 
-        <param name="curr_cost_topic_name"             type = "string" value= "$(arg curr_cost_topic_name)"/>
-        <param name="update_publish_period"            type = "double" value="0.1"/> 
-      </node>
-      -->
-
       <!-- Use the path envelope to calculate the object cost -->
       <node pkg="iliad_human_aware_navigation" type="object_aware_cost.py" name="object_aware_cost_node" output="screen" respawn="true">
         <param name="object_costamp_topic_name"   type = "string" value= "$(arg costmap_topic_name)"/>
@@ -59,8 +37,6 @@
         <param name="curr_cost_topic_name"        type = "string" value= "$(arg curr_cost_topic_name)"/>
         <param name="envelope_gridmap_topic_name" type = "string" value= "$(arg envelope_gridmap_topic_name)"/>
       </node>
-
-
 
       <!-- read the object and replan if it is necesary -->
       <node pkg="iliad_human_aware_navigation" type="object_aware_plan_assessment.py" name="object_aware_plan_assessment_node" output="screen" respawn="true">
@@ -70,24 +46,41 @@
       </node>
 
       <!-- Run the costmap node to obstain just he obstacle layer -->
-      <node name="object_costmap_node" pkg="costmap_2d" type="costmap_2d_node" >
-        <rosparam file="$(find iliad_human_aware_navigation)/config/object_layer_costmap.yml" command="load" ns="costmap"/> 
+      <node name="object_costmap_node" pkg="costmap_2d" type="costmap_2d_node" if="$(arg is_cititruck)" >
+        <rosparam file="$(find iliad_human_aware_navigation)/config/object_layer_costmap_citi.yml" command="load" ns="costmap" subst_value="true"/> 
+      </node>
+
+      <node name="object_costmap_node" pkg="costmap_2d" type="costmap_2d_node" unless="$(arg is_cititruck)" >
+        <rosparam file="$(find iliad_human_aware_navigation)/config/object_layer_costmap_bt.yml" command="load" ns="costmap" subst_value="true"/> 
       </node>
 
       <rosparam ns="object_costmap_node/costmap/" if="$(arg sim)">
         robot_base_frame: "base_link"
       </rosparam>
 
-      
     </group>
 
-      <!-- laser filter around the people detected     -->
-      <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_hanp_laser_filter_floor">
-        <remap from="scan" to="/$(arg prefix)/sensors/laser2d_floor"/>
-        <remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_floor/human_filtered"/>
-        <remap from="$(arg prefix)_hanp_laser_filter_floor/humans" to="/$(arg prefix)/human_perception/tracked_persons"/>
+
+
+      <!-- laser floor filter around the people detected     -->
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_humans_from_laser_floor">
+        <remap from="scan"          to="/$(arg prefix)/sensors/laser2d_floor/robots_filtered"/>
+        <remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_floor/robots_filtered/humans_filtered"/>
+        <remap from="$(arg prefix)_filter_humans_from_laser_floor/humans" to="/$(arg prefix)/human_perception/tracked_persons"/>
         <rosparam command="load" file="$(find iliad_human_aware_navigation)/config/human_laser_filter.yaml"/>
     </node>
+
+
+      <!-- localized laser filter around the people detected     -->
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_humans_from_localized_cloud_laser2d">
+        <remap from="scan"          to="/$(arg prefix)/localized_cloud/laser2d/robots_filtered"/>
+        <remap from="scan_filtered" to="/$(arg prefix)/localized_cloud/laser2d/robots_filtered/humans_filtered"/>
+        <remap from="$(arg prefix)_filter_humans_from_localized_cloud_laser2d/humans" to="/$(arg prefix)/human_perception/tracked_persons"/>
+        <rosparam command="load" file="$(find iliad_human_aware_navigation)/config/human_laser_filter.yaml"/>
+    </node>
+
+
+
 
 </launch>
 

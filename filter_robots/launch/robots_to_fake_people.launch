@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+    <!--
+    
+   -->
+<launch>
+
+    <!-- args -->
+    <arg name="links_to_add"      default="/base_link,/laser2d_top_link,/laser2d_floor_link"/>
+    <arg name="frame_id"          default="/map_laser2d"/>
+    <arg name="publishing_rate"   default="50"/>
+    <arg name="publish_markers"   default="True"/>
+    <arg name="marker_radius"     default = "0.5"/>
+    
+    <!-- laser filter around the people detected     -->
+    <node pkg="filter_robots" type="robots_to_fake_people.py" output="screen" name="robots_to_fake_people_node">
+      <param name="links_to_add"    type = "string" value= "$(arg links_to_add)"/>
+      <param name="frame_id"        type = "string" value= "$(arg frame_id)"/>
+      <param name="publishing_rate" type = "double" value= "$(arg publishing_rate)"/>
+      <param name="publish_markers" type = "bool" value= "$(arg publish_markers)"/>
+      <param name="marker_radius"   type = "double" value= "$(arg marker_radius)"/>
+    </node>
+
+</launch>
+
+
+
+
+
+

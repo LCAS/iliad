@@ -9,7 +9,7 @@
 import rospy
 from std_msgs.msg import Float64, Float64MultiArray, Empty, String
 from orunav_msgs.srv import  Trigger
-from orunav_msgs.msg import Task, ComputeTaskStatus
+from orunav_msgs.msg import Task, ComputeTaskStatus,ReplanStatus
 
 import numpy as np
 from threading import Lock
@@ -39,7 +39,7 @@ class object_aware_assessment():
         self.old_w_rev = None
 
         self.replan_needed = 0
-        self.path_computed = False
+        self.replan_finished = False
         self.replan_triggered = False
 
         # ................................................................
@@ -87,24 +87,18 @@ class object_aware_assessment():
         self.w_min = 0.01 
 
         # topic to read to ensure that the path has been computed
-        self.path_computed_topic_name = rospy.get_param('~path_computed_topic_name','/robot' + str(self.robot_id) + '/compute_task/status')
         self.time_needed_before_replan = rospy.get_param('~time_needed_before_replan',10)
+
 
     def initROS(self):
         # topic publishers
         self.velocity_constraints_pub = rospy.Publisher(self.velocity_constraints_topic, Float64MultiArray, queue_size=1)
         self.trigger_topic_pub = rospy.Publisher(self.trigger_topic_name, Empty, queue_size=1)
 
-        # service clients
-        # none here
-
-        # tf buffers
-        # none here
-
-
         # topic subscribers and other listeners
         rospy.Subscriber(self.curr_cost_topic_name, Float64, self.curr_cost_callback, queue_size=1)
-        rospy.Subscriber(self.path_computed_topic_name, ComputeTaskStatus, self.path_computed_callback, queue_size=1)
+        rospy.Subscriber('/robot' + str(self.robot_id) + '/compute_task/status', ComputeTaskStatus, self.compute_task_callback, queue_size=1)
+        rospy.Subscriber("/coordinator/replan/status", ReplanStatus, self.replan_status_callback, queue_size=1)
 
         # service servers
         rospy.loginfo("Waiting for the /coordinator/replan service to be available" )
@@ -167,13 +161,12 @@ class object_aware_assessment():
                                 str(self.w_rev * 180.0/np.pi) + ", " + str(self.w * 180.0/np.pi) + " deg/sec) "
                                 )
 
-    def path_computed_callback(self,msg):
+    def compute_task_callback(self,msg): #this is just for debugging purposes
         if self.replan_triggered == True:
             if msg.status == 0:
                 message = "COMPUTE_TASK_START"
             if msg.status == 1:
                 message = "COMPUTE_TASK_SUCCESS"
-                self.path_computed = True
             if msg.status == 2: 
                 message = "INVALID_TARGET"
             if msg.status == 3:
@@ -194,21 +187,18 @@ class object_aware_assessment():
                 message = "PATH_PLANNER_SERVICE_FAILED"
             if msg.status == 11:    
                 message = "PATH_PLANNER_FAILED"
-                self.path_computed = True # try replan if planner failed
             if msg.status == 12:
                 message = "PATH_PLANNER_REPOSITIONING_FAILED"
             if msg.status == 13:
                 message = "POLYGONCONSTRAINT_SERVICE_SUCCESS"
             if msg.status == 14:    
                 message = "POLYGONCONSTRAINT_SERVICE_FAILED"
-                self.path_computed = True # try replan if constraint extractor failed
             if msg.status == 15:
                 message = "SMOOTHING_SERVICE_SUCCESS"
             if msg.status == 16:
                 message = "SMOOTHING_SERVICE_FAILED"
             if msg.status == 17:
                 message = "SMOOTHING_FAILED"
-                self.path_computed = True # try replan if smoothing failed
             if msg.status == 18:
                 message = "DELTATVEC_SERVICE_SUCCESS"
             if msg.status == 19:
@@ -218,13 +208,27 @@ class object_aware_assessment():
 
             rospy.loginfo(message)
 
+    def replan_status_callback(self,msg):
+        if self.replan_triggered == True:
+            if msg.robot_id == self.robot_id:
+                if msg.status == 0:
+                    message = "REPLAN_STARTED"
+                if msg.status == 1:
+                    message = "REPLAN_SUCCESS"
+                    self.replan_finished = True
+                if msg.status == 2: 
+                    message = "REPLAN_FAILURE"
+                    self.replan_finished = True
+
+                rospy.loginfo(message)
+
     def check_for_replan(self,timer):
-        if self.replan_triggered == True and self.path_computed == False:
+        if self.replan_triggered == True and self.replan_finished == False:
             rospy.loginfo("Waiting for replan to be computed..." )
             self.replan_wait_start = 0
         else:
             self.replan_triggered = False
-            self.path_computed = False
+            self.replan_finished = False
             if self.replan_needed == 1 and self.replan_wait_start ==0:
                 self.replan_wait_start = 1
                 self.start_time = rospy.get_time()
