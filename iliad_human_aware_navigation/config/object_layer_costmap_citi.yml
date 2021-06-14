@@ -3,7 +3,7 @@ track_unknown_space: false # mfc: I think this param has no use here ...
 always_send_full_costmap: true
 footprint: [[-0.2, -0.3], [-0.2, 0.3], [1.9, 0.3], [1.9, -0.3]] # previously defined ad 1.9, for citi trucks
 global_frame: "/map_laser2d"
-robot_base_frame: "base_footprint_ground_truth"
+robot_base_frame: "base_footprint"
 publish_frequency: 3.0
 update_frequency: 5.0
 plugins:

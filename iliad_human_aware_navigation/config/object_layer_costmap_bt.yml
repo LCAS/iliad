@@ -3,7 +3,7 @@ track_unknown_space: false # mfc: I think this param has no use here ...
 always_send_full_costmap: true
 footprint: [[-0.38, -0.45], [-0.38, 0.45], [2.40, 0.45], [2.40, -0.45]]
 global_frame: "/map_laser2d"
-robot_base_frame: "base_footprint_ground_truth"
+robot_base_frame: "base_footprint"
 publish_frequency: 3.0
 update_frequency: 5.0
 plugins:
