@@ -13,7 +13,7 @@ import cell_tools as ctools
 class checking_cells(object):
     def __init__(self):
 
-        self.object_costamp_topic_name = rospy.get_param('~object_costamp_topic_name', '/object_costmap_node/costmap/costmap')
+        self.object_costmap_topic_name = rospy.get_param('~object_costmap_topic_name', '/object_costmap_node/costmap/costmap')
         self.envelope_topic_name = rospy.get_param('~envelope_topic_name', '/status')
 
         self.curr_cost_topic_name = rospy.get_param('~curr_cost_topic_name', '/object_aware/cost')
@@ -25,7 +25,7 @@ class checking_cells(object):
         self.old_envelope_points = None
 
         # init ros
-        rospy.Subscriber(self.object_costamp_topic_name, OccupancyGrid, self.costmap_callback, queue_size=1)
+        rospy.Subscriber(self.object_costmap_topic_name, OccupancyGrid, self.costmap_callback, queue_size=1)
         rospy.Subscriber(self.envelope_topic_name, MarkerArray,self.envelope_callback, queue_size=1)
 
         self.envelope_map_pub = rospy.Publisher(self.envelope_gridmap_topic_name, OccupancyGrid, queue_size=1)

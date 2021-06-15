@@ -18,14 +18,13 @@
     <arg name="robotST_topic"         default = "/$(arg prefix)/robot_poseST"/>
     <arg name="robot_base_frame_id"   default="$(arg prefix)/base_link"/>
     
-    <arg name="costmap_topic_name"        default = "/$(arg prefix)/object_costmap_node/costmap/costmap"/>
+    <arg name="costmap_topic_name"        default = "/$(arg prefix)/object_costmap_node/global_costmap/costmap"/>
     <arg name="task_topic_name"           default = "/$(arg prefix)/control/task"/>
 
     <arg name="envelope_topic_name"            default = "/$(arg prefix)/envelope"/> <!-- `envelope` is a republished version of `status` -->
     <arg name="curr_cost_topic_name"           default = "/$(arg prefix)/object_aware/cost"/>
     <arg name="envelope_gridmap_topic_name"    default = "/$(arg prefix)/object_aware/envelope_gridmap"/>
-
-    <arg name="path_occ_grid_topic_name"  default = "/$(arg prefix)/object_aware/constraints_costmap_path"/>
+    <arg name="clear_costmap_service_name"    default = "/$(arg prefix)/object_costmap_node/clear_costmaps"/>
 
     <!-- the group -->
     <group ns="$(arg prefix)">
@@ -35,28 +34,33 @@
         <param name="object_costmap_topic_name"   type = "string" value= "$(arg costmap_topic_name)"/>
         <param name="envelope_topic_name"         type = "string" value= "$(arg envelope_topic_name)"/>
         <param name="curr_cost_topic_name"        type = "string" value= "$(arg curr_cost_topic_name)"/>
-        <param name="envelope_gridmap_topic_name" type = "string" value= "$(arg envelope_gridmap_topic_name)"/>
+        <param name="envelope_gridmap_topic_name" type = "string" value= "$(arg clear_costmap_service_name)"/>
       </node>
 
       <!-- read the object and replan if it is necesary -->
-      <node pkg="iliad_human_aware_navigation" type="object_aware_plan_assessment.py" name="object_aware_plan_assessment_node" output="screen" respawn="true">
+      <node pkg="iliad_human_aware_navigation" type="object_aware_plan_assessment_with_clearing.py" name="object_aware_plan_assessment_node" output="screen" respawn="true">
         <param name="robot_id" value="$(arg robot_id)"/>
         <param name="curr_cost_topic_name"       type = "string" value= "$(arg curr_cost_topic_name)"/>
         <param name="time_needed_before_replan"  type = "double" value="10"/>
+        <param name="clear_costmap_service_name" type = "string" value= "$(arg clear_costmap_service_name)"/>
       </node>
 
-      <!-- Run the costmap node to obstain just he obstacle layer -->
-      <node name="object_costmap_node" pkg="costmap_2d" type="costmap_2d_node" if="$(arg is_cititruck)" >
-        <rosparam file="$(find iliad_human_aware_navigation)/config/object_layer_costmap_citi.yml" command="load" ns="costmap" subst_value="true"/> 
+      <node pkg="move_base" type="move_base" respawn="true" name="object_costmap_node" output="screen"  if="$(arg is_cititruck)">
+            <remap from="/odom" to="/fake/odom" />
+            <remap from="/cmd_vel" to="/fake/cmd_vel" />
+            <rosparam file="$(find iliad_human_aware_navigation)/config/object_layer_costmap_citi_movebase.yml" command="load" subst_value="true" /> 
       </node>
 
-      <node name="object_costmap_node" pkg="costmap_2d" type="costmap_2d_node" unless="$(arg is_cititruck)" >
-        <rosparam file="$(find iliad_human_aware_navigation)/config/object_layer_costmap_bt.yml" command="load" ns="costmap" subst_value="true"/> 
+      <node pkg="move_base" type="move_base" respawn="true" name="object_costmap_node" output="screen"  unless="$(arg is_cititruck)">
+            <remap from="/odom" to="/fake/odom" />
+            <remap from="/cmd_vel" to="/fake/cmd_vel" />
+            <rosparam file="$(find iliad_human_aware_navigation)/config/object_layer_costmap_bt_movebase.yml" command="load" subst_value="true" /> 
       </node>
 
-      <rosparam ns="object_costmap_node/costmap/" if="$(arg sim)">
+      <rosparam ns="object_costmap_node/global_costmap/" if="$(arg sim)">
         robot_base_frame: "base_link"
       </rosparam>
+
 
     </group>
 
@@ -83,9 +87,3 @@
 
 
 </launch>
-
-
-
-
-
-

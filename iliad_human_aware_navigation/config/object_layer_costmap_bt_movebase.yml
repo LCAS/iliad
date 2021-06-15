@@ -1,0 +1,55 @@
+global_costmap:
+  static_map: true
+  track_unknown_space: false # mfc: I think this param has no use here ...
+  always_send_full_costmap: true
+  footprint: [[-0.38, -0.45], [-0.38, 0.45], [2.40, 0.45], [2.40, -0.45]]
+  global_frame: "/map_laser2d"
+  robot_base_frame: "base_footprint"
+  publish_frequency: 3.0
+  update_frequency: 5.0
+  plugins:
+    - {name: static_map, type: "costmap_2d::StaticLayer"}
+    - {name: obstacles_laser, type: "costmap_2d::ObstacleLayer"}
+    - {name: obstacles_3d, type: "costmap_2d::ObstacleLayer"}
+
+  static_map:
+    track_unknown_space: true
+    map_topic: "/maps/map_laser2d"
+    use_maximum: true
+    trinary_costmap: false
+
+  obstacles_laser:
+    observation_sources: laserScanner
+    laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/laser2d_floor/robots_filtered/humans_filtered', sensor_frame: '/robot$(arg robot_id)/laser2d_floor_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
+    
+  obstacles_3d:
+    observation_sources: velodyne
+    velodyne: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/velodyne_points/laser2d/robots_filtered/humans_filtered', sensor_frame: '/robot$(arg robot_id)/velodyne_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
+
+local_costmap:
+  static_map: true
+  track_unknown_space: false # mfc: I think this param has no use here ...
+  always_send_full_costmap: true
+  footprint: [[-0.38, -0.45], [-0.38, 0.45], [2.40, 0.45], [2.40, -0.45]]
+  global_frame: "/map_laser2d"
+  robot_base_frame: "base_footprint"
+  publish_frequency: 3.0
+  update_frequency: 5.0
+  plugins:
+    - {name: static_map, type: "costmap_2d::StaticLayer"}
+    - {name: obstacles_laser, type: "costmap_2d::ObstacleLayer"}
+    - {name: obstacles_3d, type: "costmap_2d::ObstacleLayer"}
+
+  static_map:
+    track_unknown_space: true
+    map_topic: "/maps/map_laser2d"
+    use_maximum: true
+    trinary_costmap: false
+
+  obstacles_laser:
+    observation_sources: laserScanner
+    laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/laser2d_floor/robots_filtered/humans_filtered', sensor_frame: '/robot$(arg robot_id)/laser2d_floor_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
+    
+  obstacles_3d:
+    observation_sources: velodyne
+    velodyne: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/velodyne_points/laser2d/robots_filtered/humans_filtered', sensor_frame: '/robot$(arg robot_id)/velodyne_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
