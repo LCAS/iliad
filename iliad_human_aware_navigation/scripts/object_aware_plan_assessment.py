@@ -41,6 +41,7 @@ class object_aware_assessment():
         self.replan_needed = 0
         self.replan_finished = False
         self.replan_triggered = False
+        self.replan_wait_start = 0
 
         # ................................................................
         # start ros subs/pubs/servs....
