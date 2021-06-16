@@ -6,19 +6,18 @@ Requires ROS kinetic, Ubuntu 16.04, and python3.5
 
 Install the required apt packages:
 
-`sudo apt install cython3 ros-kinetic-strands-qsr-lib python3-numpy python3-pandas python3-scipy`
+`sudo apt install ros-kinetic-rosbridge-server python3-tk python3-venv`
 
-Install the required pip packages:
-`python3.5 -m pip install roslibpy hmms`
+Create a virtual environment to run the hmms library:
+`pyenv venv-hmms`
+`source venv-hmms/bin/activate`
+`curl -fsSL -o- https://bootstrap.pypa.io/pip/3.5/get-pip.py | python3.5`
+`python3.5 -m pip install roslibpy cython numpy`
+`python3.5 -m pip install setuptools --upgrade`
+`python3.5 -m pip install git+https://github.com/lopatovsky/HMMs`
 
-If `hmms` from pypi fails to install, install from the GitHub repo:
-```
-git clone https://github.com/lopatovsky/HMMs.git
-cd HMMs
-pip install -e .
-```
 
-Finally, clone this repository into the `src` directory of your catkin workspace and call `catkin build realtime_hrsi_situation_classifier`.
+Finally, clone this repository in your ros workspace  directory of your catkin workspace and do `catkin_make`.
 
 ## Usage
 Run the real-time classifier and its associated nodes using the provided launch file:
