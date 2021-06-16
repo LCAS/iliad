@@ -10,14 +10,20 @@ Install the required apt packages:
 
 Create a virtual environment to run the hmms library:
 `pyenv venv-hmms`
+
 `source venv-hmms/bin/activate`
+
 `curl -fsSL -o- https://bootstrap.pypa.io/pip/3.5/get-pip.py | python3.5`
+
 `python3.5 -m pip install roslibpy cython numpy`
+
 `python3.5 -m pip install setuptools --upgrade`
+
 `python3.5 -m pip install git+https://github.com/lopatovsky/HMMs`
 
+Clone this repository in your ros workspace  directory of your catkin workspace and do `catkin_make`.
 
-Finally, clone this repository in your ros workspace  directory of your catkin workspace and do `catkin_make`.
+Finally, change the shebang of the `realtime_hrsi_situation_classifier/src/realttime_sit_classifier.py` script to use the python3.5 from the virtual environment created. E.g.: https://github.com/LCAS/iliad/blob/master/realtime_hrsi_situation_classifier/src/realtime_sit_classifier.py#L1
 
 ## Usage
 Run the real-time classifier and its associated nodes using the provided launch file:
