@@ -11,13 +11,31 @@
     <!-- derived args -->
     <arg name="prefix" value="robot$(arg robot_id)"/>
     <arg name="is_cititruck" value="$(eval arg('robot_type')=='cititruck')"/>
-   
+
+    <!-- fake robot publisher -->
+    <arg name="links_to_add"        default="/base_link,/laser2d_top_link,/laser2d_floor_link"/>
+    <arg name="frame_id"            default="/map_laser2d"/>
+    <arg name="publishing_rate"     default="50"/>
+    <arg name="publish_markers"     default="True"/>
+    <arg name="robot_filter_radius" default = "1"/>
+
+    <!-- publish fake people detections in top of the other robots tf links defined --> 
+    <node pkg="filter_robots" type="robots_to_fake_people.py" output="screen" name="$(arg prefix)_robots_to_fake_people_node">
+      <param name="robot_id"            type = "int"    value= "$(arg robot_id)"/>  
+      <param name="links_to_add"        type = "string" value= "$(arg links_to_add)"/>
+      <param name="frame_id"            type = "string" value= "$(arg frame_id)"/>
+      <param name="publishing_rate"     type = "double" value= "$(arg publishing_rate)"/>
+      <param name="publish_markers"     type = "bool"   value= "$(arg publish_markers)"/>
+      <param name="marker_radius_viz"   type = "double" value= "$(arg robot_filter_radius)"/>
+    </node>
+
+
     <!-- laser filter for the floor laser     -->
     <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_robots_from_laser_floor">
       <remap from="scan"          to="/$(arg prefix)/sensors/laser2d_floor"/>
       <remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_floor/robots_filtered"/>
-      <remap from="$(arg prefix)_filter_robots_from_laser_floor/humans" to="/robots_fake_people"/>
-      <rosparam command="load" file="$(find filter_robots)/config/robot_laser_filter.yaml"/>
+      <remap from="$(arg prefix)_filter_robots_from_laser_floor/humans" to="/$(arg prefix)/robots_fake_people"/>
+      <rosparam command="load" file="$(find filter_robots)/config/robot_laser_filter.yaml" subst_value="true"/>
     </node>
 
 <!-- laser filter for the velodyne (BT) -->
@@ -39,16 +57,16 @@
     <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_robots_from_localized_laser" unless="$(arg is_cititruck)">
       <remap from="scan"          to="/$(arg prefix)/sensors/velodyne_points/laser2d"/>
       <remap from="scan_filtered" to="/$(arg prefix)/sensors/velodyne_points/laser2d/robots_filtered"/>
-      <remap from="$(arg prefix)_filter_robots_from_localized_laser/humans" to="/robots_fake_people"/>
-      <rosparam command="load" file="$(find filter_robots)/config/robot_laser_filter.yaml"/>
+      <remap from="$(arg prefix)_filter_robots_from_localized_laser/humans" to="/$(arg prefix)/robots_fake_people"/>
+      <rosparam command="load" file="$(find filter_robots)/config/robot_laser_filter.yaml" subst_value="true"/>
     </node>
 
     <!-- laser filter for the laser top (citis) -->
     <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_robots_from_laser_top" if="$(arg is_cititruck)">
       <remap from="scan"          to="/$(arg prefix)/sensors/laser2d_top"/>
       <remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_top/robots_filtered"/>
-      <remap from="$(arg prefix)_filter_robots_from_laser_top/humans" to="/robots_fake_people"/>
-      <rosparam command="load" file="$(find filter_robots)/config/robot_laser_filter.yaml"/>
+      <remap from="$(arg prefix)_filter_robots_from_laser_top/humans" to="/$(arg prefix)/robots_fake_people"/>
+      <rosparam command="load" file="$(find filter_robots)/config/robot_laser_filter.yaml" subst_value="true"/>
     </node>
 
 </launch>

@@ -13,32 +13,34 @@ class robots_to_fake_people():
     def __init__(self):
 
         # read parameters
+        self.robot_id = rospy.get_param('~robot_id',3)
         self.links_to_add = rospy.get_param('~links_to_add',"/base_link,/laser2d_top_link,/laser2d_floor_link")
         self.frame_id = rospy.get_param('~frame_id',"map_laser2d")
         self.publishing_rate = rospy.get_param('~publishing_rate',50) # Hz
         self.publish_markers = rospy.get_param('~publish_markers',True)
-        self.radius = rospy.get_param('~marker_radius',0.5)
+        self.radius = rospy.get_param('~marker_radius_viz',0.5)
 
         # init variables
         self.links_to_add = self.links_to_add.split(",")
-        self.active_robots = [0,0,0,0,0,0,0,0,0]
+        self.active_robots = [1,1,1,1,1,1,1,1,1]
+        self.active_robots[self.robot_id-1] = 0 # check all the robots tf except itself
 
         # subscribers
-        rospy.Subscriber("/robot1/control/report", RobotReport, self.robot1_status_callback,queue_size=1)
-        rospy.Subscriber("/robot2/control/report", RobotReport, self.robot2_status_callback,queue_size=1)
-        rospy.Subscriber("/robot3/control/report", RobotReport, self.robot3_status_callback,queue_size=1)
-        rospy.Subscriber("/robot4/control/report", RobotReport, self.robot4_status_callback,queue_size=1)
-        rospy.Subscriber("/robot5/control/report", RobotReport, self.robot5_status_callback,queue_size=1)
-        rospy.Subscriber("/robot6/control/report", RobotReport, self.robot6_status_callback,queue_size=1)
-        rospy.Subscriber("/robot7/control/report", RobotReport, self.robot7_status_callback,queue_size=1)
-        rospy.Subscriber("/robot8/control/report", RobotReport, self.robot8_status_callback,queue_size=1)
-        rospy.Subscriber("/robot9/control/report", RobotReport, self.robot9_status_callback,queue_size=1)
+        # rospy.Subscriber("/robot1/control/report", RobotReport, self.robot1_status_callback,queue_size=1)
+        # rospy.Subscriber("/robot2/control/report", RobotReport, self.robot2_status_callback,queue_size=1)
+        # rospy.Subscriber("/robot3/control/report", RobotReport, self.robot3_status_callback,queue_size=1)
+        # rospy.Subscriber("/robot4/control/report", RobotReport, self.robot4_status_callback,queue_size=1)
+        # rospy.Subscriber("/robot5/control/report", RobotReport, self.robot5_status_callback,queue_size=1)
+        # rospy.Subscriber("/robot6/control/report", RobotReport, self.robot6_status_callback,queue_size=1)
+        # rospy.Subscriber("/robot7/control/report", RobotReport, self.robot7_status_callback,queue_size=1)
+        # rospy.Subscriber("/robot8/control/report", RobotReport, self.robot8_status_callback,queue_size=1)
+        # rospy.Subscriber("/robot9/control/report", RobotReport, self.robot9_status_callback,queue_size=1)
         
         self.tf_listener = tf.TransformListener()
 
         # publishers
-        self.robot_fake_people_pub =rospy.Publisher("/robots_fake_people",TrackedPersons,queue_size=1)
-        self.robot_circles_pub = rospy.Publisher('/robot_circles', MarkerArray,queue_size=10)  
+        self.robot_fake_people_pub =rospy.Publisher("/robot"+str(self.robot_id)+"/robots_fake_people",TrackedPersons,queue_size=1)
+        self.robot_circles_pub = rospy.Publisher("/robot"+str(self.robot_id)+'/other_robot_circles', MarkerArray,queue_size=10)  
 
         # services
 
@@ -100,32 +102,32 @@ class robots_to_fake_people():
 
         self.robot_circles_pub.publish(circle_marker_array_msg)
 
-    def robot1_status_callback(self,msg):
-        self.active_robots[0] = 1
+    # def robot1_status_callback(self,msg):
+    #     self.active_robots[0] = 1
 
-    def robot2_status_callback(self,msg):
-        self.active_robots[1] = 1
+    # def robot2_status_callback(self,msg):
+    #     self.active_robots[1] = 1
 
-    def robot3_status_callback(self,msg):
-        self.active_robots[2] = 1
+    # def robot3_status_callback(self,msg):
+    #     self.active_robots[2] = 1
 
-    def robot4_status_callback(self,msg):
-        self.active_robots[3] = 1
+    # def robot4_status_callback(self,msg):
+    #     self.active_robots[3] = 1
 
-    def robot5_status_callback(self,msg):
-        self.active_robots[4] = 1
+    # def robot5_status_callback(self,msg):
+    #     self.active_robots[4] = 1
 
-    def robot6_status_callback(self,msg):
-        self.active_robots[5] = 1
+    # def robot6_status_callback(self,msg):
+    #     self.active_robots[5] = 1
 
-    def robot7_status_callback(self,msg):
-        self.active_robots[6] = 1
+    # def robot7_status_callback(self,msg):
+    #     self.active_robots[6] = 1
 
-    def robot8_status_callback(self,msg):
-        self.active_robots[7] = 1
+    # def robot8_status_callback(self,msg):
+    #     self.active_robots[7] = 1
 
-    def robot9_status_callback(self,msg):
-        self.active_robots[8] = 1
+    # def robot9_status_callback(self,msg):
+    #     self.active_robots[8] = 1
 
 
 # Main function.

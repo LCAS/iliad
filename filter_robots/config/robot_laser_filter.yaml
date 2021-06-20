@@ -2,4 +2,4 @@ scan_filter_chain:
 - name: hanp_laser_filter
   type: hanp_filters/LaserFilter
   params:
-    human_radius: 0.50
+    human_radius: $(arg robot_filter_radius)
