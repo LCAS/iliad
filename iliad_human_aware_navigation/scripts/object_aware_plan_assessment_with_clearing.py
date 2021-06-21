@@ -109,7 +109,7 @@ class object_aware_assessment():
         self.clear_costmap_client = rospy.ServiceProxy(self.clear_costmap_service_name,Empty)
 
         #timers
-        self.check_for_replan_timer = rospy.Timer(rospy.Duration(0.5),self.check_for_replan)
+        self.check_for_replan_timer = rospy.Timer(rospy.Duration(1),self.check_for_replan)
 
 
     def curr_cost_callback(self, msg):
@@ -247,7 +247,6 @@ class object_aware_assessment():
                         self.start_time = rospy.get_time()
                     else:
                         rospy.loginfo("Clear costmap succesful" )
-                        self.replan_triggered = True
 
                     #ask the coordinator here to do a replan
                     success = self.replan_service_client(self.robot_id)
