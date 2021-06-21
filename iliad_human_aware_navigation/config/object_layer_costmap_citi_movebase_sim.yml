@@ -20,11 +20,11 @@ global_costmap:
 
   obstacles_laser_floor:
     observation_sources: laserScanner
-    laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/laser2d_floor/robots_filtered', sensor_frame: '/robot$(arg robot_id)/laser2d_floor_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
+    laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/laser2d_floor/robots_filtered/humans_filtered', sensor_frame: '/robot$(arg robot_id)/laser2d_floor_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
     
   obstacles_laser_top:
     observation_sources: laserScanner
-    laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/laser2d_top/robots_filtered', sensor_frame: '/robot$(arg robot_id)/laser2d_top_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
+    laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/laser2d_top/robots_filtered/humans_filtered', sensor_frame: '/robot$(arg robot_id)/laser2d_top_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
 
 local_costmap:
   static_map: true
@@ -48,8 +48,8 @@ local_costmap:
 
   obstacles_laser_floor:
     observation_sources: laserScanner
-    laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/laser2d_floor/robots_filtered', sensor_frame: '/robot$(arg robot_id)/laser2d_floor_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
+    laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/laser2d_floor/robots_filtered/humans_filtered', sensor_frame: '/robot$(arg robot_id)/laser2d_floor_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
     
   obstacles_laser_top:
     observation_sources: laserScanner
-    laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/laser2d_top/robots_filtered', sensor_frame: '/robot$(arg robot_id)/laser2d_top_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}
+    laserScanner: {data_type: LaserScan, clearing: true, marking: true, topic: '/robot$(arg robot_id)/sensors/laser2d_top/robots_filtered/humans_filtered', sensor_frame: '/robot$(arg robot_id)/laser2d_top_link', obstacle_range: 6.0, raytrace_range: 66.5, inf_is_valid: true}

@@ -68,17 +68,4 @@
   	</include>
 </group>
 
-<group if="$(env ZONE5)">
-
-	<include file="$(find moving_actor_gazebo)/launch/spawn_actor_moving.launch">
-	    <arg name="actor_name" value="actor05" />
-	    <arg name="actor_trajectory_file" value="$(find moving_actor_gazebo)/config/trajectories/zone5_$(env HOUR)h_scenario$(env SCENARIO).txt"/>
-	    <arg name="map_topic" value="/map_laser2d"/>
-	    <arg name="use_gpu_gazebo_lidar" value="$(env GPU_GAZEBO_LIDAR)"/>
-	    <arg name="start_pose_x" value="25" />
-	    <arg name="start_pose_y" value="0" />
-	    <arg name="start_pose_Y" value="0" />
-  	</include>
-</group>
-
 </launch> 

@@ -45,11 +45,13 @@
         <param name="clear_costmap_service_name" type = "string" value= "$(arg clear_costmap_service_name)"/>
       </node>
 
+    <group unless="$(arg sim)">
       <node pkg="move_base" type="move_base" respawn="true" name="object_costmap_node" output="screen"  if="$(arg is_cititruck)">
             <remap from="/odom" to="/fake/odom" />
             <remap from="/cmd_vel" to="/fake/cmd_vel" />
             <rosparam file="$(find iliad_human_aware_navigation)/config/object_layer_costmap_citi_movebase.yml" command="load" subst_value="true" /> 
       </node>
+    </group>
 
       <node pkg="move_base" type="move_base" respawn="true" name="object_costmap_node" output="screen"  unless="$(arg is_cititruck)">
             <remap from="/odom" to="/fake/odom" />
@@ -57,17 +59,29 @@
             <rosparam file="$(find iliad_human_aware_navigation)/config/object_layer_costmap_bt_movebase.yml" command="load" subst_value="true" /> 
       </node>
 
+        <!-- In simulation it is possible to add also the human filtered to the citis     -->
+      <group if="$(arg sim)">
+            <node pkg="move_base" type="move_base" respawn="true" name="object_costmap_node" output="screen"  if="$(arg is_cititruck)">
+                <remap from="/odom" to="/fake/odom" />
+                <remap from="/cmd_vel" to="/fake/cmd_vel" />
+                <rosparam file="$(find iliad_human_aware_navigation)/config/object_layer_costmap_citi_movebase_sim.yml" command="load" subst_value="true" /> 
+            </node>  
+      </group>
+
       <rosparam ns="object_costmap_node/global_costmap/" if="$(arg sim)">
         robot_base_frame: "base_link"
       </rosparam>
 
 
+
+
     </group>
 
-
+    
+    <!-- The human filter only works for bt as citis don't have human detectors     -->
 
       <!-- laser floor filter around the people detected     -->
-    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_humans_from_laser_floor">
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_humans_from_laser_floor" unless="$(arg is_cititruck)">
         <remap from="scan"          to="/$(arg prefix)/sensors/laser2d_floor/robots_filtered"/>
         <remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_floor/robots_filtered/humans_filtered"/>
         <remap from="$(arg prefix)_filter_humans_from_laser_floor/humans" to="/$(arg prefix)/human_perception/tracked_persons"/>
@@ -85,5 +99,27 @@
 
 
 
+    <!-- In simulation it is possible to add also the human filters to the citis     -->
+
+    <group if="$(arg sim)">
+
+          <!-- laser floor filter around the people detected     -->
+        <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_humans_from_laser_floor" if="$(arg is_cititruck)">
+            <remap from="scan"          to="/$(arg prefix)/sensors/laser2d_floor/robots_filtered"/>
+            <remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_floor/robots_filtered/humans_filtered"/>
+            <remap from="$(arg prefix)_filter_humans_from_laser_floor/humans" to="/$(arg prefix)/human_perception/tracked_persons"/>
+            <rosparam command="load" file="$(find iliad_human_aware_navigation)/config/human_laser_filter.yaml"/>
+        </node>
+
+
+          <!-- top laser     -->
+        <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="$(arg prefix)_filter_humans_from_localized_cloud_laser2d" if="$(arg is_cititruck)">
+            <remap from="scan"          to="/$(arg prefix)/sensors/laser2d_top/robots_filtered"/>
+            <remap from="scan_filtered" to="/$(arg prefix)/sensors/laser2d_top/robots_filtered/humans_filtered"/>
+            <remap from="$(arg prefix)_filter_humans_from_localized_cloud_laser2d/humans" to="/$(arg prefix)/human_perception/tracked_persons"/>
+            <rosparam command="load" file="$(find iliad_human_aware_navigation)/config/human_laser_filter.yaml"/>
+        </node>
+
+    </group>
 
 </launch>

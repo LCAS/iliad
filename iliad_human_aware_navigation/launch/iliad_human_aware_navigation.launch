@@ -34,8 +34,11 @@
     <arg name="curr_cost_topic_name"      default = "/$(arg prefix)/qsr/cost"/>
     <arg name="situation_topic_name"      default = "/$(arg prefix)/qsr/situation_predictions"/>
 
-    <!--    -->
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"></include>
+    <arg name="use_realtime_situation_prediction" default="false" />
+
+    <group if="$(arg use_realtime_situation_prediction)">
+      <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"></include>
+    </group>
 
     <!-- the group -->
     <group ns="$(arg prefix)/qsr">
@@ -96,9 +99,11 @@
       </node>
       
       <!-- TODO: Here goes Laurence situation assessment module! -->
+      <group if="$(arg use_realtime_situation_prediction)">
         <param name="situation_rejection_threshold" value="0.1"/>
         <node name="realtime_sit_classifier" pkg="realtime_hrsi_situation_classifier" type="realtime_sit_classifier.py" output="screen" respawn="false" args="$(arg robot_id)">
         </node>
+      </group>
 
       <!-- constraints costmap V2: creates human exclusion area -->
       <node pkg="iliad_human_aware_navigation" type="iliad_constraints_costmap.py" name="constraints_costmap_server" output="screen" respawn="true">
@@ -149,6 +154,18 @@
         <param name="situation_topic_name"       type = "string" value="$(arg situation_topic_name)"/>
         <param name="curr_cost_topic_name"       type = "string" value= "$(arg curr_cost_topic_name)"/>
         <param name="time_needed_before_replan"  type = "double" value="15"/>     
+      </node>
+
+      <!-- Publish groundtruth tracks and detections from Gazebo -->
+      <node name="groundtruth_tracks_from_gazebo_1" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true"  if="$(arg sim)">
+          <remap from="/groundtruth/detected_persons" to="$(arg dperson_topic)"/>
+          <remap from="/groundtruth/tracked_persons" to="$(arg person_topic)"/>            
+      </node>
+
+      <!-- Publish groundtruth tracks and detections from Gazebo -->
+      <node name="groundtruth_tracks_from_gazebo_2" pkg="iliad_human_perception_launch" type="groundtruth_tracks_from_gazebo.py" respawn="true"  if="$(arg sim)">
+          <remap from="/groundtruth/detected_persons" to="$(arg dperson_topic)"/>
+          <remap from="/groundtruth/tracked_persons" to="/$(arg prefix)/human_perception/tracked_persons"/>            
       </node>
       
     </group>
