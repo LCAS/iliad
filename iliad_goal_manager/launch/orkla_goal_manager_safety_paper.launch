@@ -4,9 +4,9 @@
 	<arg name="mode" value="1"/><!-- [0] click and point mode,  [1] mission mode -->
     <arg name="orders_file" value=""/>
   
-<!--     <arg name="parsed_orders_file" value="$(find iliad_goal_manager)/config/path_afbcdba.json" /> -->
+    <arg name="parsed_orders_file" value="$(find iliad_goal_manager)/config/path_afbcdba.json" />
 
-    <arg name="parsed_orders_file" value="$(find iliad_goal_manager)/config/path_cbedc.json" />
+<!--     <arg name="parsed_orders_file" value="$(find iliad_goal_manager)/config/path_cbedc.json" /> -->
     
     <arg name="orders_times_file" value="" />
     <arg name="items_locations_file" value="$(find iliad_goal_manager)/config/path_item_locations.json" />
