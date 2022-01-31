@@ -3,7 +3,7 @@
 import rospy
 from geometry_msgs.msg import Pose,PoseStamped
 import Tkinter as tk
-from std_msgs.msg import String, Int16
+from std_msgs.msg import String, Int16, Empty
 import tkMessageBox
 import xml.etree.ElementTree as ET
 import json
@@ -35,6 +35,8 @@ class iliad_goal_manager(object):
 		self.shutdown_node = False
 		self.exploration_ongoing = False
 		self.robot_report_status = {}
+
+		self.start_experiment = False
 		
 
 		if self.mode==0: #click and point 
@@ -95,6 +97,8 @@ class iliad_goal_manager(object):
 			rospy.Subscriber("/robot7/compute_task/status", ComputeTaskStatus, self.robot7_computetaskstatus_callback,queue_size=1)
 			rospy.Subscriber("/robot8/compute_task/status", ComputeTaskStatus, self.robot8_computetaskstatus_callback,queue_size=1)
 			rospy.Subscriber("/robot9/compute_task/status", ComputeTaskStatus, self.robot9_computetaskstatus_callback,queue_size=1)
+
+			rospy.Subscriber("start_experiment", Empty, self.start_experiment_callback,queue_size=1)			
 
 			# create topic publishers
 			self.active_robots_status_pub = rospy.Publisher('/active_robot_status', String,queue_size=10)
@@ -413,12 +417,19 @@ class iliad_goal_manager(object):
 
 		#self.gui.mainloop() #blocking
 
+	def start_experiment_callback(self, msg):
+		self.start_experiment = True
+
 	def start_missions_callback(self):
 		print "starting the missions"
 		if self.missions_started == 0:
 			#update the active robots list from the selection
 			robot_names = self.available_list.get(0,tk.END)
 			robot_selection =  self.available_list.curselection()
+
+			# added for automation
+			robot_names = ('robot1',)
+			robot_selection = (0,)
 
 			if len(robot_selection) > 0:
 				for i in range(0,len(robot_selection)):
@@ -476,7 +487,6 @@ class iliad_goal_manager(object):
 		self.queued_missions = []
 		self.all_missions_added = 0
 		self.completed_missions = []
-
 
 	def skip_goal_callback(self):
 		if len(self.active_list.curselection()) > 0:
@@ -824,6 +834,10 @@ class iliad_goal_manager(object):
 		r = rospy.Rate(10)
 		while not rospy.is_shutdown() and self.shutdown_node == False:
 
+			if self.start_experiment == True:
+				self.start_missions_callback()
+				self.start_experiment = False 
+
 			# the misison are put in the queue when their starting time arrives
 			if (self.missions_started==1 and self.all_missions_added==0):
 				if self.corrected_missions_times[self.next_mission] <= rospy.get_time():
@@ -831,11 +845,6 @@ class iliad_goal_manager(object):
 					self.next_mission = self.next_mission + 1
 					if self.next_mission >= len(self.corrected_missions_times):
 						self.all_missions_added = 1
-
-			if self.all_missions_added == 1 and len(self.mission_status["completed"])==self.number_of_orders and self.allow_exploration_value == 0:
-			   self.finish_missions()
-
-
 
 			#update all the gui fields with the new info
 			self.gui_update()
@@ -852,6 +861,9 @@ class iliad_goal_manager(object):
 			self.mission_status_pub.publish(json.dumps(self.mission_status))
 
 			self.exploration_allowed_pub.publish(self.allow_exploration_value) 
+
+			if self.all_missions_added == 1 and len(self.mission_status["completed"])==self.number_of_orders and self.allow_exploration_value == 0:
+				self.finish_missions()
 
 			r.sleep()
 

@@ -1,0 +1,20 @@
+- name: "/next_experiment"
+  signal_when: 
+    condition: "published"
+  execute:
+  - shell:
+      verbose: True
+      shell_feature: True
+      cmd_args:
+      - "tmule -c /home/sergi/catkin_ws/src/iliad_metapackage/tmule/iliad-coordinator.yaml launch -t all"
+      #- "tmule -c /home/sergi/catkin_ws/src/iliad_metapackage/tmule/iliad-robot.yaml launch"              
+
+- name: "/stop_experiment"
+  signal_when: 
+    condition: "published"
+  execute:
+  - shell:
+      verbose: True
+      cmd_args:
+      - "tmule -c /home/sergi/catkin_ws/src/iliad_metapackage/tmule/iliad-coordinator.yaml stop -t all"
+      - "tmule -c /home/sergi/catkin_ws/src/iliad_metapackage/tmule/iliad-robot.yaml stop"              

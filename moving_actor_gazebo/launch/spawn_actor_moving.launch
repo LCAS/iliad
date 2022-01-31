@@ -40,7 +40,7 @@ MFC: based on Adam's spawn actor from RASberry
     </include>
 
 
-    <node pkg="moving_actor_gazebo" type="multigoal_feeder.py" name="goal_manager" output="screen">
+    <node pkg="moving_actor_gazebo" type="multigoal_feeder_with_controlled_start.py" name="goal_manager" output="screen">
       <param name="model_name" type="string" value="$(arg actor_name)"/>
       <param name="trajectories_filename" type="string" value="$(arg actor_trajectory_file)"/>
       <param name="frame_id" type="string" value="$(arg global_frame_id)"/>

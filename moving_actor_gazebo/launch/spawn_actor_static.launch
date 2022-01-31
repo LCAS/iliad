@@ -5,18 +5,19 @@ MFC: based on Adam's spawn actor from RASberry
 -->
 
 <launch>  
-  <arg name="use_gpu_gazebo_lidar" default="false"/>
+  <arg name="use_gpu_gazebo_lidar" default="true"/>
   <arg name="actor_name" default="actor"/>
-  <arg name="map_topic" default="/map"/>
+  <arg name="map_topic" default="/map_laser2d"/>
   <arg name="global_frame_id" default="world"/>
-  <arg name="start_pose_x" default="10"/>
-  <arg name="start_pose_y" default="5"/>
+  <arg name="start_pose_x" default="0"/>
+  <arg name="start_pose_y" default="0"/>
   <arg name="start_pose_z" default="0"/>
   <arg name="start_pose_R" default="0"/>
   <arg name="start_pose_P" default="0"/>
   <arg name="start_pose_Y" default="0"/>
+  <arg name="loop" default="False"/>
 
-  <arg name="actor_trajectory_file" default="$(find moving_actor_gazebo)/config/trajectories/trajectory.json"/>
+  <arg name="actor_trajectory_file" default="$(find moving_actor_gazebo)/config/trajectories/actor00.json"/>
 
   <arg name="actor_xacro_file" default="$(find moving_actor_gazebo)/urdf/actor.xacro"/>
   

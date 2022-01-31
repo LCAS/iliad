@@ -1,0 +1,29 @@
+{
+    "orders": [
+        {
+            "full_pallets": 1, 
+            "id": "1", 
+            "mission": [
+                {
+                    "location": "loc_B", 
+                    "operation": "NO_OPERATION"
+                }, 
+                {
+                    "location": "loc_E", 
+                    "operation": "NO_OPERATION"
+                },
+                {
+                    "location": "loc_D", 
+                    "operation": "NO_OPERATION"
+                },
+                {
+                    "location": "loc_C", 
+                    "operation": "NO_OPERATION"
+                }
+
+            ], 
+            "mixed_pallets": 0, 
+            "starting_time": 0
+        }
+    ]
+}

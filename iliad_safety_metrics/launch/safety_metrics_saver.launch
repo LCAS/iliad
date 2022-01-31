@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="test_name" default="default_test"/>
+
+    <node pkg="iliad_safety_metrics" type="safety_metrics_saver.py" name="safety_matric_saver" output="screen">
+        <param name="test_name" value="$(arg test_name)"/> 
+    </node>
+
+</launch>

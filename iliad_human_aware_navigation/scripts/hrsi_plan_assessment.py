@@ -10,6 +10,7 @@ import rospy
 from std_msgs.msg import Float64, Float64MultiArray, Empty, String
 from orunav_msgs.srv import  Trigger
 from orunav_msgs.msg import ComputeTaskStatus,ReplanStatus
+from orunav_msgs.msg import ControllerCommand
 
 import numpy as np
 from threading import Lock
@@ -41,6 +42,7 @@ class HRSIassessment():
         self.replan_needed = 0
         self.replan_finished = False
         self.replan_triggered = False
+        self.last_controller_command = 0
 
         # ................................................................
         # start ros subs/pubs/servs....
@@ -81,9 +83,9 @@ class HRSIassessment():
         # this max left turning speed
         self.w_max = rospy.get_param(self.ven_name + '/max_rotational_vel', 0.1 )
         # this max backward speed
-        self.v_rev_max = rospy.get_param(self.ven_name + '/max_vel', self.v_max)
+        self.v_rev_max = rospy.get_param(self.ven_name + '/max_vel', 0.1)
         # this max right turning speed
-        self.w_rev_max = rospy.get_param(self.ven_name + '/max_rotational_vel', self.w_max)
+        self.w_rev_max = rospy.get_param(self.ven_name + '/max_rotational_vel', 0.1)
         
         # this is the minimum speed to prevent mpc to go bananas
         self.v_min = 0.01
@@ -92,10 +94,12 @@ class HRSIassessment():
         # topic to read to ensure that the path has been computed
         self.time_needed_before_replan = rospy.get_param('~time_needed_before_replan',10)
 
+
     def initROS(self):
         # topic publishers
         self.velocity_constraints_pub = rospy.Publisher(self.velocity_constraints_topic, Float64MultiArray, queue_size=1)
-        self.trigger_topic_pub = rospy.Publisher(self.trigger_topic_name, Empty, queue_size=1)
+        self.layer3_replan_triggered_pub = rospy.Publisher("layer3_replan_triggered", Empty, queue_size=1)
+        self.layer3_activated_pub = rospy.Publisher("layer3_activated", Empty, queue_size=1)
 
         # service clients
         # none here
@@ -110,6 +114,8 @@ class HRSIassessment():
         rospy.Subscriber('/robot' + str(self.robot_id) + '/compute_task/status', ComputeTaskStatus, self.compute_task_callback, queue_size=1)
         rospy.Subscriber("/coordinator/replan/status", ReplanStatus, self.replan_status_callback, queue_size=1)
 
+        rospy.Subscriber("robot1/control/controller/commands",ControllerCommand , self.controller_command_callback, queue_size=1)
+
         # service servers
         rospy.loginfo("Waiting for the /coordinator/replan service to be available" )
         rospy.wait_for_service('/coordinator/replan')
@@ -117,7 +123,10 @@ class HRSIassessment():
 
         #timers
         self.check_for_replan_timer = rospy.Timer(rospy.Duration(0.5),self.check_for_replan)
-                 
+    
+    def controller_command_callback(self, msg_data): # this is used to  count the number of brakes
+        self.last_controller_command = msg_data.command
+
     def curr_cost_callback(self, msg):
         update = False
         with self.lock:         
@@ -200,15 +209,18 @@ class HRSIassessment():
                 #"We should consider a replanning ..." )
 
                 self.replan_needed = 1
-                #self.trigger_topic_pub.publish(Empty())
-
-
 
             self.sendNewConstraints()
 
 
 
     def sendNewConstraints(self):
+        #if self.last_controller_command != 1: 
+        #triger a layer activation count if old is max and new is < max
+        if (self.old_v == self.v_max and self.old_w == self.w_max and self.old_v_rev == self.v_rev_max and self.old_w_rev == self.w_rev_max) and (self.v < self.v_max or self.w < self.w_max or self.v_rev < self.v_rev_max or self.w_rev < self.w_rev_max):
+            self.layer3_activated_pub.publish(Empty())
+
+
         #only update constraints if they are different
         if self.old_v != self.v and self.old_w != self.w and self.old_v_rev != self.v_rev and self.old_w_rev != self.w_rev:
             self.old_v = self.v
@@ -225,8 +237,11 @@ class HRSIassessment():
                                 "New speed Constraints sent : V ( -" +
                                 str(self.v_rev) + ", " + str(self.v) + " m/s), " +
                                 "W ( -" +
-                                str(self.w_rev * 180.0/np.pi) + ", " + str(self.w * 180.0/np.pi) + " deg/sec) "
-                                )
+                                str(self.w_rev * 180.0/np.pi) + ", " + str(self.w * 180.0/np.pi) + " deg/sec) "  )
+
+
+            
+
 
     def compute_task_callback(self,msg): #this is just for debugging purposes
         if self.replan_triggered == True:
@@ -313,6 +328,7 @@ class HRSIassessment():
                     else:
                         rospy.loginfo("Replan call succesful" )
                         self.replan_triggered = True
+                        self.layer3_replan_triggered_pub.publish(Empty())
 
                 else:
                     rospy.loginfo(self.time_needed_before_replan - (rospy.get_time() - self.start_time))
